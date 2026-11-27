@@ -233,6 +233,10 @@ header{height:58px}.brand{font-size:22px}.mark{width:36px;height:30px}.app-intro
 const $=id=>document.getElementById(id);
 /* Original synthesized sound cues; no files, tracking or playback on page load. */
 let soundOn=true,audioCtx=null,soundBus=null,soundGeneration=0,soundUnlock=null;
+// V5.3: boost quiet interaction cues for phone speakers while retaining headroom.
+const SOUND_MASTER_GAIN=1.0;
+const SOUND_VOICE_GAIN=2.2;
+const SOUND_REEL_GAIN=3.0;
 const soundPalette={
  tap:[[520,0,.052,.035,"sine",410]],
  open:[[510,0,.075,.032,"sine",610],[760,.045,.09,.022,"sine"]],
@@ -252,7 +256,7 @@ function syncSoundButton(){
 }
 function setSoundBus(){
  if(!audioCtx||!soundBus)return;
- try{const p=soundBus.gain,t=audioCtx.currentTime;p.cancelScheduledValues(t);p.setValueAtTime(soundOn&&!document.hidden ? .5 : 0,t)}catch{}
+ try{const p=soundBus.gain,t=audioCtx.currentTime;p.cancelScheduledValues(t);p.setValueAtTime(soundOn&&!document.hidden ? SOUND_MASTER_GAIN : 0,t)}catch{}
 }
 function unlockSound(){
  if(!soundOn||document.hidden)return Promise.resolve(false);
@@ -271,7 +275,7 @@ function playSound(kind){
   try{
    const osc=audioCtx.createOscillator(),gain=audioCtx.createGain(),t=now+offset+.005;
    osc.type=type;osc.frequency.setValueAtTime(hz,t);if(endHz)osc.frequency.exponentialRampToValueAtTime(endHz,t+length);
-   gain.gain.setValueAtTime(.0001,t);gain.gain.exponentialRampToValueAtTime(volume,t+.006);gain.gain.exponentialRampToValueAtTime(.0001,t+length);
+   gain.gain.setValueAtTime(.0001,t);gain.gain.exponentialRampToValueAtTime(volume*(kind==="tick"||kind==="tickSoft"?SOUND_REEL_GAIN:SOUND_VOICE_GAIN),t+.006);gain.gain.exponentialRampToValueAtTime(.0001,t+length);
    osc.connect(gain);gain.connect(soundBus);osc.onended=()=>{try{osc.disconnect();gain.disconnect()}catch{}};
    osc.start(t);osc.stop(t+length+.008);
   }catch{}
