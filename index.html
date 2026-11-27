@@ -199,8 +199,18 @@ header{height:58px}.brand{font-size:22px}.mark{width:36px;height:30px}.app-intro
 .window-time[data-reel="settled"]{display:flex;align-items:center;gap:0;letter-spacing:0;font-variant-numeric:tabular-nums;animation:none!important;opacity:1;filter:none;transform:none;line-height:1.18;white-space:nowrap}
 .window-time[data-reel="settled"] .reel-digit{mask-image:none}
 @media(max-width:360px){.window-time[data-reel="settled"]{font-size:clamp(23px,8vw,28px)}}
+
+/* V5.2: original interaction audio, optional, with a full-size touch target. */
+.sound-toggle{display:grid;place-items:center;flex:0 0 44px;width:44px;height:44px;border-radius:50%;color:#365c4b;background:#e7ebdf70;touch-action:manipulation}
+.sound-toggle svg{width:21px;height:21px;pointer-events:none}
+.sound-toggle .sound-cross{display:none}
+.sound-toggle[aria-pressed="false"]{color:#748278;background:transparent}
+.sound-toggle[aria-pressed="false"] .sound-waves{display:none}
+.sound-toggle[aria-pressed="false"] .sound-cross{display:block}
+.header-meta .location-btn{flex:0 1 auto}
+@media(max-width:680px){header{gap:8px}.header-meta{gap:3px}.sound-toggle{background:transparent}.sound-toggle svg{width:19px;height:19px}.header-meta .location-btn{max-width:150px;min-width:0;gap:4px}}
 </style></head><body><div class="shell">
-<header><div class="brand"><span class="mark" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 34" fill="none"><circle cx="31" cy="10" r="7.5" fill="#e8b868"/><path d="M23 12C18 1 7 7 4 17c-4 14 9 16 20 9 8-5 15-8 21 1" stroke="#315b49" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>날씨틈</div><div class="header-meta"><span class="date" id="date"></span><button id="locationBtn" class="location-btn" aria-label="지역 변경"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 21s7-6 7-12a7 7 0 0 0-14 0c0 6 7 12 7 12Z" stroke="currentColor" stroke-width="1.7"/><circle cx="12" cy="9" r="2.5" stroke="currentColor" stroke-width="1.7"/></svg><span id="locLabel">지역 선택</span><svg width="14" height="14" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button></div></header>
+<header><div class="brand"><span class="mark" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 34" fill="none"><circle cx="31" cy="10" r="7.5" fill="#e8b868"/><path d="M23 12C18 1 7 7 4 17c-4 14 9 16 20 9 8-5 15-8 21 1" stroke="#315b49" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>날씨틈</div><div class="header-meta"><span class="date" id="date"></span><button type="button" id="soundToggle" class="sound-toggle" aria-pressed="true" aria-label="효과음 켜기 또는 끄기" title="효과음 켜짐"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4Z" stroke="currentColor" stroke-width="1.65" stroke-linejoin="round"/><g class="sound-waves" stroke="currentColor" stroke-width="1.55" stroke-linecap="round"><path d="M16 9q3 3 0 6M19 6q5 6 0 12"/></g><path class="sound-cross" d="m16 9 5 6m0-6-5 6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button><button id="locationBtn" class="location-btn" aria-label="지역 변경"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 21s7-6 7-12a7 7 0 0 0-14 0c0 6 7 12 7 12Z" stroke="currentColor" stroke-width="1.7"/><circle cx="12" cy="9" r="2.5" stroke="currentColor" stroke-width="1.7"/></svg><span id="locLabel">지역 선택</span><svg width="14" height="14" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button></div></header>
 <main><div class="app-intro"><div><h1>오늘 최고의 두 시간.</h1><p>날씨에 맞춰 옷차림, 음식, 할 일까지.</p></div><span class="tag">오늘의 일상 큐레이션</span></div>
 <section class="start" aria-label="내 동네 날씨"><div class="start-copy"><b>내 동네 날씨를 확인해요</b><small>GPS 원본은 외부로 전송하지 않아요.</small></div><button class="primary" id="gpsBtn"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="7" stroke="currentColor" stroke-width="1.7"/><circle cx="12" cy="12" r="2.7" fill="currentColor"/><path d="M12 2v3m0 14v3M2 12h3m14 0h3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg><span id="gpsText">내 위치로 시작</span></button><button id="manualBtn" class="secondary">지역 직접 선택</button></section>
 <div class="status" id="status" data-state="idle" role="status" aria-live="polite" aria-atomic="true"><span class="status-mark" aria-hidden="true"><span class="location-radar"><span class="radar-ring"></span><span class="radar-orbit"></span><span class="radar-core"></span></span><svg class="status-check" viewBox="0 0 24 24" fill="none"><path d="m6 12 4 4 8-8" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="status-dot"></span></span><div class="status-copy"><strong id="statusTitle" hidden></strong><span id="statusText">내 위치나 지역을 선택하면 오늘의 틈을 찾아드려요.</span></div></div>
@@ -221,6 +231,90 @@ header{height:58px}.brand{font-size:22px}.mark{width:36px;height:30px}.app-intro
 <script>
 (()=>{"use strict";
 const $=id=>document.getElementById(id);
+/* Original synthesized sound cues; no files, tracking or playback on page load. */
+let soundOn=true,audioCtx=null,soundBus=null,soundGeneration=0,soundUnlock=null;
+const soundPalette={
+ tap:[[520,0,.052,.035,"sine",410]],
+ open:[[510,0,.075,.032,"sine",610],[760,.045,.09,.022,"sine"]],
+ close:[[620,0,.045,.025,"sine",480]],
+ select:[[690,0,.055,.033,"sine"],[900,.046,.075,.024,"sine"]],
+ change:[[480,0,.055,.032,"triangle",590],[750,.05,.09,.023,"sine"]],
+ search:[[380,0,.075,.034,"sine",440],[620,.065,.12,.027,"sine",740]],
+ share:[[520,0,.06,.027,"sine"],[660,.045,.085,.025,"sine"],[820,.09,.105,.02,"sine"]],
+ tick:[[920,0,.024,.017,"triangle",620]],
+ tickSoft:[[760,0,.022,.008,"triangle",540]],
+ lock:[[540,0,.055,.022,"sine",410]],
+ success:[[523.25,0,.14,.038,"sine"],[659.25,.085,.18,.034,"sine"],[783.99,.17,.24,.029,"sine"],[1046.5,.25,.23,.012,"sine"]],
+ error:[[510,0,.105,.023,"sine",450],[370,.105,.15,.022,"sine",320]]
+};
+function syncSoundButton(){
+ const b=$("soundToggle");b.setAttribute("aria-pressed",String(soundOn));b.title=soundOn?"효과음 켜짐 · 누르면 끄기":"효과음 꺼짐 · 누르면 켜기";
+}
+function setSoundBus(){
+ if(!audioCtx||!soundBus)return;
+ try{const p=soundBus.gain,t=audioCtx.currentTime;p.cancelScheduledValues(t);p.setValueAtTime(soundOn&&!document.hidden ? .5 : 0,t)}catch{}
+}
+function unlockSound(){
+ if(!soundOn||document.hidden)return Promise.resolve(false);
+ try{
+  if(!audioCtx){const C=window.AudioContext||window.webkitAudioContext;if(!C)return Promise.resolve(false);audioCtx=new C();soundBus=audioCtx.createGain();soundBus.connect(audioCtx.destination);setSoundBus()}
+  if(audioCtx.state==="running")return Promise.resolve(true);
+  // A later trusted gesture may retry if a browser rejected an earlier resume.
+  if(!soundUnlock)soundUnlock=Promise.resolve(audioCtx.resume()).then(()=>audioCtx.state==="running").catch(()=>false).finally(()=>{soundUnlock=null});
+  return soundUnlock;
+ }catch{return Promise.resolve(false)}
+}
+function playSound(kind){
+ if(!soundOn||document.hidden||!audioCtx||audioCtx.state!=="running"||!soundBus)return;
+ const now=audioCtx.currentTime;
+ for(const [hz,offset,length,volume,type,endHz] of soundPalette[kind]||soundPalette.tap){
+  try{
+   const osc=audioCtx.createOscillator(),gain=audioCtx.createGain(),t=now+offset+.005;
+   osc.type=type;osc.frequency.setValueAtTime(hz,t);if(endHz)osc.frequency.exponentialRampToValueAtTime(endHz,t+length);
+   gain.gain.setValueAtTime(.0001,t);gain.gain.exponentialRampToValueAtTime(volume,t+.006);gain.gain.exponentialRampToValueAtTime(.0001,t+length);
+   osc.connect(gain);gain.connect(soundBus);osc.onended=()=>{try{osc.disconnect();gain.disconnect()}catch{}};
+   osc.start(t);osc.stop(t+length+.008);
+  }catch{}
+ }
+}
+function activatedSound(kind){
+ const gen=soundGeneration,begin=performance.now();
+ return unlockSound().then(ok=>{if(ok&&gen===soundGeneration&&performance.now()-begin<350)playSound(kind)}).catch(()=>{});
+}
+function controlSound(el){
+ const id=el.id||"";
+ if(id==="gpsBtn"||id==="applyRegion"||id==="retryRegion")return "search";
+ if(id==="closeDialog"||id==="closeShareDialog")return "close";
+ if(id==="manualBtn"||id==="locationBtn")return "open";
+ if(el.hasAttribute("data-avatar")||el.hasAttribute("data-who")||el.closest("#searchResults"))return "select";
+ if(/^more(Wear|Food|Act)$/.test(id))return "change";
+ if(/^(share|download|nativeShare|copyShareImage|saveShareImage|copyShareText|openInstagram)$/.test(id)||el.hasAttribute("data-target"))return "share";
+ return "tap";
+}
+function initSounds(){
+ syncSoundButton();
+ $("soundToggle").addEventListener("click",()=>{
+   soundOn=!soundOn;++soundGeneration;syncSoundButton();setSoundBus();
+   if(soundOn)return activatedSound("select");
+ });
+ document.addEventListener("click",e=>{
+   if(!e.isTrusted||!e.target?.closest)return;
+   const el=e.target.closest("button,a[href],input:not([type=hidden]),select,[role=button]");
+   if(!el||el.id==="soundToggle"||el.disabled||el.getAttribute("aria-disabled")==="true"||el.closest("[inert]"))return;
+   return activatedSound(controlSound(el));
+ },true);
+ document.addEventListener("change",e=>{if(e.isTrusted&&e.target?.matches("select,input[type=checkbox],input[type=radio]"))return activatedSound("select")},true);
+ document.addEventListener("visibilitychange",()=>{++soundGeneration;setSoundBus()});
+ window.addEventListener("pagehide",()=>{++soundGeneration;if(soundBus&&audioCtx){try{soundBus.gain.cancelScheduledValues(audioCtx.currentTime);soundBus.gain.setValueAtTime(0,audioCtx.currentTime)}catch{}}});
+ window.addEventListener("pageshow",setSoundBus);
+}
+let reelSoundLast=0;
+function reelSoundTick(elapsed){
+ const gap=elapsed<2300?105:elapsed<6000?190:310;
+ if(elapsed-reelSoundLast<gap)return;
+ reelSoundLast=elapsed;playSound(elapsed<2300?"tick":"tickSoft");
+}
+
 const DATA_URL="https://raw.githubusercontent.com/vuski/admdongkor/master/ver20261001/HangJeongDong_ver20261001.geojson";
 const PROVINCES={"서울특별시":[37.57,126.98],"부산광역시":[35.18,129.08],"대구광역시":[35.87,128.60],"인천광역시":[37.46,126.70],"대전광역시":[36.35,127.38],"울산광역시":[35.54,129.31],"세종특별자치시":[36.48,127.29],"경기도":[37.26,127.03],"강원특별자치도":[37.88,127.73],"충청북도":[36.64,127.49],"충청남도":[36.66,126.67],"전북특별자치도":[35.82,127.15],"전남광주통합특별시":[35.16,126.85],"경상북도":[36.58,128.51],"경상남도":[35.23,128.69],"제주특별자치도":[33.50,126.53]};
 let regions=[],regionPromise=null,selected={full:"서울 · 예시",name:"서울",lat:37.57,lon:126.98},current=null,plan=null,sample=true,who="혼자",avatar="m",actIndex=0,foodIndex=0,wearIndex=0,requestId=0;
@@ -231,7 +325,7 @@ const timeText=t=>t.slice(11,16);const plusHours=(t,h)=>new Date(Date.parse(t+":
 const wx=c=>c===0?"맑음":c<=2?"구름 조금":c===3?"흐림":c<=48?"안개":c>=95?"뇌우":c>=71&&c<=77||c===85||c===86?"눈":c>=51?"비":"흐림";
 const theme=(c,day)=>!day?"night":c===0||c<=2?"clear":c>=71&&c<=77||c===85||c===86?"snow":c>=51?"rain":"cloud";
 function icon(c,big=false,day=true){let cloud=c>=2;let rainy=c>=51&&!(c>=71&&c<=77||c===85||c===86);let snow=c>=71&&c<=77||c===85||c===86;let sun=c<=2;let rays=sun&&day?'<g stroke="#dfad52" stroke-width="2.2" stroke-linecap="round"><path d="M24 3v5m0 32v5M3 24h5m32 0h5M9 9l4 4m22 22 4 4M9 39l4-4m22-22 4-4"/></g>':"";return '<svg viewBox="0 0 48 48" fill="none" aria-hidden="true">'+rays+(sun?(day?'<circle cx="24" cy="24" r="12" fill="#f4c86d"/>':'<path d="M31 7A18 18 0 1 0 42 34 18 18 0 0 1 31 7Z" fill="#f7e6ae"/>'):"")+(cloud?'<path d="M12 34a9 9 0 0 1-1-18 12 12 0 0 1 23-2 10 10 0 0 1 3 20Z" fill="#f9fbfc" stroke="#819ca9" stroke-width="1.2"/>':"")+(rainy?'<path d="m15 37-3 6m12-6-3 6m12-6-3 6" stroke="#5594b5" stroke-width="2.6" stroke-linecap="round"/>':"")+(snow?'<g fill="#6d9db7"><circle cx="14" cy="40" r="2"/><circle cx="24" cy="42" r="2"/><circle cx="34" cy="39" r="2"/></g>':"")+'</svg>'}
-function setStatus(msg,state,phase=""){if(state==="loading"&&$("bestWindow").dataset.reveal!=="searching")resetUnresolved("searching");else if(state==="error")resetUnresolved("error");const status=$("status"),hero=$("weatherResults"),title=$("statusTitle");$("statusText").textContent=msg;status.dataset.state=state;status.classList.remove("loading");title.hidden=state!=="loading"&&state!=="live"&&state!=="error";title.textContent=state==="loading"?(phase||"날씨 확인 중"):state==="live"?(locationMode==="gps"?"내 동네 확인 완료":"선택한 지역 확인 완료"):state==="error"?"다시 확인해 주세요":"";hero.setAttribute("aria-busy",String(state==="loading"));hero.dataset.motion=state==="loading"?"pending":state==="live"?"arrived":"idle";if(state==="loading"){$("windowGrade").textContent=phase||"오늘의 좋은 시간을 찾는 중";$("windowDesc").textContent="내 동네의 날씨를 바탕으로 가장 좋은 시간을 찾고 있어요.";if(locationMode==="gps")$("gpsText").textContent="내 위치 찾는 중…";}
+function setStatus(msg,state,phase=""){if(state==="loading"&&$("bestWindow").dataset.reveal!=="searching")resetUnresolved("searching");else if(state==="error"){resetUnresolved("error");playSound("error");}const status=$("status"),hero=$("weatherResults"),title=$("statusTitle");$("statusText").textContent=msg;status.dataset.state=state;status.classList.remove("loading");title.hidden=state!=="loading"&&state!=="live"&&state!=="error";title.textContent=state==="loading"?(phase||"날씨 확인 중"):state==="live"?(locationMode==="gps"?"내 동네 확인 완료":"선택한 지역 확인 완료"):state==="error"?"다시 확인해 주세요":"";hero.setAttribute("aria-busy",String(state==="loading"));hero.dataset.motion=state==="loading"?"pending":state==="live"?"arrived":"idle";if(state==="loading"){$("windowGrade").textContent=phase||"오늘의 좋은 시간을 찾는 중";$("windowDesc").textContent="내 동네의 날씨를 바탕으로 가장 좋은 시간을 찾고 있어요.";if(locationMode==="gps")$("gpsText").textContent="내 위치 찾는 중…";}
 if(state==="live"){$("bestWindow").dataset.reveal="ready";settleTimeReel(planTimeLabel());$("dailyRecs").dataset.ready="true";$("moreAct").disabled=$("moreFood").disabled=$("moreWear").disabled=false;}
 }
 let locationMode="manual";
@@ -258,9 +352,9 @@ function mountReels(){
 }
 function paintReels(){reelTracks.forEach((node,i)=>{let p=((reelPositions[i]%10)+10)%10;node.style.transform="translate3d(0,"+(-p*1.18)+"em,0)"})}
 function startTimeReel(){
- stopTimeReel();if(reelReduced()||typeof requestAnimationFrame!=="function")return;
+ stopTimeReel();reelSoundLast=0;if(reelReduced()||typeof requestAnimationFrame!=="function")return;
  mountReels();paintReels();const rev=reelRevision;
- function frame(ts){if(rev!==reelRevision)return;const dt=reelLast===null?0:Math.min(48,Math.max(0,ts-reelLast));reelLast=ts;reelVisibleMs+=dt;reelPositions=reelPositions.map((p,i)=>p+dt*(.012+i*.0006));paintReels();reelFrame=requestAnimationFrame(frame)}
+ function frame(ts){if(rev!==reelRevision)return;const dt=reelLast===null?0:Math.min(48,Math.max(0,ts-reelLast));reelLast=ts;reelVisibleMs+=dt;reelSoundTick(reelVisibleMs);reelPositions=reelPositions.map((p,i)=>p+dt*(.012+i*.0006));paintReels();reelFrame=requestAnimationFrame(frame)}
  reelFrame=requestAnimationFrame(frame);
 }
 /* V5.1: wait for a full second of visible reel motion, not a fixed network delay.
@@ -278,14 +372,14 @@ function waitForReelMinimum(id){
  });
 }
 function settleTimeReel(target){
- if(!/^\d{2}:\d{2} ~ \d{2}:\d{2}$/.test(target)||reelReduced()||!reelTracks.length){stopTimeReel(target);return}
+ if(!/^\d{2}:\d{2} ~ \d{2}:\d{2}$/.test(target)||reelReduced()||!reelTracks.length){stopTimeReel(target);playSound("success");return}
  cancelReelFrame();const rev=reelRevision,start=reelPositions.slice(),digits=Array.from(target).filter(c=>/\d/.test(c)).map(Number);
  const duration=digits.map((_,i)=>440+i*55);
  const ends=start.map((p,i)=>{const min=p+duration[i]*(.012+i*.0006)/2;return Math.ceil((min-digits[i])/10)*10+digits[i]});
- let t0=null;
+ let t0=null,lockedPairs=0;
  function frame(ts){if(rev!==reelRevision)return;if(t0===null)t0=ts;let done=true;
  reelPositions=start.map((p,i)=>{let u=Math.min(1,(ts-t0)/duration[i]);if(u<1)done=false;const v=(.012+i*.0006)*duration[i],d=ends[i]-p;return p+v*u*(1-u)*(1-u)+d*u*u*(3-2*u)});
- paintReels();if(done){stopTimeReel(target);return}reelFrame=requestAnimationFrame(frame)}
+ paintReels();const pairs=[1,3,5,7].filter(i=>ts-t0>=duration[i]).length;if(done){stopTimeReel(target);playSound("success");return}if(pairs>lockedPairs){lockedPairs=pairs;playSound("lock")}reelFrame=requestAnimationFrame(frame)}
  reelFrame=requestAnimationFrame(frame);
 }
 function resetUnresolved(state){
@@ -797,7 +891,7 @@ $("locationBtn").onclick=$("manualBtn").onclick=openRegion;$("gpsBtn").onclick=a
 $("regionSearch").oninput=()=>{let q=$("regionSearch").value.trim().replace(/\s/g,""),out=$("searchResults");out.replaceChildren();if(q.length<2)return;let hits=regions.filter(r=>r.full.replace(/\s/g,"").includes(q)).slice(0,15);for(let r of hits){let b=document.createElement("button");b.type="button";b.textContent=r.full;b.onclick=()=>{selectPath(r);out.replaceChildren();$("regionSearch").value=r.name};out.append(b)}if(!hits.length){let p=document.createElement("p");p.textContent="검색 결과가 없어요.";out.append(p)}};
 $("applyRegion").onclick=()=>{let r=regions.find(r=>r.sido===$("sido").value&&r.sgg===$("sgg").value&&r.name===$("emd").value);if(!r&&!regions.length&&PROVINCES[$("sido").value]){let n=$("sido").value,[lat,lon]=PROVINCES[n];r={full:n+" 대표 지점",name:n,lat,lon}}if(r){$("regionDialog").close();fetchWeather(r)}};
 document.querySelectorAll("[data-who]").forEach(b=>b.onclick=()=>{who=b.dataset.who;actIndex=0;document.querySelectorAll("[data-who]").forEach(x=>x.setAttribute("aria-pressed",String(x===b)));renderRecs()});$("moreAct").onclick=()=>{actIndex++;renderRecs()};$("moreFood").onclick=()=>{foodIndex++;renderRecs()};$("moreWear").onclick=()=>{wearIndex++;renderRecs()};$("download").onclick=()=>makeCard(true);$("share").onclick=()=>makeCard(false);
-initAvatarPicker();initShareChooser();
+initAvatarPicker();initShareChooser();initSounds();
 resetUnresolved("idle");setStatus("내 위치나 지역을 선택하면 오늘의 틈을 찾아드려요.","idle");
 })();
 </script></body></html>
