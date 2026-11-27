@@ -233,10 +233,10 @@ header{height:58px}.brand{font-size:22px}.mark{width:36px;height:30px}.app-intro
 const $=id=>document.getElementById(id);
 /* Original synthesized sound cues; no files, tracking or playback on page load. */
 let soundOn=true,audioCtx=null,soundBus=null,soundGeneration=0,soundUnlock=null;
-// V5.3: boost quiet interaction cues for phone speakers while retaining headroom.
+// V5.4: stronger phone-speaker cues with a protected output mix.
 const SOUND_MASTER_GAIN=1.0;
-const SOUND_VOICE_GAIN=2.2;
-const SOUND_REEL_GAIN=3.0;
+const SOUND_VOICE_GAIN=5.0;
+const SOUND_REEL_GAIN=8.0;
 const soundPalette={
  tap:[[520,0,.052,.035,"sine",410]],
  open:[[510,0,.075,.032,"sine",610],[760,.045,.09,.022,"sine"]],
@@ -245,8 +245,8 @@ const soundPalette={
  change:[[480,0,.055,.032,"triangle",590],[750,.05,.09,.023,"sine"]],
  search:[[380,0,.075,.034,"sine",440],[620,.065,.12,.027,"sine",740]],
  share:[[520,0,.06,.027,"sine"],[660,.045,.085,.025,"sine"],[820,.09,.105,.02,"sine"]],
- tick:[[920,0,.024,.017,"triangle",620]],
- tickSoft:[[760,0,.022,.008,"triangle",540]],
+ tick:[[920,0,.044,.017,"triangle",620]],
+ tickSoft:[[760,0,.036,.008,"triangle",540]],
  lock:[[540,0,.055,.022,"sine",410]],
  success:[[523.25,0,.14,.038,"sine"],[659.25,.085,.18,.034,"sine"],[783.99,.17,.24,.029,"sine"],[1046.5,.25,.23,.012,"sine"]],
  error:[[510,0,.105,.023,"sine",450],[370,.105,.15,.022,"sine",320]]
@@ -261,7 +261,13 @@ function setSoundBus(){
 function unlockSound(){
  if(!soundOn||document.hidden)return Promise.resolve(false);
  try{
-  if(!audioCtx){const C=window.AudioContext||window.webkitAudioContext;if(!C)return Promise.resolve(false);audioCtx=new C();soundBus=audioCtx.createGain();soundBus.connect(audioCtx.destination);setSoundBus()}
+  if(!audioCtx){const C=window.AudioContext||window.webkitAudioContext;if(!C)return Promise.resolve(false);audioCtx=new C();soundBus=audioCtx.createGain();
+   if(typeof audioCtx.createDynamicsCompressor==="function"){
+     const limiter=audioCtx.createDynamicsCompressor();
+     limiter.threshold.value=-8;limiter.knee.value=4;limiter.ratio.value=16;limiter.attack.value=.003;limiter.release.value=.1;
+     soundBus.connect(limiter);limiter.connect(audioCtx.destination);
+   }else soundBus.connect(audioCtx.destination);
+   setSoundBus()}
   if(audioCtx.state==="running")return Promise.resolve(true);
   // A later trusted gesture may retry if a browser rejected an earlier resume.
   if(!soundUnlock)soundUnlock=Promise.resolve(audioCtx.resume()).then(()=>audioCtx.state==="running").catch(()=>false).finally(()=>{soundUnlock=null});
@@ -275,7 +281,7 @@ function playSound(kind){
   try{
    const osc=audioCtx.createOscillator(),gain=audioCtx.createGain(),t=now+offset+.005;
    osc.type=type;osc.frequency.setValueAtTime(hz,t);if(endHz)osc.frequency.exponentialRampToValueAtTime(endHz,t+length);
-   gain.gain.setValueAtTime(.0001,t);gain.gain.exponentialRampToValueAtTime(volume*(kind==="tick"||kind==="tickSoft"?SOUND_REEL_GAIN:SOUND_VOICE_GAIN),t+.006);gain.gain.exponentialRampToValueAtTime(.0001,t+length);
+   gain.gain.setValueAtTime(.0001,t);const peak=volume*(kind==="tick"||kind==="tickSoft"?SOUND_REEL_GAIN:SOUND_VOICE_GAIN);gain.gain.exponentialRampToValueAtTime(peak,t+.006);gain.gain.setValueAtTime(peak*.85,t+length*.30);gain.gain.exponentialRampToValueAtTime(.0001,t+length);
    osc.connect(gain);gain.connect(soundBus);osc.onended=()=>{try{osc.disconnect();gain.disconnect()}catch{}};
    osc.start(t);osc.stop(t+length+.008);
   }catch{}
