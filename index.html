@@ -143,6 +143,9 @@ header{height:58px}.brand{font-size:22px}.mark{width:36px;height:30px}.app-intro
 .share-inline .share-actions{flex-shrink:0}
 .share-inline .share-actions button{min-height:44px}
 @media(max-width:680px){.avatar-caption{display:none}.avatar-picker{gap:0}.avatar-switch{gap:5px}.avatar-switch button{width:44px;height:44px;min-width:44px;padding:3px}.share-inline{margin-top:10px;padding:15px}.share-inline .share-actions{width:100%}}
+/* Wardrobe names may span two lines on narrow devices. */
+.rec h3{overflow-wrap:anywhere;word-break:keep-all}
+@media(max-width:680px){.rec h3{font-size:16px;line-height:1.35}.rec p{overflow-wrap:anywhere}}
 </style></head><body><div class="shell">
 <header><div class="brand"><span class="mark" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 34" fill="none"><circle cx="31" cy="10" r="7.5" fill="#e8b868"/><path d="M23 12C18 1 7 7 4 17c-4 14 9 16 20 9 8-5 15-8 21 1" stroke="#315b49" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>날씨틈</div><div class="header-meta"><span class="date" id="date"></span><button id="locationBtn" class="location-btn" aria-label="지역 변경"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 21s7-6 7-12a7 7 0 0 0-14 0c0 6 7 12 7 12Z" stroke="currentColor" stroke-width="1.7"/><circle cx="12" cy="9" r="2.5" stroke="currentColor" stroke-width="1.7"/></svg><span id="locLabel">서울 · 예시</span><svg width="14" height="14" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button></div></header>
 <main><div class="app-intro"><div><h1>오늘 최고의 두 시간.</h1><p>날씨에 맞춰 옷차림, 음식, 할 일까지.</p></div><span class="tag">오늘의 일상 큐레이션</span></div>
@@ -195,28 +198,72 @@ function artDefs(id){
 function artSvg(id,bg,body){
  return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 148" preserveAspectRatio="xMidYMid meet" aria-hidden="true" focusable="false">'+artDefs(id)+'<rect width="180" height="148" rx="10" fill="'+bg+'"/>'+body+'<rect width="180" height="148" fill="url(#'+id+'grain)" opacity=".52" pointer-events="none"/></svg>';
 }
-function outfitLook(t,rain=0){
- let style=t<5?"puffer":t<10?"coat":t<17?"jacket":t<23?"shirt":t<28?"tee":"summer";
- const coat={puffer:"#527568",coat:"#b18b64",jacket:"#748c70",shirt:"#8aa6ae",tee:"#e8d3ad",summer:"#f4e6cd"}[style];
- return {style,coat,top:style==="tee"||style==="summer"?"#f1e8d3":"#f7edda",pants:t>=28?"#a69578":t>=23?"#8b9d92":"#666e64",umbrella:rain>=40};
+/* Weather-appropriate wardrobe, tailored to the selected illustrated character.
+   The same outfit object drives all scenes and the recommendation copy. */
+const wardrobes={
+ m:[
+ {style:"puffer",cut:"hooded",coat:"#466859",top:"#d9ccaf",pants:"#565f60",trouser:"straight",title:"후드 패딩과 니트",detail:"도톰한 패딩에 니트, 긴바지와 목도리를 챙겨요."},
+ {style:"coat",cut:"tailored",coat:"#947b61",top:"#eee3cd",pants:"#424d51",trouser:"straight",title:"울 코트와 슬랙스",detail:"울 코트 안에 니트를 입고 긴 슬랙스로 보온해요."},
+ {style:"jacket",cut:"field",coat:"#687d5d",top:"#eee6d3",pants:"#556c79",trouser:"straight",title:"필드 재킷과 데님",detail:"긴팔 티셔츠와 재킷, 일자 청바지를 겹쳐 입어요."},
+ {style:"shirt",cut:"overshirt",coat:"#7797a5",top:"#f5ebd7",pants:"#a29173",trouser:"straight",title:"오버셔츠와 치노 팬츠",detail:"얇은 티셔츠 위에 셔츠를 걸쳐 일교차에 대비해요."},
+ {style:"tee",cut:"crew",coat:"#f0e4cd",top:"#e8ddc4",pants:"#748477",trouser:"straight",title:"반팔 티와 면바지",detail:"여유로운 반팔과 가벼운 면바지로 편하게 움직여요."},
+ {style:"summer",cut:"linen",coat:"#ede5d4",top:"#ede5d4",pants:"#a99c81",trouser:"shorts",title:"리넨 반팔과 반바지",detail:"통풍이 좋은 리넨 셔츠와 반바지를 입고 수분도 챙겨요."}
+ ],
+ f:[
+ {style:"puffer",cut:"cropped",coat:"#b6a69a",top:"#eddfcc",pants:"#555e59",trouser:"straight",title:"숏패딩과 기모 팬츠",detail:"따뜻한 니트에 볼륨감 있는 숏패딩, 기모 팬츠와 목도리를 챙겨요."},
+ {style:"coat",cut:"belted",coat:"#b89375",top:"#f1dfd0",pants:"#777269",trouser:"wide",title:"벨티드 코트와 니트",detail:"허리끈 있는 울 코트에 니트, 와이드 팬츠로 보온해요."},
+ {style:"jacket",cut:"cardigan",coat:"#aa8075",top:"#f3e8d7",pants:"#d0bd9d",trouser:"wide",title:"도톰한 카디건과 와이드 팬츠",detail:"긴팔 이너에 도톰한 카디건과 와이드 팬츠를 입어요."},
+ {style:"shirt",cut:"blouse",coat:"#e7d9c3",top:"#e7d9c3",pants:"#778b86",trouser:"wide",title:"블라우스와 와이드 슬랙스",detail:"긴팔 블라우스와 얇은 겉옷, 움직이기 편한 슬랙스가 좋아요."},
+ {style:"tee",cut:"stripe",coat:"#eae4d4",top:"#f0e7d7",pants:"#7b8d9c",trouser:"wide",title:"스트라이프 반팔과 데님",detail:"가벼운 스트라이프 티셔츠와 얇은 와이드 데님을 추천해요."},
+ {style:"summer",cut:"linenBlouse",coat:"#e6c8b0",top:"#e6c8b0",pants:"#c6b79a",trouser:"wide",title:"리넨 블라우스와 팬츠",detail:"바람이 잘 통하는 리넨 블라우스와 넉넉한 얇은 팬츠를 입어요."}
+ ]
+};
+function outfitLook(t,rain=0,gender=avatar,variant=0,wind=0){
+ const band=t<5?0:t<10?1:t<17?2:t<23?3:t<28?4:5;
+ const base=wardrobes[gender==="f"?"f":"m"][band],look={...base,umbrella:rain>=40,windproof:wind>=20,scarf:band<2};
+ // In exposed/windy conditions, an actual extra outer layer is more useful than decoration.
+ if(wind>=20&&band>=2&&band<=3){Object.assign(look,{style:"jacket",cut:"windbreaker",coat:gender==="f"?"#a4a995":"#647f81",top:"#f1e8d5",title:gender==="f"?"바람막이와 와이드 팬츠":"바람막이와 긴바지",detail:"바람을 막는 얇은 외투를 긴팔 위에 걸치고 긴바지를 입어요."})}
+ if(variant===1)look.coat=look.style==="tee"||look.style==="summer"?look.coat:(gender==="f"?"#a29d83":"#7b8990");
+ if(variant===2)look.coat="#91a8a2";
+ return look;
 }
 function littlePerson(x,y,k,o={}){
  const p=artP,skin=o.skin||p.skin,hair=o.hair||p.hair,coat=o.coat||p.green,top=o.top||p.cream,pants=o.pants||"#737c72";
- const st=o.style||"jacket",puff=st==="puffer",long=st==="coat",tee=st==="tee"||st==="summer",hem=long?78:puff?69:tee?59:64,walking=!!o.walk;
+ const st=o.style||"jacket",puff=st==="puffer",long=st==="coat",tee=st==="tee"||st==="summer",hem=long?82:puff?(o.cut==="cropped"?61:69):tee?59:64,walking=!!o.walk,cut=o.cut||"tailored";
  // Relaxed straight-leg silhouette, with only a small step when walking.
- const leg=walking?'<path d="M-13 '+(hem-3)+'L-1 '+hem+' -3 86-9 111H-19L-15 85Z" fill="'+pants+'"/><path d="M0 '+hem+'L13 '+(hem-3)+' 12 86 14 113H3L1 90Z" fill="'+pants+'"/><path d="M-11 '+(hem+6)+'l-3 34M7 '+(hem+6)+'l1 35" stroke="#354b42" stroke-opacity=".32" stroke-width="1"/><path d="M-19 110h10l1 6h-17q-1-4 6-6M3 112h11q6 1 8 6H3Z" fill="#f5edda" stroke="#4f594b" stroke-width=".85"/>':'<path d="M-13 '+(hem-3)+'H13L13 113H3L0 '+(hem+13)+'-3 113H-13Z" fill="'+pants+'"/><path d="M0 '+(hem+2)+'v17M-8 '+(hem+6)+'l-1 37M8 '+(hem+6)+'l1 37" stroke="#41544a" stroke-opacity=".34" stroke-width="1"/><path d="M-14 112h11v6h-18q-1-4 7-6M3 112h11q7 2 7 6H3Z" fill="#f5edda" stroke="#4f594b" stroke-width=".85"/>';
+ const wide=o.trouser==="wide",shorts=o.trouser==="shorts",bottom=shorts?89:113,outer=wide?16:13,inner=wide?2:3,step=walking?3:0,hemStart=hem-4;
+ const left=-outer-step,right=outer,foot="#f5edda";
+ const leg='<path d="M-13 '+hemStart+'H-1L-'+inner+' '+bottom+'H'+left+'L-14 '+(hem+9)+'Z" fill="'+pants+'"/><path d="M1 '+hemStart+'H13L14 '+(hem+10)+' '+right+' '+bottom+'H'+inner+'Z" fill="'+pants+'"/><path d="M-9 '+(hem+5)+'L'+(left+4)+' '+(bottom-4)+'M9 '+(hem+5)+'L'+(right-4)+' '+(bottom-4)+'" stroke="#34473c" stroke-opacity=".27" stroke-width=".9" fill="none"/>'+(shorts?'<path d="M'+(left+2)+' 89H-3L-4 113H'+(left+3)+'Z M3 89H'+(right-2)+'L'+(right-3)+' 113H4Z" fill="'+skin+'"/>':'')+'<path d="M'+(shorts?left+3:left)+' 112H-3V118H'+(left-7)+'Q'+(left-8)+' 114 '+(shorts?left+3:left)+' 112Z M3 112H'+(shorts?right-3:right)+'Q'+(right+7)+' 114 '+(right+7)+' 118H3Z" fill="'+foot+'" stroke="#4f594b" stroke-width=".85"/><path d="M'+(left-4)+' 116H-3M3 116H'+(right+4)+'" stroke="#c9c9b9" stroke-width=".8"/>';
  const sleeve=tee?top:coat;
  const arm=tee?43:61;
  const armLeft=walking?'<path d="M-13 28Q-22 28-24 39L-27 '+(arm+3)+'Q-23 '+(arm+6)+'-18 '+(arm+4)+'L-15 43Z" fill="'+sleeve+'"/><path d="M-27 '+(arm+3)+'l-2 6q2 4 6 3l5-8Z" fill="'+skin+'"/>':'<path d="M-12 27Q-23 28-25 42L-23 '+arm+'-15 '+arm+'-14 43Z" fill="'+sleeve+'"/><path d="M-23 '+arm+'l1 10q4 4 8-2l-1-8Z" fill="'+skin+'"/>';
  const armRight=o.umbrella?'<path d="M12 27q12 1 13 16l-1 11 12-11 6 7-17 19q-5 3-9-1l-5-24Z" fill="'+sleeve+'"/><path d="M35 44l5-8q4-2 6 2l-3 12Z" fill="'+skin+'"/>':walking?'<path d="M12 28Q22 28 24 41L27 '+(arm-2)+'l-7 5-9-18Z" fill="'+sleeve+'"/><path d="M20 '+(arm+3)+'l7-5 4 7q0 4-5 5Z" fill="'+skin+'"/>':'<path d="M12 27Q23 28 25 42L23 '+arm+'H15L14 43Z" fill="'+sleeve+'"/><path d="M15 '+arm+'l-1 9q4 5 8 0l1-9Z" fill="'+skin+'"/>';
  let garment='';
+ const outline="#4d6050",light="#f5edda",collar='<path d="M-7 26Q0 34 7 26" stroke="#a2967e" stroke-width=".8" fill="none"/>';
+ const buttonRow=(x,ys)=>ys.map(y=>'<circle cx="'+x+'" cy="'+y+'" r="1.05" fill="'+outline+'"/>').join("");
  if(puff){
-  garment='<path d="M-13 26Q0 20 13 26Q19 34 19 47L18 69Q0 75-18 69L-19 47Q-19 34-13 26Z" fill="'+coat+'"/><path d="M-17 36q17 5 34 0M-18 46q18 5 36 0M-18 56q18 5 36 0M-17 65q17 5 34 0" stroke="#dce1cb" stroke-opacity=".55" stroke-width="1.1" fill="none"/><path d="M0 28v43" stroke="#315748" stroke-width="1.25"/><path d="M-11 54l-3 9m25-9 3 9" stroke="#e5e6d8" stroke-width="1.1" stroke-opacity=".55"/><path d="M-12 26q12 10 24 0" stroke="#be795d" stroke-width="7" stroke-linecap="round" fill="none"/><path d="M9 28l5 18-6 1-4-17" fill="#be795d"/><path d="M8 33l5 13" stroke="#e2b297" stroke-width="1"/>';
+  const cropped=cut==="cropped",width=cropped?17:19;
+  garment=(cropped?'':'<path d="M-15 28Q-17 15 0 15Q17 15 15 28L9 33H-9Z" fill="'+coat+'" stroke="#3c594b" stroke-width=".8"/>')+'<path d="M-13 26Q0 20 13 26Q'+width+' 34 '+width+' 47L'+(width-1)+' '+hem+'Q0 '+(hem+3)+'-'+(width-1)+' '+hem+'L-'+width+' 47Q-'+width+' 34-13 26Z" fill="'+coat+'"/>'+
+  [36,46,56,65].filter(y=>y<hem-2).map(y=>'<path d="M-'+(width-2)+' '+y+'q'+(width-2)+' 4 '+(width-2)*2+' 0" stroke="'+light+'" stroke-opacity=".55" stroke-width="1.1" fill="none"/>').join("")+'<path d="M0 28V'+hem+'" stroke="'+outline+'" stroke-width="1.15"/><path d="M-11 49l-3 8m25-8 3 8" stroke="'+light+'" stroke-opacity=".55" stroke-width="1.2"/>';
+ }else if(cut==="belted"){
+  garment='<path d="M-13 26Q0 20 13 26L12 48Q17 63 20 '+hem+'Q0 '+(hem+5)+'-20 '+hem+'Q-17 63-12 48Z" fill="'+coat+'"/><path d="M-7 26L0 38 7 26 4 '+(hem-1)+'H-4Z" fill="'+top+'"/><path d="M-13 28L-4 39-8 44 0 49 8 44 4 39 13 28" fill="none" stroke="#80674f" stroke-width="1"/><path d="M-14 50H14" stroke="#90745c" stroke-width="4"/><rect x="-4" y="48" width="8" height="4" rx="1" fill="none" stroke="#e5c39d" stroke-width=".8"/><path d="M2 52l4 14m-5-14-5 11M-14 65l8-4m12 0 8 4" stroke="#8f7359" stroke-width="1.3" stroke-linecap="round"/>';
+ }else if(cut==="cardigan"){
+  garment='<path d="M-14 27Q0 20 14 27L15 '+hem+'Q0 '+(hem+2)+'-15 '+hem+'Z" fill="'+coat+'"/><path d="M-8 26L0 43 8 26 5 '+hem+'H-5Z" fill="'+top+'"/><path d="M-8 26L0 43V'+hem+'M8 26L0 43" stroke="#dfb6a6" stroke-width="2" fill="none"/>'+buttonRow(0,[47,53,59])+'<path d="M-13 32V62M13 32V62M-10 45V60M10 45V60" stroke="#efd1bc" stroke-opacity=".4" stroke-width=".8"/><path d="M-14 '+(hem-3)+'H14" stroke="#805f55" stroke-opacity=".5" stroke-width="2"/>';
+ }else if(cut==="blouse"||cut==="linenBlouse"){
+  garment='<path d="M-14 28Q-8 22 0 26Q8 22 14 28L12 '+(hem-5)+'Q0 '+hem+'-12 '+(hem-5)+'Z" fill="'+top+'"/>'+collar+'<path d="M-5 27L0 33 5 27M0 33V'+(hem-7)+'" stroke="#9b8570" stroke-width=".9" fill="none"/>'+buttonRow(0,[38,44,50])+'<path d="M-10 39l3 18m17-18-3 18" stroke="#bc9a81" stroke-opacity=".6" stroke-width=".8"/><path d="M-13 '+(hem-5)+'Q0 '+hem+' 13 '+(hem-5)+'" stroke="#ad9074" stroke-width="1" fill="none"/>';
  }else if(tee){
-  garment='<path d="M-14 26Q0 21 14 26L12 '+hem+'Q0 '+(hem+3)+'-12 '+hem+'Z" fill="'+top+'"/><path d="M-6 26q6 8 12 0M-10 '+(hem-5)+'q10 2 20 0" fill="none" stroke="#b7ab90" stroke-width="1.1"/><path d="M-9 40l5 5m9-9-1 14" stroke="#cbbda2" stroke-width=".8"/>';
+  garment='<path d="M-14 26Q0 21 14 26L12 '+hem+'Q0 '+(hem+3)+'-12 '+hem+'Z" fill="'+top+'"/>'+collar;
+  if(cut==="stripe")garment+=[35,41,47,53].map(y=>'<path d="M-12 '+y+'H12" stroke="#68877c" stroke-width="1.8" opacity=".85"/>').join("");
+  else if(cut==="linen")garment+='<path d="M-6 26L0 34 6 26M0 34V'+hem+'" stroke="#a49a83" stroke-width="1.2" fill="none"/>'+buttonRow(0,[39,45,51])+'<path d="M5 38h6v8H5Z" fill="none" stroke="#b0a38b" stroke-width=".8"/>';
+  else garment+='<path d="M-10 '+(hem-5)+'q10 2 20 0M-9 40l5 5m9-9-1 14" fill="none" stroke="#b7ab90" stroke-width=".9"/>';
  }else{
-  garment='<path d="M-13 26Q0 20 13 26L'+(long?19:15)+' '+hem+'Q0 '+(hem+4)+'-'+(long?19:15)+' '+hem+'Z" fill="'+coat+'"/><path d="M-7 26Q0 34 7 26L5 '+(hem-1)+'H-5Z" fill="'+top+'"/><path d="M-13 27l8 12-4 5 5 7m17-24-8 12 4 5-5 7" stroke="#394a3c" stroke-opacity=".65" fill="none" stroke-width="1"/><path d="M-11 50l-2 13m24-13 2 13" stroke="#f6ebd3" stroke-opacity=".32" stroke-width=".8"/><path d="M-15 '+(hem-12)+'l7-2m16 0 7 2" stroke="#4b5c4c" stroke-width="1.2" stroke-opacity=".65"/><circle cx="5" cy="48" r="1" fill="#46564a"/><circle cx="5" cy="58" r="1" fill="#46564a"/>'+(st==="shirt"?'<path d="M-14 36l4 29m24-29-4 29" stroke="#e0e8d9" opacity=".38" stroke-width=".7"/>':'');
+  garment='<path d="M-13 26Q0 20 13 26L'+(long?18:15)+' '+hem+'Q0 '+(hem+4)+'-'+(long?18:15)+' '+hem+'Z" fill="'+coat+'"/><path d="M-7 26Q0 34 7 26L5 '+(hem-1)+'H-5Z" fill="'+top+'"/>';
+  if(cut==="field")garment+='<path d="M-12 27L-4 38-8 43M12 27L4 38 8 43" stroke="'+outline+'" stroke-width="1" fill="none"/><g fill="none" stroke="#475b43" stroke-width=".8"><path d="M-13 39h9v9h-9Zm17 0h9v9H4ZM-13 53h10v8h-10Zm16 0h10v8H3Z"/></g><path d="M-13 40h9m8 0h9" stroke="#b6bf9e" stroke-width="1.1"/>';
+  else if(cut==="overshirt")garment+='<path d="M-11 27L-3 36-7 39M11 27L3 36 7 39M0 39V'+hem+'" stroke="'+outline+'" stroke-width="1" fill="none"/><path d="M-12 41h8v10h-8Z" fill="none" stroke="#4b6970" stroke-width=".85"/>'+buttonRow(0,[42,49,56]);
+  else if(cut==="windbreaker")garment+='<path d="M-13 28Q-16 16 0 17Q16 16 13 28M0 28V'+hem+'M-12 49l7 7m17-7-7 7" stroke="#405b52" fill="none" stroke-width="1.25"/><path d="M-11 '+(hem-3)+'H11" stroke="#d9ddcb" stroke-width="1"/>';
+  else garment+='<path d="M-13 27l8 12-4 5 5 7m17-24-8 12 4 5-5 7" stroke="'+outline+'" fill="none" stroke-width="1.1"/>'+buttonRow(6,[47,59,70])+'<path d="M-13 59l8-3m10 0 8 3" stroke="'+outline+'" stroke-width="1"/>';
  }
+ if(o.scarf)garment+='<path d="M-11 25Q0 34 11 25" stroke="#bd8269" stroke-width="6" stroke-linecap="round" fill="none"/><path d="M7 28l4 18-6 1-4-17" fill="#bd8269"/><path d="M5 43l2 4m2-5 2 4" stroke="#e3b59a" stroke-width=".9"/>';
  // Distinct facial designs, not merely a different haircut.
  const female=o.gender==="f",child=o.gender==="child";
  const hairBack=o.longHair?'<path d="M-12 0q-7 7-5 24l-2 10 13-3 14 3 7-7-1-28Z" fill="'+hair+'"/>':'';
@@ -226,14 +273,14 @@ function littlePerson(x,y,k,o={}){
  const features=female?'<g fill="none" stroke-linecap="round"><path d="M-7 6.4q3-2 6-.8m5.5 0q3-1.1 5.5 1" stroke="#625044" stroke-width=".85"/><path d="M-7 9q2.8-2.4 5.5 0m5.5 0q2.8-2.4 5.5 0" stroke="#4e4137" stroke-width=".95"/><path d="M1.7 10l-.7 3.1 1.5.3" stroke="#ad785f" stroke-width=".65"/><path d="M-1.8 17q3.8-1.1 7 .1-3.8 2.8-7-.1Z" fill="#bc7669" stroke="none"/></g><circle cx="-4.1" cy="9.3" r="1.05" fill="#403d33"/><circle cx="6.8" cy="9.3" r="1.05" fill="#403d33"/><ellipse cx="-6.4" cy="13.4" rx="2.8" ry="1.3" fill="#c9857c" opacity=".45"/><ellipse cx="9" cy="13.4" rx="2.2" ry="1.2" fill="#c9857c" opacity=".3"/>':'<g fill="none" stroke-linecap="round"><path d="M-7 6l5.8-.5m5.6 0 5.5.6" stroke="#4e4137" stroke-width="1.35"/><path d="M-6.2 9h4.8m6.2 0h4.8" stroke="#53483d" stroke-width=".7"/><path d="M2 9.8l-1.2 4.5 2.4.3" stroke="#9f6f58" stroke-width=".85"/><path d="M-1.8 17.1q3.3 1.2 6.8 0" stroke="#95614e" stroke-width=".95"/></g><circle cx="-3.8" cy="9.2" r=".88" fill="#3e4034"/><circle cx="7" cy="9.2" r=".88" fill="#3e4034"/>';
  const face=hairBack+neck+head+hairFront+features;
  const umbrella=o.umbrella?'<g transform="translate(40 -2)"><path d="M-38 4Q-32-27 0-28Q32-25 38 4Q26-3 13 4Q0-4-13 4Q-26-3-38 4Z" fill="#8da9a4" stroke="#5f7d72" stroke-width="1.2"/><path d="M0-27Q-16-17-13 4M0-27Q16-17 13 4" stroke="#d1d9cb" stroke-width="1" fill="none"/><path d="M0 4v50q0 7-5 7t-5-5" stroke="#536b60" stroke-width="1.5" fill="none" stroke-linecap="round"/></g>':'';
- const bag=o.bag?'<path d="M-12 26L20 60" stroke="#8d6c4b" stroke-width="2"/><path d="M10 54l18-2 4 20-21 3Z" fill="#bb9567" stroke="#886c4e" stroke-width=".8"/><path d="M13 57l15-2" stroke="#e6ca98" stroke-width="1"/>':'';
+ const bag=o.bag?(female?'<path d="M12 28Q24 39 20 58" fill="none" stroke="#927759" stroke-width="2"/><rect x="12" y="54" width="19" height="17" rx="5" fill="#b59068" stroke="#806749" stroke-width=".8"/><path d="M13 58q8 5 17 0" fill="none" stroke="#e6ca98" stroke-width="1"/><circle cx="22" cy="60" r="1" fill="#e3c38e"/>':'<path d="M-12 26L20 60" stroke="#8d6c4b" stroke-width="2"/><path d="M10 54l18-2 4 20-21 3Z" fill="#bb9567" stroke="#886c4e" stroke-width=".8"/><path d="M13 57l15-2" stroke="#e6ca98" stroke-width="1"/>'):'';
  return '<g transform="translate('+x+' '+y+') scale('+k+')">'+leg+armLeft+armRight+garment+bag+face+umbrella+'</g>';
 }
 function treeArt(x,y,k,fall=false){
  const colors=fall?["#d3aa62","#c68a61","#e2c78b"]:["#809e80","#9fb59a","#b9c9a9"];
  return '<g transform="translate('+x+' '+y+') scale('+k+')"><path d="M0 54L0 6M0 31l-13-17M0 38l16-23" stroke="#8d8062" stroke-width="2.8" fill="none" stroke-linecap="round"/><path d="M-20 13Q-35-2-19-15Q-16-32 0-28Q17-34 25-15Q36-4 25 11Q13 29-7 20Z" fill="'+colors[0]+'"/><path d="M-24 2Q-27-13-12-18Q-2-25 5-13Q4 4-13 13Z" fill="'+colors[1]+'"/><path d="M7-20q20 0 23 16-3 16-20 15Q0-2 7-20Z" fill="'+colors[2]+'" opacity=".6"/><path d="M-17 0l7-7m17-3 9 4m-3 12 5-6" stroke="#fff5db" stroke-opacity=".4" fill="none" stroke-width="1"/></g>';
 }
-function lifestyleArt(title,who,indoor,t,rain=0,startHour=12){
+function lifestyleArt(title,who,indoor,t,rain=0,startHour=12,wind=0){
  const id="act-",p=artP,night=!indoor&&(startHour>=18||startHour<7),wet=!indoor&&rain>=40,cold=t<8,walk=!indoor&&/산책|걸어|나들이|데이트|투어|사진/.test(title),look=outfitLook(t,rain);
  let body="",props="",floor="";
  if(indoor){
@@ -267,14 +314,14 @@ function lifestyleArt(title,who,indoor,t,rain=0,startHour=12){
   else if(night)props='<path d="M146 110V62q0-6-6-6h-6" stroke="#566b61" stroke-width="2.2" fill="none"/><path d="M130 56h11l4 7h-19Z" fill="#eacb85"/>';
  }
  const cast=castFor(who,avatar),count=cast.length,poses=count===1?[[82,24,.83]]:count===2?[[57,29,.79],[105,35,.74]]:[[43,30,.76],[86,26,.79],[120,61,.49]];
- const people=poses.map(([x,y,k],i)=>'<ellipse cx="'+x+'" cy="'+(y+116*k)+'" rx="'+(27*k)+'" ry="'+(5*k)+'" fill="url(#act-shadow)"/>'+littlePerson(x,y,k,{...look,coat:i?[p.rust,p.blue][i-1]:look.coat,top:i? "#f0dfc6":look.top,skin:["#e7b894","#c99275","#edc5a3"][i],...cast[i],walk,bag:i===0&&!look.umbrella,umbrella:wet&&i===0})).join("");
+ const people=poses.map(([x,y,k],i)=>'<ellipse cx="'+x+'" cy="'+(y+116*k)+'" rx="'+(27*k)+'" ry="'+(5*k)+'" fill="url(#act-shadow)"/>'+littlePerson(x,y,k,{...outfitLook(t,rain,cast[i].gender,i,wind),...cast[i],walk,bag:i===0&&!look.umbrella,umbrella:wet&&i===0})).join("");
  return artSvg(id,indoor?"url(#act-paper)":"url(#act-sky)",body+props+people);
 }
 function outfitArt(t,rain,wind){
- const look=outfitLook(t,rain),id="wear-",st=look.style;
+ const look=outfitLook(t,rain,avatar,0,wind),id="wear-",st=look.style;
  let body='<rect width="180" height="148" fill="url(#wear-paper)"/><rect x="8" y="8" width="164" height="132" rx="7" fill="none" stroke="#c6c8b1" stroke-width=".65"/><circle cx="89" cy="71" r="57" fill="#e5e8d9"/><circle cx="89" cy="71" r="51" fill="none" stroke="#f8f4e5" stroke-width="1.2"/><path d="M18 122H162" stroke="#c9c8b3" stroke-width=".7"/><ellipse cx="78" cy="130" rx="39" ry="7" fill="url(#wear-shadow)"/>';
  body+=littlePerson(76,17,.94,{...look,...castFor("혼자",avatar)[0],bag:!look.umbrella});
- if(st==="puffer"||st==="coat"){
+ if(look.scarf){
   body+='<g transform="translate(141 49)"><path d="M-15-6q0-15 13-15 14 0 14 15l-5 5-5-5-7 9-8-2Z" fill="#be795d" stroke="#9f6e55" stroke-width=".8"/><path d="M-12-5q12 7 23-2" stroke="#e2ab8b" stroke-width="2" fill="none"/><path d="M8-5l7 25-7 2L1 0" fill="#be795d"/><path d="M7 19l3 6m3-7 3 5" stroke="#aa765c" stroke-width="1"/></g>';
  }else if(st==="tee"||st==="summer"){
   body+='<g transform="translate(137 49)"><ellipse cy="5" rx="22" ry="5" fill="#a9b59b"/><path d="M-13 3q0-18 13-18T13 3Z" fill="#bdc7ad"/><path d="M-12 0h24" stroke="#839d89" stroke-width="2"/></g>';
@@ -344,13 +391,13 @@ function portrait(gender){
  const p=castFor("혼자",gender)[0];
  return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 42 44" aria-hidden="true"><rect x="1" y="1" width="40" height="42" rx="13" fill="#dce3d0"/><svg x="0" y="2" width="42" height="42" viewBox="-25 -16 50 50">'+littlePerson(0,0,1,{...p,style:"jacket",coat:gender==="m"?"#567763":"#bd765b"})+'</svg></svg>';
 }
-function windowCharacterArt(who,self,t,rain,indoor,hour,title){
+function windowCharacterArt(who,self,t,rain,indoor,hour,title,wind=0){
  const cast=castFor(who,self),look=outfitLook(t,rain),night=hour>=18||hour<7,walk=!indoor&&/산책|걸어|나들이|데이트|투어|사진/.test(title);
  let scenery='<defs><radialGradient id="hero-glow"><stop stop-color="#dce5b7" stop-opacity=".45"/><stop offset="1" stop-color="#dce5b7" stop-opacity="0"/></radialGradient></defs><circle cx="121" cy="50" r="70" fill="url(#hero-glow)"/>';
  if(indoor)scenery+='<path d="M98 13h64v105H98Z" fill="#b4c5ad" opacity=".38"/><path d="M130 13v105m-32-52h64" stroke="#e9ebd5" stroke-width="1.1" opacity=".6"/><path d="M94 118h72" stroke="#c8d1b4" stroke-width="3"/>';
  else scenery+='<path d="M0 126q53-34 103-10t77-9v41H0Z" fill="#8fa98b" opacity=".52"/><path d="M12 148q62-33 168-20" stroke="#e7e2bd" stroke-width="6" fill="none" opacity=".65"/>'+(night?'<path d="M147 11a15 15 0 1 0 17 23 16 16 0 0 1-17-23Z" fill="#e9ddb1"/>':'<circle cx="151" cy="23" r="13" fill="#eac477" opacity=".95"/>')+'<path d="M180 3Q147 5 132 31m26-22-9 15m20-17-8 14" stroke="#c8b67f" stroke-width="1.3" fill="none"/><g fill="#c9ca89"><ellipse cx="149" cy="10" rx="9" ry="4" transform="rotate(-28 149 10)"/><ellipse cx="159" cy="20" rx="9" ry="4" transform="rotate(-46 159 20)"/><ellipse cx="133" cy="31" rx="8" ry="4" transform="rotate(-32 133 31)"/></g>';
  const positions=cast.length===1?[[101,25,1.02]]:cast.length===2?[[67,30,.93],[126,34,.88]]:[[49,31,.88],[103,28,.9],[143,72,.55]];
- const figures=positions.map(([x,y,k],i)=>littlePerson(x,y,k,{...look,...cast[i],coat:i===0?look.coat:i===1?"#be8c71":"#8ca3a3",bag:i===0&&!look.umbrella,umbrella:!indoor&&look.umbrella&&i===0,walk})).join("");
+ const figures=positions.map(([x,y,k],i)=>littlePerson(x,y,k,{...outfitLook(t,rain,cast[i].gender,i,wind),...cast[i],bag:i===0&&!look.umbrella,umbrella:!indoor&&look.umbrella&&i===0,walk})).join("");
  return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 148" preserveAspectRatio="xMidYMid meet" aria-hidden="true">'+scenery+figures+'</svg>';
 }
 function weatherAtmosphere(code,day){
@@ -360,7 +407,7 @@ function weatherAtmosphere(code,day){
  return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 190" preserveAspectRatio="xMidYMid slice"><defs><linearGradient id="wx-sky" x1="0" y1="0" x2="1" y2=".7"><stop stop-color="#f1eee2"/><stop offset=".45" stop-color="#e5e9dc"/><stop offset="1" stop-color="'+sky+'"/></linearGradient><linearGradient id="wx-haze" x2="0" y2="1"><stop stop-color="#fff8df" stop-opacity="0"/><stop offset="1" stop-color="#f3f1e5" stop-opacity=".95"/></linearGradient></defs><rect width="400" height="190" fill="url(#wx-sky)"/>'+(day&&!rainy&&!snow?'<circle cx="302" cy="44" r="24" fill="#edcd85" opacity="'+(cloudy?".5":".9")+'"/>':!day?'<path d="M314 22a22 22 0 1 0 23 30 24 24 0 0 1-23-30Z" fill="#f3e6bb"/>':'')+(cloudy?cloud:'')+(rainy?'<g stroke="#789ca8" stroke-opacity=".55" stroke-width="1.2">'+Array.from({length:15},(_,i)=>'<path d="M'+(215+i*23%179)+' '+(69+i*17%60)+'l-5 10"/>').join("")+'</g>':snow?'<g fill="#fff" opacity=".85">'+Array.from({length:15},(_,i)=>'<circle cx="'+(212+i*29%179)+'" cy="'+(70+i*13%62)+'" r="2"/>').join("")+'</g>':'')+'<rect y="65" width="400" height="125" fill="url(#wx-haze)"/></svg>';
 }
 
-function renderRecs(){let arr=activities[plan.indoor?"in":"out"][who],a=arr[actIndex%arr.length];$("actTitle").textContent=a[0];$("actText").textContent=a[1];$("actMini").textContent=a[2];let t=plan.temp,wear=t<5?["패딩과 방한 용품","두꺼운 외투, 니트, 목도리를 챙기세요."]:t<10?["코트 또는 경량 패딩","니트와 긴 바지를 겹쳐 입어요."]:t<17?["재킷과 긴팔","가벼운 겉옷으로 일교차에 대비하세요."]:t<23?["가벼운 셔츠와 겉옷","걷기 편한 긴바지와 얇은 겉옷이 좋아요."]:t<28?["반팔과 가벼운 바지","통기성 좋은 옷과 얇은 겉옷을 준비하세요."]:["시원한 반팔과 통기성 좋은 옷","그늘과 수분 보충을 잊지 마세요."];$("wearTitle").textContent=wear[0];$("wearText").textContent=wear[1];$("wearMini").textContent=(plan.rain>=40?"접이식 우산 챙기기":plan.wind>=20?"바람막이 챙기기":"체감온도 "+fmt(t)+"° 기준");let food=t<14?[["따뜻한 칼국수","따뜻한 국물로 몸을 녹이는 한 끼."],["뜨끈한 국밥","든든하게 오늘의 에너지를 채워요."],["차와 구운 빵","잠깐의 휴식과 잘 어울려요."]]:t>25?[["냉면","더운 날 입맛을 살리는 시원한 한 그릇."],["샐러드와 시원한 음료","가볍게 즐기고 수분도 챙겨요."]]:[["샌드위치와 커피","산책과 잘 어울리는 부담 없는 한 끼."],["제철 채소 비빔밥","편안하고 든든하게 즐겨요."]];let f=food[foodIndex%food.length];$("foodTitle").textContent=f[0];$("foodText").textContent=f[1];$("foodMini").textContent="오늘의 기온에 어울리는 메뉴";$("activityArt").innerHTML=lifestyleArt(a[0],who,plan.indoor,t,plan.rain,plan.start?Number(plan.start.slice(11,13)):kst().hour);$("outfitArt").innerHTML=outfitArt(t,plan.rain,plan.wind);$("mealArt").innerHTML=mealArt(f[0]);$("windowCharacter").innerHTML=windowCharacterArt(who,avatar,t,plan.rain,plan.indoor,plan.start?Number(plan.start.slice(11,13)):kst().hour,a[0]);prepareShareCard();$("planBTitle").textContent=plan.indoor?"오늘은 실내 계획을 먼저":"날씨가 바뀐다면 · PLAN B";$("planBText").textContent=plan.indoor?"가까운 서점, 카페, 집에서 보내는 시간을 추천해요.":"갑자기 비가 오거나 바람이 강해지면 가까운 실내 전시나 카페로 바꿔요."}
+function renderRecs(){let arr=activities[plan.indoor?"in":"out"][who],a=arr[actIndex%arr.length];$("actTitle").textContent=a[0];$("actText").textContent=a[1];$("actMini").textContent=a[2];let t=plan.temp,wear=outfitLook(t,plan.rain,avatar,0,plan.wind);$("wearTitle").textContent=wear.title;$("wearText").textContent=wear.detail;$("wearMini").textContent=(plan.rain>=40?"접이식 우산 챙기기":plan.wind>=20?"바람막이 챙기기":"체감온도 "+fmt(t)+"° 기준");let food=t<14?[["따뜻한 칼국수","따뜻한 국물로 몸을 녹이는 한 끼."],["뜨끈한 국밥","든든하게 오늘의 에너지를 채워요."],["차와 구운 빵","잠깐의 휴식과 잘 어울려요."]]:t>25?[["냉면","더운 날 입맛을 살리는 시원한 한 그릇."],["샐러드와 시원한 음료","가볍게 즐기고 수분도 챙겨요."]]:[["샌드위치와 커피","산책과 잘 어울리는 부담 없는 한 끼."],["제철 채소 비빔밥","편안하고 든든하게 즐겨요."]];let f=food[foodIndex%food.length];$("foodTitle").textContent=f[0];$("foodText").textContent=f[1];$("foodMini").textContent="오늘의 기온에 어울리는 메뉴";$("activityArt").innerHTML=lifestyleArt(a[0],who,plan.indoor,t,plan.rain,plan.start?Number(plan.start.slice(11,13)):kst().hour,plan.wind);$("outfitArt").innerHTML=outfitArt(t,plan.rain,plan.wind);$("mealArt").innerHTML=mealArt(f[0]);$("windowCharacter").innerHTML=windowCharacterArt(who,avatar,t,plan.rain,plan.indoor,plan.start?Number(plan.start.slice(11,13)):kst().hour,a[0],plan.wind);prepareShareCard();$("planBTitle").textContent=plan.indoor?"오늘은 실내 계획을 먼저":"날씨가 바뀐다면 · PLAN B";$("planBText").textContent=plan.indoor?"가까운 서점, 카페, 집에서 보내는 시간을 추천해요.":"갑자기 비가 오거나 바람이 강해지면 가까운 실내 전시나 카페로 바꿔요."}
 async function fetchWeather(r,source="manual"){locationMode=source;let id=++requestId;selected=r;actIndex=foodIndex=0;setBusy(true);setStatus(r.full+"의 실제 예보를 확인하고 있어요.","loading","동네 날씨 불러오는 중");let ctrl=new AbortController(),timer=setTimeout(()=>ctrl.abort(),18000);try{const q=new URLSearchParams({latitude:(Math.round(r.lat/0.05)*0.05).toFixed(2),longitude:(Math.round(r.lon/0.05)*0.05).toFixed(2),current:"temperature_2m,apparent_temperature,weather_code,wind_speed_10m,is_day",hourly:"temperature_2m,apparent_temperature,precipitation_probability,precipitation,weather_code,wind_speed_10m,wind_gusts_10m,uv_index",daily:"temperature_2m_min,temperature_2m_max,precipitation_probability_max,weather_code",timezone:"Asia/Seoul",forecast_days:"7",wind_speed_unit:"kmh"});let res=await fetch("https://api.open-meteo.com/v1/forecast?"+q,{signal:ctrl.signal,referrerPolicy:"no-referrer"});if(!res.ok)throw Error("예보 요청 실패");let data=await res.json();if(!data.current||!data.hourly?.time?.length||!data.daily?.time?.length)throw Error("예보 데이터 부족");if(id!==requestId)return;render(data,false);setStatus(r.full+" · 실제 모델 예보가 적용됐어요.","live")}catch(e){if(id!==requestId)return;render(makeSample(),true);setStatus("예보 연결 실패 · 현재 화면은 실제 날씨가 아닌 예시 데이터입니다. 다시 선택해 주세요.","error")}finally{clearTimeout(timer);if(id===requestId)setBusy(false)}}
 function outerRings(g){if(!g)return[];return g.type==="Polygon"?[g.coordinates]:g.type==="MultiPolygon"?g.coordinates:[]}
 function bbox(polys){let minX=Infinity,minY=Infinity,maxX=-Infinity,maxY=-Infinity;for(const p of polys)for(const v of p[0]||[]){minX=Math.min(minX,v[0]);minY=Math.min(minY,v[1]);maxX=Math.max(maxX,v[0]);maxY=Math.max(maxY,v[1])}return[minX,minY,maxX,maxY]}
