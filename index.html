@@ -195,6 +195,10 @@ header{height:58px}.brand{font-size:22px}.mark{width:36px;height:30px}.app-intro
 .reel-continuous>span{height:1.18em;line-height:1.18em;flex:none;display:block}
 .reel-digit{width:.59em;mask-image:linear-gradient(0deg,transparent,#000 12%,#000 88%,transparent)}
 @media(max-width:360px){.window-time[data-reel="on"]{font-size:clamp(23px,8vw,28px)}}
+
+.window-time[data-reel="settled"]{display:flex;align-items:center;gap:0;letter-spacing:0;font-variant-numeric:tabular-nums;animation:none!important;opacity:1;filter:none;transform:none;line-height:1.18;white-space:nowrap}
+.window-time[data-reel="settled"] .reel-digit{mask-image:none}
+@media(max-width:360px){.window-time[data-reel="settled"]{font-size:clamp(23px,8vw,28px)}}
 </style></head><body><div class="shell">
 <header><div class="brand"><span class="mark" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 34" fill="none"><circle cx="31" cy="10" r="7.5" fill="#e8b868"/><path d="M23 12C18 1 7 7 4 17c-4 14 9 16 20 9 8-5 15-8 21 1" stroke="#315b49" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>날씨틈</div><div class="header-meta"><span class="date" id="date"></span><button id="locationBtn" class="location-btn" aria-label="지역 변경"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 21s7-6 7-12a7 7 0 0 0-14 0c0 6 7 12 7 12Z" stroke="currentColor" stroke-width="1.7"/><circle cx="12" cy="9" r="2.5" stroke="currentColor" stroke-width="1.7"/></svg><span id="locLabel">지역 선택</span><svg width="14" height="14" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button></div></header>
 <main><div class="app-intro"><div><h1>오늘 최고의 두 시간.</h1><p>날씨에 맞춰 옷차림, 음식, 할 일까지.</p></div><span class="tag">오늘의 일상 큐레이션</span></div>
@@ -240,7 +244,11 @@ function reelReduced(){return typeof matchMedia==="function"&&matchMedia("(prefe
 function cancelReelFrame(){++reelRevision;if(reelFrame!==null)cancelAnimationFrame(reelFrame);reelFrame=null}
 function stopTimeReel(value=blankTime){
  cancelReelFrame();reelTracks=[];reelPositions=[];reelLast=null;
- const el=$("windowTime");el.dataset.reel="off";el.setAttribute("aria-live","polite");el.removeAttribute("aria-label");el.textContent=value;
+ const el=$("windowTime");el.setAttribute("aria-live","polite");el.removeAttribute("aria-label");
+ if(/^\d{2}:\d{2} ~ \d{2}:\d{2}$/.test(value)){
+   el.dataset.reel="settled";el.setAttribute("aria-label",value);
+   el.innerHTML=Array.from(value,ch=>/\d/.test(ch)?'<span class="reel-digit" aria-hidden="true"><span class="reel-static">'+ch+'</span></span>':'<span class="reel-separator" aria-hidden="true">'+ch+'</span>').join("");
+ }else{el.dataset.reel="off";el.textContent=value;}
 }
 function mountReels(){
  const el=$("windowTime");el.dataset.reel="on";el.setAttribute("aria-live","off");el.setAttribute("aria-label","추천 시간을 찾는 중");
@@ -261,7 +269,7 @@ function settleTimeReel(target){
  const ends=start.map((p,i)=>{const min=p+duration[i]*(.012+i*.0006)/2;return Math.ceil((min-digits[i])/10)*10+digits[i]});
  let t0=null;
  function frame(ts){if(rev!==reelRevision)return;if(t0===null)t0=ts;let done=true;
- reelPositions=start.map((p,i)=>{let u=Math.min(1,(ts-t0)/duration[i]);if(u<1)done=false;const ease=1-Math.pow(1-u,3);return p+(ends[i]-p)*ease});
+ reelPositions=start.map((p,i)=>{let u=Math.min(1,(ts-t0)/duration[i]);if(u<1)done=false;const v=(.012+i*.0006)*duration[i],d=ends[i]-p;return p+v*u*(1-u)*(1-u)+d*u*u*(3-2*u)});
  paintReels();if(done){stopTimeReel(target);return}reelFrame=requestAnimationFrame(frame)}
  reelFrame=requestAnimationFrame(frame);
 }
