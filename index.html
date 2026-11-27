@@ -179,6 +179,15 @@ header{height:58px}.brand{font-size:22px}.mark{width:36px;height:30px}.app-intro
 @media(min-width:681px){.window{min-height:256px}.window-character{width:35%;height:85%;bottom:14px}.window-time{font-size:clamp(40px,5vw,57px)}}
 @media(max-width:680px){.window{min-height:237px}.window-time{white-space:nowrap;font-size:clamp(25px,8.3vw,36px)}.window-character{height:64%;bottom:27px}.section{margin-top:19px}}
 @media(prefers-reduced-motion:reduce){.window[data-reveal="searching"] .window-time,.window[data-reveal="searching"] .window-character,.window[data-reveal="ready"] .window-time{animation:none!important;opacity:1;transform:none;filter:none}}
+
+/* Time reels use fixed-width clipped slots; no layout shift while digits move. */
+.window-time[data-reel="on"]{display:flex;align-items:center;gap:0;letter-spacing:0;font-variant-numeric:tabular-nums;animation:none!important;opacity:1;filter:none;transform:none;line-height:1.18;white-space:nowrap}
+.reel-digit{display:inline-block;width:.61em;height:1.18em;overflow:hidden;vertical-align:top;flex:none;text-align:center}
+.reel-track{display:flex;flex-direction:column;animation:reelSlide 90ms cubic-bezier(.17,.67,.35,1) both}
+.reel-track>span,.reel-static{display:block;height:1.18em;line-height:1.18em}
+.reel-separator{display:inline-block;white-space:pre;flex:none;line-height:1.18em;opacity:.85}
+@keyframes reelSlide{from{transform:translateY(0)}to{transform:translateY(-1.18em)}}
+@media(prefers-reduced-motion:reduce){.reel-track{animation:none!important;transform:translateY(-1.18em)}}
 </style></head><body><div class="shell">
 <header><div class="brand"><span class="mark" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 34" fill="none"><circle cx="31" cy="10" r="7.5" fill="#e8b868"/><path d="M23 12C18 1 7 7 4 17c-4 14 9 16 20 9 8-5 15-8 21 1" stroke="#315b49" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>날씨틈</div><div class="header-meta"><span class="date" id="date"></span><button id="locationBtn" class="location-btn" aria-label="지역 변경"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 21s7-6 7-12a7 7 0 0 0-14 0c0 6 7 12 7 12Z" stroke="currentColor" stroke-width="1.7"/><circle cx="12" cy="9" r="2.5" stroke="currentColor" stroke-width="1.7"/></svg><span id="locLabel">지역 선택</span><svg width="14" height="14" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button></div></header>
 <main><div class="app-intro"><div><h1>오늘 최고의 두 시간.</h1><p>날씨에 맞춰 옷차림, 음식, 할 일까지.</p></div><span class="tag">오늘의 일상 큐레이션</span></div>
@@ -212,14 +221,64 @@ const wx=c=>c===0?"맑음":c<=2?"구름 조금":c===3?"흐림":c<=48?"안개":c>
 const theme=(c,day)=>!day?"night":c===0||c<=2?"clear":c>=71&&c<=77||c===85||c===86?"snow":c>=51?"rain":"cloud";
 function icon(c,big=false,day=true){let cloud=c>=2;let rainy=c>=51&&!(c>=71&&c<=77||c===85||c===86);let snow=c>=71&&c<=77||c===85||c===86;let sun=c<=2;let rays=sun&&day?'<g stroke="#dfad52" stroke-width="2.2" stroke-linecap="round"><path d="M24 3v5m0 32v5M3 24h5m32 0h5M9 9l4 4m22 22 4 4M9 39l4-4m22-22 4-4"/></g>':"";return '<svg viewBox="0 0 48 48" fill="none" aria-hidden="true">'+rays+(sun?(day?'<circle cx="24" cy="24" r="12" fill="#f4c86d"/>':'<path d="M31 7A18 18 0 1 0 42 34 18 18 0 0 1 31 7Z" fill="#f7e6ae"/>'):"")+(cloud?'<path d="M12 34a9 9 0 0 1-1-18 12 12 0 0 1 23-2 10 10 0 0 1 3 20Z" fill="#f9fbfc" stroke="#819ca9" stroke-width="1.2"/>':"")+(rainy?'<path d="m15 37-3 6m12-6-3 6m12-6-3 6" stroke="#5594b5" stroke-width="2.6" stroke-linecap="round"/>':"")+(snow?'<g fill="#6d9db7"><circle cx="14" cy="40" r="2"/><circle cx="24" cy="42" r="2"/><circle cx="34" cy="39" r="2"/></g>':"")+'</svg>'}
 function setStatus(msg,state,phase=""){if(state==="loading"&&$("bestWindow").dataset.reveal!=="searching")resetUnresolved("searching");else if(state==="error")resetUnresolved("error");const status=$("status"),hero=$("weatherResults"),title=$("statusTitle");$("statusText").textContent=msg;status.dataset.state=state;status.classList.remove("loading");title.hidden=state!=="loading"&&state!=="live"&&state!=="error";title.textContent=state==="loading"?(phase||"날씨 확인 중"):state==="live"?(locationMode==="gps"?"내 동네 확인 완료":"선택한 지역 확인 완료"):state==="error"?"다시 확인해 주세요":"";hero.setAttribute("aria-busy",String(state==="loading"));hero.dataset.motion=state==="loading"?"pending":state==="live"?"arrived":"idle";if(state==="loading"){$("windowGrade").textContent=phase||"오늘의 좋은 시간을 찾는 중";$("windowDesc").textContent="내 동네의 날씨를 바탕으로 가장 좋은 시간을 찾고 있어요.";if(locationMode==="gps")$("gpsText").textContent="내 위치 찾는 중…";}
-if(state==="live"){$("bestWindow").dataset.reveal="ready";$("dailyRecs").dataset.ready="true";$("moreAct").disabled=$("moreFood").disabled=false;}
+if(state==="live"){$("bestWindow").dataset.reveal="ready";settleTimeReel(planTimeLabel());$("dailyRecs").dataset.ready="true";$("moreAct").disabled=$("moreFood").disabled=false;}
 }
 let locationMode="manual";
 function setBusy(b){$("gpsBtn").disabled=b;$("manualBtn").disabled=b;$("locationBtn").disabled=b;$("gpsBtn").setAttribute("aria-busy",String(b&&locationMode==="gps"));if(!b)$("gpsText").textContent="내 위치로 시작";if(b){++shareRevision;readyShareBlob=null;$("share").disabled=true;$("download").disabled=true}else if(current&&plan&&!sample){prepareShareCard()}}
+/* V4.9: decorative time reels, independent of actual forecast data. */
+let reelTimer=null,reelRevision=0,reelPrevious="",reelStep=0;
+const blankTime="??:?? ~ ??:??";
+function planTimeLabel(){return plan?.start?timeText(plan.start)+" ~ "+(plan.end.endsWith("T00:00")?"24:00":timeText(plan.end)):"오늘은 마무리"}
+function reelReduced(){return typeof matchMedia==="function"&&matchMedia("(prefers-reduced-motion: reduce)").matches}
+function stopTimeReel(value=blankTime){
+ ++reelRevision;if(reelTimer!==null)clearTimeout(reelTimer);reelTimer=null;
+ const el=$("windowTime");el.dataset.reel="off";el.setAttribute("aria-live","polite");el.removeAttribute("aria-label");el.textContent=value;reelPrevious=value;
+}
+function spinningTime(step){
+ const h=(7+step*7)%24,m=(step*13)%60;
+ const stamp=(h,m)=>String(h).padStart(2,"0")+":"+String(m).padStart(2,"0");
+ return stamp(h,m)+" ~ "+stamp((h+2)%24,m);
+}
+function paintTimeReel(value,locked=[]){
+ const el=$("windowTime"),before=reelPrevious||blankTime;
+ el.dataset.reel="on";el.setAttribute("aria-live","off");el.setAttribute("aria-label","추천 시간을 찾는 중");
+ el.innerHTML=Array.from(value,(ch,i)=>{
+   if(!/[0-9?]/.test(ch))return '<span class="reel-separator" aria-hidden="true">'+ch+'</span>';
+   const prev=before[i]&&/[0-9?]/.test(before[i])?before[i]:"?";
+   if(prev===ch||locked.includes(i))return '<span class="reel-digit" aria-hidden="true"><span class="reel-static">'+ch+'</span></span>';
+   return '<span class="reel-digit" aria-hidden="true"><span class="reel-track"><span>'+prev+'</span><span>'+ch+'</span></span></span>';
+ }).join("");
+ reelPrevious=value;
+}
+function startTimeReel(){
+ stopTimeReel();if(reelReduced())return;
+ const rev=reelRevision;reelStep=0;
+ function tick(){if(rev!==reelRevision)return;paintTimeReel(spinningTime(++reelStep));reelTimer=setTimeout(tick,95)}
+ tick();
+}
+function settleTimeReel(target){
+ const before=reelPrevious,el=$("windowTime");
+ if(!/^\d{2}:\d{2} ~ \d{2}:\d{2}$/.test(target)||reelReduced()){stopTimeReel(target);return}
+ if(reelTimer!==null)clearTimeout(reelTimer);reelTimer=null;const rev=++reelRevision;
+ reelPrevious=before||blankTime;
+ const positions=[0,1,3,4,8,9,11,12]; // indices of the eight digits
+ // Derive positions from the real string, so spacing changes cannot affect the result.
+ const digits=Array.from(target).map((ch,i)=>/\d/.test(ch)?i:-1).filter(i=>i>=0);
+ let stage=0;
+ function tick(){
+   if(rev!==reelRevision)return;
+   const count=Math.min(digits.length,Math.max(0,stage-1)),locked=digits.slice(0,count),moving=spinningTime(++reelStep);
+   const value=Array.from(target,(ch,i)=>digits.includes(i)&&!locked.includes(i)?moving[i]:ch).join("");
+   paintTimeReel(value,locked);
+   if(count===digits.length){stopTimeReel(target);return}
+   stage++;reelTimer=setTimeout(tick,stage<4?75:90);
+ }
+ tick();
+}
 function resetUnresolved(state){
  current=null;plan=null;sample=true;actIndex=foodIndex=0;++shareRevision;readyShareBlob=null;
- const searching=state==="searching";$("bestWindow").dataset.reveal=state;$("dailyRecs").dataset.ready="false";
- $("locLabel").textContent="지역 선택";$("windowTime").textContent="??:?? ~ ??:??";$("windowGrade").textContent=searching?"오늘의 좋은 시간을 찾는 중":state==="error"?"아직 시간을 찾지 못했어요":"오늘의 틈은 몇 시일까요?";
+ const searching=state==="searching";stopTimeReel();$("bestWindow").dataset.reveal=state;$("dailyRecs").dataset.ready="false";
+ $("locLabel").textContent="지역 선택";$("windowGrade").textContent=searching?"오늘의 좋은 시간을 찾는 중":state==="error"?"아직 시간을 찾지 못했어요":"오늘의 틈은 몇 시일까요?";
  $("windowDesc").textContent=searching?"내 동네의 날씨를 확인하고 있어요.":state==="error"?"내 위치 또는 지역을 다시 선택해 주세요.":"내 위치를 확인하면 좋은 시간을 알려드려요.";
  $("windowChips").innerHTML="<span>체감 —°</span><span>강수 —%</span><span>바람 — m/s</span>";
  $("windowCharacter").innerHTML='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 148" aria-hidden="true"><circle cx="120" cy="70" r="47" fill="#d4e6c5" opacity=".07"/><circle cx="120" cy="70" r="40" fill="none" stroke="#b9cdb4" stroke-width="1" opacity=".3"/><path d="M120 45v25l14 9" stroke="#d9e7c7" stroke-width="2.6" stroke-linecap="round" fill="none"/><circle cx="120" cy="70" r="3" fill="#e8b868"/><path d="M120 34v4m0 64v4M84 70h4m64 0h4" stroke="#d9e7c7" opacity=".6" stroke-linecap="round"/></svg>';
@@ -228,12 +287,12 @@ function resetUnresolved(state){
  $("moreAct").disabled=$("moreFood").disabled=$("share").disabled=$("download").disabled=true;
  $("shareStatus").textContent="지역 선택 후 공유할 수 있어요.";
  $("planBTitle").textContent="날씨가 바뀐다면 · PLAN B";$("planBText").textContent="날씨를 확인한 뒤 대안도 함께 알려드려요.";
- $("hours").innerHTML='<p class="forecast-placeholder">지역을 선택하면 시간별 예보가 표시돼요.</p>';$("week").innerHTML='<p class="forecast-placeholder">지역을 선택하면 7일 예보가 표시돼요.</p>';
+ $("hours").innerHTML='<p class="forecast-placeholder">지역을 선택하면 시간별 예보가 표시돼요.</p>';$("week").innerHTML='<p class="forecast-placeholder">지역을 선택하면 7일 예보가 표시돼요.</p>';if(searching)startTimeReel();
 }
 function makeSample(){let t=kst(),h={time:[],temperature_2m:[],apparent_temperature:[],precipitation_probability:[],precipitation:[],weather_code:[],wind_speed_10m:[],wind_gusts_10m:[],uv_index:[]},daily={time:[],temperature_2m_min:[],temperature_2m_max:[],precipitation_probability_max:[],weather_code:[]};for(let i=0;i<168;i++){let dt=plusHours(t.date+"T00:00",i),hh=i%24,temp=9+Math.round(8*Math.sin((hh-7)/24*2*Math.PI));h.time.push(dt);h.temperature_2m.push(temp);h.apparent_temperature.push(temp-1);h.precipitation_probability.push(hh>17?35:10);h.precipitation.push(0);h.weather_code.push(hh>18?3:2);h.wind_speed_10m.push(8);h.wind_gusts_10m.push(14);h.uv_index.push(hh>=10&&hh<=15?3:0)}for(let i=0;i<7;i++){daily.time.push(plusHours(t.date+"T00:00",i*24).slice(0,10));daily.temperature_2m_min.push(3+i%3);daily.temperature_2m_max.push(15+i%4);daily.precipitation_probability_max.push([35,10,20,70,40,10,15][i]);daily.weather_code.push([2,0,3,61,3,0,2][i])}let i=t.hour;return {current:{time:h.time[i],temperature_2m:h.temperature_2m[i],apparent_temperature:h.apparent_temperature[i],weather_code:h.weather_code[i],wind_speed_10m:8,is_day:i>=7&&i<18?1:0},hourly:h,daily}}
 function score(h,i){let t=number(h.apparent_temperature[i],number(h.temperature_2m[i])),r=number(h.precipitation_probability[i]),p=number(h.precipitation[i]),w=number(h.wind_speed_10m[i]),g=number(h.wind_gusts_10m[i]),u=number(h.uv_index[i]),c=number(h.weather_code[i]);let dangerous=c>=95||p>=4||g>=55||t>=35||t<=-12;let s=100-Math.max(0,Math.abs(t-21)-5)*2.3-r*.56-p*8-Math.max(0,w-9)*1.15-Math.max(0,g-25)*.8-Math.max(0,u-5)*2-(c>=51?12:0);return {s:dangerous?Math.min(s,15):s,t,r,w,indoor:dangerous||r>=65||p>=1.5||c>=71&&c<=86||w>=35||t<=-5||t>=32}}
 function chooseWindow(d){let t=kst(),h=d.hourly,now=t.date+"T"+String(t.hour).padStart(2,"0")+":"+String(t.minute).padStart(2,"0"),best=null;for(let i=0;i+1<h.time.length;i++){let a=h.time[i],b=h.time[i+1],end=plusHours(a,2);if(a<now||a.slice(0,10)!==t.date||b!==plusHours(a,1)||end>plusHours(t.date+"T00:00",24))continue;let x=score(h,i),y=score(h,i+1),hour=+a.slice(11,13),outdoorPenalty=hour<7||hour>=20?17:0,s=(x.s+y.s)/2-outdoorPenalty;let p={start:a,end,score:s,temp:(x.t+y.t)/2,rain:Math.max(x.r,y.r),wind:Math.max(x.w,y.w),indoor:x.indoor||y.indoor||s<52,index:i};if(!best||s>best.score)best=p}if(best)return best;let c=d.current;return {start:null,end:null,temp:number(c.apparent_temperature,number(c.temperature_2m)),rain:number(d.daily?.precipitation_probability_max?.[0]),wind:number(c.wind_speed_10m),indoor:true,index:-1}}
-function render(d,isSample){current=d;sample=isSample;plan=chooseWindow(d);let c=d.current,h=d.hourly,dy=d.daily,t=kst(),name=selected.full;$("date").textContent=new Intl.DateTimeFormat("ko-KR",{timeZone:"Asia/Seoul",month:"long",day:"numeric",weekday:"short"}).format(new Date());$("locLabel").textContent=name;$("windowTime").textContent=plan.start?timeText(plan.start)+" ~ "+(plan.end.endsWith("T00:00")?"24:00":timeText(plan.end)):"오늘은 마무리";$("windowGrade").textContent=!plan.start?"남은 연속 두 시간이 없어요":plan.indoor?"실내에서 보내기 좋은 시간":plan.score>=80?"가볍게 나가기 좋은 시간":"오늘 중 비교적 괜찮은 시간";$("windowDesc").textContent=!plan.start?"무리한 야외 일정 대신 편안한 저녁을 보내요.":plan.indoor?"날씨 조건을 고려해 실내 계획을 먼저 추천해요.":"남은 시간의 기온, 비, 바람을 비교해 골랐어요.";$("windowChips").innerHTML=["체감 "+fmt(plan.temp)+"°","강수 "+fmt(plan.rain)+"%","바람 "+windMS(plan.wind)].map(x=>"<span>"+x+"</span>").join("");let ix=h.time.findIndex(x=>x>=t.date+"T"+String(t.hour).padStart(2,"0")+":00");if(ix<0)ix=0;$("hours").innerHTML=h.time.slice(ix,ix+8).map((v,j)=>{let k=ix+j,bt=plan.index>=0&&(k===plan.index||k===plan.index+1);return '<div class="hour'+(bt?' best':'')+'"><span class="hour-label">'+(j===0?"지금":v.slice(11,13)+"시")+'</span>'+icon(number(h.weather_code[k],3),false,+v.slice(11,13)>=7&&+v.slice(11,13)<18)+'<b>'+fmt(h.temperature_2m[k])+'°</b><small>'+fmt(h.precipitation_probability[k])+'%</small></div>'}).join("");let min=Math.min(...dy.temperature_2m_min.filter(Number.isFinite)),max=Math.max(...dy.temperature_2m_max.filter(Number.isFinite)),range=Math.max(1,max-min);$("week").innerHTML=dy.time.map((v,i)=>{let a=number(dy.temperature_2m_min[i]),b=number(dy.temperature_2m_max[i]),label=i===0?"오늘":new Intl.DateTimeFormat("ko-KR",{timeZone:"UTC",weekday:"short"}).format(new Date(v+"T12:00:00Z"));return '<div class="day"><b>'+label+'</b>'+icon(number(dy.weather_code[i],3))+'<span class="low">'+fmt(a)+'°</span><span class="range"><i style="left:'+Math.max(0,(a-min)/range*100)+'%;width:'+Math.max(1,(b-a)/range*100)+'%"></i></span><span class="high">'+fmt(b)+'°</span></div>'}).join("");renderRecs()}
+function render(d,isSample){current=d;sample=isSample;plan=chooseWindow(d);let c=d.current,h=d.hourly,dy=d.daily,t=kst(),name=selected.full;$("date").textContent=new Intl.DateTimeFormat("ko-KR",{timeZone:"Asia/Seoul",month:"long",day:"numeric",weekday:"short"}).format(new Date());$("locLabel").textContent=name;if($("bestWindow").dataset.reveal!=="searching")stopTimeReel(planTimeLabel());$("windowGrade").textContent=!plan.start?"남은 연속 두 시간이 없어요":plan.indoor?"실내에서 보내기 좋은 시간":plan.score>=80?"가볍게 나가기 좋은 시간":"오늘 중 비교적 괜찮은 시간";$("windowDesc").textContent=!plan.start?"무리한 야외 일정 대신 편안한 저녁을 보내요.":plan.indoor?"날씨 조건을 고려해 실내 계획을 먼저 추천해요.":"남은 시간의 기온, 비, 바람을 비교해 골랐어요.";$("windowChips").innerHTML=["체감 "+fmt(plan.temp)+"°","강수 "+fmt(plan.rain)+"%","바람 "+windMS(plan.wind)].map(x=>"<span>"+x+"</span>").join("");let ix=h.time.findIndex(x=>x>=t.date+"T"+String(t.hour).padStart(2,"0")+":00");if(ix<0)ix=0;$("hours").innerHTML=h.time.slice(ix,ix+8).map((v,j)=>{let k=ix+j,bt=plan.index>=0&&(k===plan.index||k===plan.index+1);return '<div class="hour'+(bt?' best':'')+'"><span class="hour-label">'+(j===0?"지금":v.slice(11,13)+"시")+'</span>'+icon(number(h.weather_code[k],3),false,+v.slice(11,13)>=7&&+v.slice(11,13)<18)+'<b>'+fmt(h.temperature_2m[k])+'°</b><small>'+fmt(h.precipitation_probability[k])+'%</small></div>'}).join("");let min=Math.min(...dy.temperature_2m_min.filter(Number.isFinite)),max=Math.max(...dy.temperature_2m_max.filter(Number.isFinite)),range=Math.max(1,max-min);$("week").innerHTML=dy.time.map((v,i)=>{let a=number(dy.temperature_2m_min[i]),b=number(dy.temperature_2m_max[i]),label=i===0?"오늘":new Intl.DateTimeFormat("ko-KR",{timeZone:"UTC",weekday:"short"}).format(new Date(v+"T12:00:00Z"));return '<div class="day"><b>'+label+'</b>'+icon(number(dy.weather_code[i],3))+'<span class="low">'+fmt(a)+'°</span><span class="range"><i style="left:'+Math.max(0,(a-min)/range*100)+'%;width:'+Math.max(1,(b-a)/range*100)+'%"></i></span><span class="high">'+fmt(b)+'°</span></div>'}).join("");renderRecs()}
 const activities={out:{"혼자":[["동네 산책","바람이 잔잔한 시간, 평소 지나치던 골목을 천천히 걸어봐요.","가벼운 30~60분"],["사진 한 장","가까운 공원에서 오늘의 하늘을 담아보세요.","한적한 길 추천"]],"친구":[["카페까지 걸어가기","좋아하는 카페까지 걸으면서 가벼운 이야기를 나눠요.","산책 + 커피"],["피크닉","가까운 공원에서 간단한 간식을 즐겨요.","돗자리와 간식"]],"연인":[["햇빛 따라 데이트","동네 공원과 카페를 이어 걷는 작은 데이트.","둘만의 산책"],["노을 산책","날이 밝을 때 가까운 전망 좋은 길을 걸어요.","무리하지 않는 코스"]],"가족":[["가족 공원 나들이","가까운 공원에서 함께 움직이고 쉬어가요.","휴식이 있는 코스"],["동네 간식 투어","아이들과 가까운 곳에서 간단한 간식을 골라요.","짧은 이동"]]},in:{"혼자":[["서점에 들르기","책 한 권을 고르고 따뜻한 음료와 함께 쉬어가요.","조용한 실내"],["집에서 음악 듣기","좋아하는 음악과 따뜻한 차로 짧은 휴식 시간을 만들어보세요.","편안한 휴식"]],"친구":[["보드게임 카페","이동을 짧게 하고 실내에서 이야기를 나눠요.","실내에서 함께"],["작은 전시 보기","관심 있는 전시를 골라 천천히 둘러봐요.","가까운 실내"]],"연인":[["전시와 카페","비나 추위를 피해서 이야기를 나누는 데이트.","실내 데이트"],["집에서 영화 한 편","서로 고른 영화와 간식으로 저녁을 즐겨요.","따뜻한 시간"]],"가족":[["실내 체험 나들이","가까운 도서관이나 실내 체험 공간을 찾아봐요.","짧은 이동"],["함께 요리하기","집에서 좋아하는 메뉴를 함께 준비해봐요.","안전하고 따뜻하게"]]}};
 
 /* Hand-authored vector artwork; all shapes are local, no image requests. */
@@ -512,7 +571,7 @@ function renderSharePoster(snap,images){
 function prepareShareCard(){if(!current||!plan||sample)return;
  const rev=++shareRevision;readyShareBlob=null;
  $("share").disabled=true;$("download").disabled=true;
- const snap={sample,location:selected.full,time:$("windowTime").textContent,grade:$("windowGrade").textContent,feels:fmt(plan.temp),rain:fmt(plan.rain),wind:windMS(plan.wind),weather:wx(number(current.current.weather_code,3)),who,activity:$("actTitle").textContent,outfit:$("wearTitle").textContent,food:$("foodTitle").textContent};
+ const snap={sample,location:selected.full,time:planTimeLabel(),grade:$("windowGrade").textContent,feels:fmt(plan.temp),rain:fmt(plan.rain),wind:windMS(plan.wind),weather:wx(number(current.current.weather_code,3)),who,activity:$("actTitle").textContent,outfit:$("wearTitle").textContent,food:$("foodTitle").textContent};
  const art=["activityArt","outfitArt","mealArt"].map(id=>$(id).innerHTML);
  $("shareStatus").textContent="일러스트 카드를 준비하고 있어요…";
  Promise.all(art.map(shareArtImage)).then(images=>new Promise((resolve,reject)=>{const c=renderSharePoster(snap,images);c.toBlob(b=>b?resolve(b):reject(Error("이미지 생성 실패")),"image/png")})).then(blob=>{if(rev!==shareRevision)return;readyShareBlob=blob;$("shareStatus").textContent="";$("share").disabled=false;$("download").disabled=false}).catch(()=>{if(rev!==shareRevision)return;$("shareStatus").textContent="카드를 준비하지 못했어요. 다시 눌러 주세요.";$("share").disabled=false;$("download").disabled=false});
