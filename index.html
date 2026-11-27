@@ -496,14 +496,14 @@ function renderSharePoster(snap,images){
  roundedPanel(c,64,710,952,500,30,"#e5eadb");
  c.save();c.beginPath();c.rect(416,732,578,456);c.clip();c.drawImage(images[0],424,732,554,456);c.restore();
  drawShareLine(c,"03  /  오늘 할 일",98,774,304,26,20,"#60796a",700);
- c.fillStyle="#203f35";c.font="750 51px -apple-system, BlinkMacSystemFont, sans-serif";wrap(c,snap.activity,98,868,307,61);
+ c.fillStyle="#203f35";wrap(c,snap.activity,98,868,307,51,3);
  drawShareLine(c,snap.who==="혼자"?"나를 위한 작은 시간":snap.who+"와 함께",98,1113,307,27,21,"#536b5b",600);
  // Supporting cards: a real outfit reference and the selected dish.
  for(const [i,item] of [[0,{label:"01  /  옷차림",title:snap.outfit,art:images[1]}],[1,{label:"02  /  음식",title:snap.food,art:images[2]}]]){
    const x=64+i*484;roundedPanel(c,x,400,468,286,24,i===0?"#e8ebdf":"#eee6d7");
    drawShareLine(c,item.label,x+23,444,422,25,20,"#5e7568",700);
    c.drawImage(item.art,x+217,461,227,187);
-   c.fillStyle="#203f35";c.font="750 37px -apple-system, BlinkMacSystemFont, sans-serif";wrap(c,item.title,x+23,511,192,45);
+   c.fillStyle="#203f35";wrap(c,item.title,x+23,511,192,37,3);
  }
  drawShareLine(c,snap.sample?"실제 날씨가 아닌 예시 데이터":"예보 출처: Open-Meteo · CC BY 4.0",64,1282,952,24,18,"#64766a",500);
  c.textAlign="right";drawShareLine(c,"오늘의 작은 틈, 날씨틈",1016,1321,952,23,18,"#225747",650);c.textAlign="left";
@@ -615,7 +615,31 @@ function initShareChooser(){
  $("copyShareImage").onclick=copyCardImage;$("copyShareText").onclick=copyShareMessage;$("nativeShare").onclick=()=>useNativeShare();
  $("saveShareImage").onclick=()=>{if(shareDialogBlob){downloadShareBlob(shareDialogBlob);shareFeedback("이미지 저장을 요청했어요. 친구의 채팅방에 첨부하세요.")}};
 }
-function wrap(c,str,x,y,max,line){let s="";for(let ch of str){if(c.measureText(s+ch).width>max&&s){c.fillText(s,x,y);y+=line;s=ch}else s+=ch}if(s)c.fillText(s,x,y)}
+/* V4.8: Korean word-aware wrapping for the exported PNG.
+   Measure actual glyph widths; keep every whitespace-delimited word intact.
+   Fit within the available number of lines by adjusting font size, never truncating. */
+function wrap(c,str,x,y,max,preferred,maxLines=3){
+ const words=String(str??"").trim().split(/\s+/).filter(Boolean);
+ if(!words.length)return {lines:[],size:preferred};
+ c.save();
+ let lines=[],size=preferred;
+ for(;size>=1;size--){
+   c.font="750 "+size+"px -apple-system, BlinkMacSystemFont, sans-serif";
+   if(words.some(w=>c.measureText(w).width>max))continue;
+   const candidate=[];let row="";
+   for(const word of words){
+     const next=row?row+" "+word:word;
+     if(row&&c.measureText(next).width>max){candidate.push(row);row=word}else row=next;
+   }
+   if(row)candidate.push(row);
+   if(candidate.length<=maxLines){lines=candidate;break}
+ }
+ if(!lines.length){lines=[words.join(" ")];size=1;c.font="750 1px -apple-system, BlinkMacSystemFont, sans-serif"}
+ const leading=Math.ceil(size*1.22);
+ lines.forEach((row,i)=>c.fillText(row,x,y+i*leading,max));
+ c.restore();
+ return {lines,size};
+}
 $("locationBtn").onclick=$("manualBtn").onclick=openRegion;$("gpsBtn").onclick=autoLocation;$("closeDialog").onclick=()=>$("regionDialog").close();$("retryRegion").onclick=openRegion;$("sido").onchange=onSido;$("sgg").onchange=onSgg;$("emd").onchange=onEmd;
 $("regionSearch").oninput=()=>{let q=$("regionSearch").value.trim().replace(/\s/g,""),out=$("searchResults");out.replaceChildren();if(q.length<2)return;let hits=regions.filter(r=>r.full.replace(/\s/g,"").includes(q)).slice(0,15);for(let r of hits){let b=document.createElement("button");b.type="button";b.textContent=r.full;b.onclick=()=>{selectPath(r);out.replaceChildren();$("regionSearch").value=r.name};out.append(b)}if(!hits.length){let p=document.createElement("p");p.textContent="검색 결과가 없어요.";out.append(p)}};
 $("applyRegion").onclick=()=>{let r=regions.find(r=>r.sido===$("sido").value&&r.sgg===$("sgg").value&&r.name===$("emd").value);if(!r&&!regions.length&&PROVINCES[$("sido").value]){let n=$("sido").value,[lat,lon]=PROVINCES[n];r={full:n+" 대표 지점",name:n,lat,lon}}if(r){$("regionDialog").close();fetchWeather(r)}};
