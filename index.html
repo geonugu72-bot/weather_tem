@@ -36,6 +36,10 @@ dialog{border:0;padding:0;border-radius:25px;width:min(440px,calc(100% - 28px));
 .rec .text-btn{grid-column:1/-1;grid-row:5;min-height:44px;border-top:1px solid #edf0e9;width:100%;padding:8px 0 0}
 }
 @media(max-width:340px){.rec{padding:12px;column-gap:8px;grid-template-columns:minmax(0,1fr) 96px}.rec h3{font-size:16px}}
+/* Mobile header breathing room: keep the native top edge effect away from the brand. */
+@media(max-width:680px){
+  .shell{padding-top:max(14px, calc(env(safe-area-inset-top, 0px) - 12px));}
+}
 </style></head><body><div class="shell">
 <header><div class="brand"><span class="mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M3 16h18M5 13a7 7 0 0 1 14 0M12 3v3M4.5 6.5l2 2M19.5 6.5l-2 2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></span>날씨틈</div><div class="header-meta"><span class="date" id="date"></span><button id="locationBtn" class="location-btn" aria-label="지역 변경"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 21s7-6 7-12a7 7 0 0 0-14 0c0 6 7 12 7 12Z" stroke="currentColor" stroke-width="1.7"/><circle cx="12" cy="9" r="2.5" stroke="currentColor" stroke-width="1.7"/></svg><span id="locLabel">서울 · 예시</span><svg width="14" height="14" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button></div></header>
 <main><div class="app-intro"><div><h1>오늘 최고의 두 시간.</h1><p>날씨에 맞춰 할 일, 옷차림, 음식까지.</p></div><span class="tag">오늘의 일상 큐레이션</span></div>
