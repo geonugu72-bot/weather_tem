@@ -178,7 +178,7 @@ header{height:58px}.brand{font-size:22px}.mark{width:36px;height:30px}.app-intro
 <section class="section"><div class="section-head"><h2>7일 날씨</h2><small>최저 / 최고 기온</small></div><div class="panel week" id="week"></div></section>
 <footer class="footer"><strong>날씨틈</strong> · 오늘 최고의 두 시간<br>날씨 출처: <a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo</a> (CC BY 4.0). 모델 예보이며 실시간 관측값과 다를 수 있습니다.<details><summary>데이터 · 추천 기준 · 위치정보</summary><p>예보는 공개 행정동 대표 좌표를 약 0.05도 단위로 반올림한 지점에 대해 조회합니다. GPS 원본은 브라우저 내에서만 처리하고 저장하거나 전송하지 않습니다. 지역 대표 예보 좌표와 통상적인 연결 정보는 외부 데이터 제공자에 전달됩니다. 동마다 다른 예보가 보장되지는 않습니다.</p><p>행정동 경계: 통계청 SGIS 공공누리 제1유형, <a href="https://github.com/vuski/admdongkor" target="_blank" rel="noopener">vuski/admdongkor</a> (2026-10-01, CC BY 4.0). 공개 경계 파일을 브라우저에서 불러오며, 별도 계정·서버·위치 저장·광고·분석 추적 기능이 없습니다.</p><p>추천은 남은 시간 중 연속 두 시간의 체감온도·강수확률·강수량·풍속·돌풍·자외선·날씨 코드를 비교한 참고 정보입니다. 기상특보 및 안전 판단은 <a href="https://www.weather.go.kr/" target="_blank" rel="noopener">기상청</a>에서 확인하세요. <a href="https://open-meteo.com/en/terms" target="_blank" rel="noopener">예보 API 이용 조건</a>.</p></details><span>예시 모드의 날씨와 추천은 실제 예보가 아닙니다.</span></footer></main></div>
 <dialog id="regionDialog"><div class="dialog-inner"><div class="dialog-head"><h2>어느 동네인가요?</h2><button class="close" id="closeDialog" aria-label="닫기">×</button></div><p class="dialog-intro">시·도부터 우리 동네까지 선택하거나 이름으로 찾으세요.</p><div class="region-note" id="regionNote" role="status">행정구역 데이터를 준비합니다.</div><div class="field"><label for="regionSearch">동네 이름으로 검색</label><input id="regionSearch" type="search" placeholder="예: 서울특별시 강남구 역삼1동" autocomplete="off" disabled><div id="searchResults" class="search-results"></div></div><div class="field"><label for="sido">시·도</label><select id="sido" disabled><option value="">선택</option></select></div><div class="field"><label for="sgg">시·군·구</label><select id="sgg" disabled><option value="">선택</option></select></div><div class="field"><label for="emd">읍·면·동</label><select id="emd" disabled><option value="">선택</option></select></div><div class="dialog-actions"><button class="secondary" id="retryRegion">지역 목록 다시 불러오기</button><button class="primary" id="applyRegion" disabled>이 지역 날씨 보기</button></div></div></dialog>
-<dialog id="shareDialog" aria-labelledby="shareDialogTitle"><div class="dialog-inner share-dialog-inner"><div class="dialog-head"><h2 id="shareDialogTitle">오늘의 틈을 함께 나눠요</h2><button class="close" id="closeShareDialog" type="button" aria-label="공유 창 닫기">×</button></div><p class="dialog-intro">앱을 선택하고 받을 친구에게 카드를 보내세요.</p><div class="share-preview-row"><img id="sharePreviewImg" alt="공유할 날씨틈 이미지 카드"><div><strong>오늘 최고의 2시간☃️</strong><p>친구에게 오늘의 계획을 보내보세요.</p><small>카드는 내 기기에서 생성돼요.</small></div></div><div class="share-targets" role="group" aria-label="공유 방법"><button type="button" class="share-target" data-target="kakao" aria-pressed="false"><span class="share-channel-icon kakao-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 4C6.8 4 3 7.1 3 11c0 2.4 1.5 4.6 4 5.9l-.8 3.2 3.7-2.2c.7.1 1.4.2 2.1.2 5.2 0 9-3.1 9-7.1S17.2 4 12 4Z"/></svg></span><span><b>카카오톡</b><small id="kakaoShareHint">기기 공유에서 카카오톡 선택</small></span><span class="share-chevron" aria-hidden="true">›</span></button><button type="button" class="share-target" data-target="instagram" aria-pressed="false"><span class="share-channel-icon insta-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M3 4l18 7-8 3-3 7L3 4Zm7 10 11-3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span><b>인스타그램 DM</b><small id="instaShareHint">기기 공유에서 Instagram 선택</small></span><span class="share-chevron" aria-hidden="true">›</span></button><button type="button" class="share-target" id="nativeShare"><span class="share-channel-icon native-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M12 15V3m-4 4 4-4 4 4M7 10H5a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7a2 2 0 0 0-2-2h-2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span><b>기기 공유 메뉴</b><small>지원되는 앱에서 공유 대상 선택</small></span><span class="share-chevron" aria-hidden="true">›</span></button></div><div class="share-guide" id="shareGuide" hidden><b id="shareGuideTitle"></b><p id="shareGuideText"></p><a id="openInstagram" href="https://www.instagram.com/direct/inbox/" target="_blank" rel="noopener noreferrer" hidden>인스타그램 DM 열기 ↗</a></div><div class="share-tools"><button class="secondary" type="button" id="copyShareImage">이미지 복사</button><button class="secondary" type="button" id="saveShareImage">이미지 저장</button></div><button type="button" class="share-copy-text" id="copyShareText">공유 문구 복사</button><p class="share-dialog-status" id="shareDialogStatus" role="status" aria-live="polite"></p><p class="share-privacy">날씨틈은 친구 목록에 접근하거나 자동으로 메시지를 보내지 않아요. 카드에는 선택한 지역명이 포함됩니다.</p></div></dialog>
+<dialog id="shareDialog" aria-labelledby="shareDialogTitle"><div class="dialog-inner share-dialog-inner"><div class="dialog-head"><h2 id="shareDialogTitle">오늘의 틈을 함께 나눠요</h2><button class="close" id="closeShareDialog" type="button" aria-label="공유 창 닫기">×</button></div><p class="dialog-intro">앱을 선택하고 받을 친구에게 카드를 보내세요.</p><div class="share-preview-row"><img id="sharePreviewImg" alt="공유할 날씨틈 이미지 카드"><div><strong>오늘 최고의 2시간☃️</strong><p>친구에게 오늘의 계획을 보내보세요.</p><small>카드는 내 기기에서 생성돼요.</small></div></div><div class="share-targets" role="group" aria-label="공유 방법"><button type="button" class="share-target" data-target="kakao" aria-pressed="false"><span class="share-channel-icon kakao-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 4C6.8 4 3 7.1 3 11c0 2.4 1.5 4.6 4 5.9l-.8 3.2 3.7-2.2c.7.1 1.4.2 2.1.2 5.2 0 9-3.1 9-7.1S17.2 4 12 4Z"/></svg></span><span><b>카카오톡</b><small id="kakaoShareHint">기기 공유에서 카카오톡 선택</small></span><span class="share-chevron" aria-hidden="true">›</span></button><button type="button" class="share-target" data-target="instagram" aria-pressed="false"><span class="share-channel-icon insta-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M3 4l18 7-8 3-3 7L3 4Zm7 10 11-3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span><b>인스타그램 DM 바로 열기</b><small id="instaShareHint">앱에서 받을 친구 선택 · 사진 직접 첨부</small></span><span class="share-chevron" aria-hidden="true">›</span></button><button type="button" class="share-target" id="nativeShare"><span class="share-channel-icon native-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M12 15V3m-4 4 4-4 4 4M7 10H5a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7a2 2 0 0 0-2-2h-2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span><b>이미지 포함 공유</b><small>기기 공유 메뉴에서 Instagram 등 선택</small></span><span class="share-chevron" aria-hidden="true">›</span></button></div><div class="share-guide" id="shareGuide" hidden><b id="shareGuideTitle"></b><p id="shareGuideText"></p><a id="openInstagram" href="https://www.instagram.com/direct/inbox/" target="_blank" rel="noopener noreferrer" hidden>앱이 열리지 않으면 웹 DM 열기 ↗</a></div><div class="share-tools"><button class="secondary" type="button" id="copyShareImage">이미지 복사</button><button class="secondary" type="button" id="saveShareImage">이미지 저장</button></div><button type="button" class="share-copy-text" id="copyShareText">공유 문구 복사</button><p class="share-dialog-status" id="shareDialogStatus" role="status" aria-live="polite"></p><p class="share-privacy">날씨틈은 친구 목록에 접근하거나 자동으로 메시지를 보내지 않아요. 카드에는 선택한 지역명이 포함됩니다.</p></div></dialog>
 <script>
 (()=>{"use strict";
 const $=id=>document.getElementById(id);
@@ -484,6 +484,8 @@ function prepareShareCard(){
 }
 // Keep share card local. Recipient selection belongs to the messaging application.
 const SHARE_MESSAGE="오늘 최고의 2시간☃️";
+const INSTAGRAM_WEB_DM="https://www.instagram.com/direct/inbox/";
+const INSTAGRAM_APP_DM="instagram://direct-inbox";
 let shareDialogBlob=null,sharePreviewURL=null;
 function shareFile(blob){return new File([blob],"날씨틈.png",{type:"image/png"})}
 function canNativeShare(blob){try{return !!(blob&&navigator.share&&navigator.canShare?.({files:[shareFile(blob)]}))}catch{return false}}
@@ -494,11 +496,32 @@ async function chooseShareTarget(target){
  if(!blob)return;
  document.querySelectorAll("[data-target]").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.target===target)));
  $("shareGuide").hidden=true;$("openInstagram").hidden=true;
+ if(target==="instagram"){openInstagramDirect();return}
  if(canNativeShare(blob)){
    // Invoke directly in the original tap: no await before the OS share sheet.
    await useNativeShare(target);return;
  }
  showChannelFallback(target,true);
+}
+// Opening Instagram and transferring an image are separate capabilities on the web.
+function instagramLaunchURL(ua="",platform="",touch=0){
+ if(/Android/i.test(ua))return "intent://direct-inbox#Intent;scheme=instagram;package=com.instagram.android;S.browser_fallback_url="+encodeURIComponent(INSTAGRAM_WEB_DM)+";end";
+ if(/iPhone|iPad|iPod/i.test(ua)||(/Mac/i.test(platform)&&touch>1))return INSTAGRAM_APP_DM;
+ return INSTAGRAM_WEB_DM;
+}
+function openInstagramDirect(){
+ const blob=shareDialogBlob;if(!blob)return;
+ $("shareGuide").hidden=false;$("shareGuideTitle").textContent="인스타그램에서 받을 친구를 선택하세요";
+ $("shareGuideText").textContent="DM에서 기존 채팅을 열거나 새 메시지로 친구를 선택하세요. 카드 이미지는 저장 후 사진으로 첨부해 주세요. 이미지를 함께 넘기려면 ‘이미지 포함 공유’를 이용하세요.";
+ $("openInstagram").hidden=false;
+ shareFeedback("인스타그램 DM 열기를 요청했어요. 사진은 자동 첨부되지 않아요.");
+ const destination=instagramLaunchURL(navigator.userAgent,navigator.platform,navigator.maxTouchPoints);
+ if(destination===INSTAGRAM_WEB_DM){
+   window.open(INSTAGRAM_WEB_DM,"_blank","noopener,noreferrer");return;
+ }
+ // The undocumented app URL is best-effort. Keep a visible HTTPS fallback.
+ // No delayed redirects: returning from Instagram must not open another page.
+ try{window.location.href=destination}catch(e){shareFeedback("앱을 열지 못했어요. 아래 웹 DM 버튼을 이용해 주세요.")}
 }
 function showChannelFallback(target,openNow=false){
  const kakao=target==="kakao";
@@ -506,7 +529,7 @@ function showChannelFallback(target,openNow=false){
  $("shareGuideText").textContent=kakao?"이 브라우저는 앱으로 이미지 직접 전달을 지원하지 않아요. 복사 또는 저장 후 PC 카카오톡의 원하는 채팅방에서 붙여넣거나 첨부해 주세요.":"이 브라우저는 앱으로 이미지 직접 전달을 지원하지 않아요. 저장한 카드를 DM에서 첨부해 주세요.";
  $("openInstagram").hidden=kakao;
  if(openNow&&kakao){if(navigator.clipboard?.write&&typeof ClipboardItem!=="undefined")copyCardImage();else shareFeedback("이미지 저장 후 카카오톡에서 첨부해 주세요.");}
- else if(openNow&&!kakao){const win=window.open("https://www.instagram.com/direct/inbox/","_blank","noopener,noreferrer");downloadShareBlob(shareDialogBlob);shareFeedback("DM 열기와 이미지 저장을 요청했어요. 친구를 선택하고 카드를 첨부해 주세요.")}
+ else if(openNow&&!kakao){openInstagramDirect()}
 }
 function openShareChooser(){
  if(!readyShareBlob){if(current&&plan)prepareShareCard();return}
@@ -517,7 +540,7 @@ function openShareChooser(){
  const native=canNativeShare(shareDialogBlob);
  $("nativeShare").hidden=!native;
  $("kakaoShareHint").textContent=native?"공유 메뉴에서 카카오톡 · 친구 선택":"이미지 복사 후 PC 채팅방에 붙여넣기";
- $("instaShareHint").textContent=native?"공유 메뉴에서 Instagram · 친구 선택":"DM 열기 · 이미지 저장";
+ $("instaShareHint").textContent="DM 바로 열기 · 사진 직접 첨부";
  $("copyShareImage").hidden=!(navigator.clipboard?.write&&typeof ClipboardItem!=="undefined");
  if($("copyShareImage").hidden)$("saveShareImage").style.gridColumn="1/-1";else $("saveShareImage").style.gridColumn="";
  shareFeedback("");if(!$("shareDialog").open)$("shareDialog").showModal();
