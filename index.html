@@ -254,6 +254,70 @@ header{height:58px}.brand{font-size:22px}.mark{width:36px;height:30px}.app-intro
 .window .window-grade{word-break:keep-all;overflow-wrap:anywhere;letter-spacing:-.045em}
 .window .window-desc{word-break:keep-all;overflow-wrap:anywhere}
 @media(max-width:680px){.window .window-grade{max-width:64%;font-size:15px;line-height:1.4}.window .window-desc{max-width:60%;font-size:11px;line-height:1.55}}
+
+/* V6.4 — 날씨틈 / quiet editorial.
+   One signature pine color, warm neutral surfaces, muted illustration colors. */
+:root{--ink:#24342f;--sub:#53615b;--muted:#606b64;--paper:#f4f2ed;--card:#fffefa;--line:#dfdfd7;--green:#28564e;--accent:#e7b879;--shadow:0 2px 10px #3a39300a;--surface-soft:#eeede6;--surface-sage:#e6ede7;--key:#28564e}
+body{background:var(--paper);letter-spacing:-.035em}
+.brand{color:var(--key);letter-spacing:-.08em}
+.app-intro h1{color:var(--ink);font-weight:800}
+.app-intro p{color:var(--sub)}
+.location-btn,.sound-toggle{color:var(--key)}
+.sound-toggle{background:transparent}
+.start,.panel,.rec,.share-inline{background:var(--card);border:1px solid var(--line);box-shadow:var(--shadow)}
+.start{border-radius:16px}
+.primary{background:var(--key);color:#fffefa;border-radius:11px;box-shadow:none}
+.secondary{background:#fffefa;border-color:#d4d9d0;color:var(--key);border-radius:11px}
+.primary:not(:disabled):active,.secondary:not(:disabled):active{transform:scale(.98)}
+.status[data-state="live"],.status[data-state="loading"]{background:var(--surface-sage);color:#365b4d}
+.window{background:#f9f7f1;border-color:#e0ddd3;border-radius:24px;box-shadow:0 4px 18px #4a463b0d}
+.window .eyebrow,.window .window-grade{color:var(--key)}
+.window .window-time{color:#203c35;font-weight:780}
+.window .window-desc{color:#53615b}
+.window .window-chips span{background:#fffefa;border-color:#deddd4;color:#3e554b}
+.window .window-foot{color:#59675e;border-color:#deddd3}
+.window .avatar-switch button{border-color:#d9ddd3;background:#f6f5ef}
+.window .avatar-switch button[aria-pressed=true]{background:#fffefa;border-color:var(--key);box-shadow:none}
+.window .avatar-tick{background:var(--key)}
+.window-character{-webkit-mask-image:none;mask-image:none}
+.window .window-grade,.window .window-desc{max-width:58%}
+.air-note,.air-note[data-high="true"]{background:#fffefa;border-color:var(--line);color:var(--ink)}
+.air-reading{color:var(--ink)}.air-metric+.air-metric{border-color:var(--line)}
+.section-head h2{color:var(--ink);letter-spacing:-.05em}
+.companions{background:#e9e8e0;border:1px solid #e0dfd6;border-radius:13px;box-shadow:none}
+.companions button{color:#53615b;min-height:44px}
+.companions button[aria-pressed=true]{background:var(--key);color:#fffefa;box-shadow:none}
+.rec{border-radius:18px;box-shadow:var(--shadow)}
+.rec-label{color:#53615b}
+.rec h3{color:var(--ink);letter-spacing:-.045em}
+.rec p{color:var(--sub)}
+.rec .mini,.rec .text-btn{color:var(--key)}
+.rec .text-btn{font-weight:750}
+.rec:nth-child(1) .icon-box{background:#e6ede6;color:#355e50}
+.rec:nth-child(2) .icon-box{background:#f1e6d8;color:#926331}
+.rec:nth-child(3) .icon-box{background:#e4eaef;color:#42677b}
+.rec-art{-webkit-mask-image:linear-gradient(90deg,transparent,#000 8%);mask-image:linear-gradient(90deg,transparent,#000 8%)}
+.planb{background:#ebe9e1;border:1px solid #e0ded4;color:var(--ink)}
+.planb .icon-box{background:#fffefa;color:#746247}
+.hour.best{background:#e4ede5;color:#28564e}.legend i{background:#e4ede5;border-color:#c5d6ca}
+.range{background:#e8e8e1}.range i{background:#87a599}
+.footer{color:var(--muted);border-color:var(--line)}
+dialog{background:var(--card);border-radius:20px;color:var(--ink)}
+dialog::backdrop{background:#24342f66}
+.close,.field select,.field input,.search-results button{background:#f4f3ed;border-color:var(--line)}
+.share-guide,.region-note{background:#e7ede7;color:var(--key)}
+.share-guide a{background:var(--key)}
+@media(max-width:680px){
+ .window{border-radius:22px;min-height:244px}
+ .window .window-grade{max-width:55%;font-size:15px}
+ .window .window-desc{max-width:55%}
+ .window-character{width:45%;height:62%;bottom:29px}
+ .rec{border-radius:17px}
+ .section{margin-top:22px}
+ .section-head{margin-bottom:10px}
+ .companions{margin-bottom:11px}
+}
+@media(max-width:360px){.window .window-grade,.window .window-desc{max-width:57%}.window-character{width:43%}}
 </style></head><body><div class="shell">
 <header><div class="brand"><span class="mark" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 34" fill="none"><circle cx="31" cy="10" r="7.5" fill="#e8b868"/><path d="M23 12C18 1 7 7 4 17c-4 14 9 16 20 9 8-5 15-8 21 1" stroke="#315b49" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>날씨틈</div><div class="header-meta"><span class="date" id="date"></span><button type="button" id="soundToggle" class="sound-toggle" aria-pressed="true" aria-label="효과음 켜기 또는 끄기" title="효과음 켜짐"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4Z" stroke="currentColor" stroke-width="1.65" stroke-linejoin="round"/><g class="sound-waves" stroke="currentColor" stroke-width="1.55" stroke-linecap="round"><path d="M16 9q3 3 0 6M19 6q5 6 0 12"/></g><path class="sound-cross" d="m16 9 5 6m0-6-5 6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button><button id="locationBtn" class="location-btn" aria-label="지역 변경"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 21s7-6 7-12a7 7 0 0 0-14 0c0 6 7 12 7 12Z" stroke="currentColor" stroke-width="1.7"/><circle cx="12" cy="9" r="2.5" stroke="currentColor" stroke-width="1.7"/></svg><span id="locLabel">지역 선택</span><svg width="14" height="14" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button></div></header>
 <main><div class="app-intro"><div><h1>오늘 최고의 두 시간.</h1><p>날씨에 맞춰 옷차림, 음식, 할 일까지.</p></div><span class="tag">오늘의 일상 큐레이션</span></div>
@@ -724,6 +788,50 @@ function wardrobeOptions(t,rain=0,gender=avatar,wind=0){
  return list.map(v=>({...v,umbrella:rain>=40&&wind<35,windproof:wind>=20,scarf:band<2,detail:v.detail+(wind>=35?" 강풍에는 실내에 머무르고 우산을 펼치지 않는 편이 좋아요.":"")}));
 }
 function outfitLook(t,rain=0,gender=avatar,variant=0,wind=0){const list=plan&&current&&!sample?selectedWearOptions(gender):wardrobeOptions(t,rain,gender,wind);return list[((variant%list.length)+list.length)%list.length]}
+/* V6.4: editorial design system. Choose a garment-aware neutral illustration stage,
+   and coordinate companion colors without changing the user's own outfit. */
+const DESIGN_STAGES=[
+ {base:"#e7ded1",edge:"#c9bcae",name:"oat"},
+ {base:"#dce5e9",edge:"#aebfc5",name:"mist"},
+ {base:"#e5e0e7",edge:"#beb1c2",name:"lilac"},
+ {base:"#b2b9bb",edge:"#879497",name:"slate"},
+ {base:"#bcb2a5",edge:"#948675",name:"stone"},
+ {base:"#f1ede4",edge:"#d7cfc1",name:"linen"}
+];
+function colorRGB(c){return [1,3,5].map(i=>parseInt(c.slice(i,i+2),16)/255)}
+function colorLum(c){return colorRGB(c).map(v=>v<=.04045?v/12.92:((v+.055)/1.055)**2.4).reduce((sum,v,i)=>sum+v*[.2126,.7152,.0722][i],0)}
+function colorContrast(a,b){const x=colorLum(a),y=colorLum(b);return (Math.max(x,y)+.05)/(Math.min(x,y)+.05)}
+function colorDistance(a,b){const x=colorRGB(a),y=colorRGB(b);return Math.sqrt(x.reduce((sum,v,i)=>sum+(v-y[i])**2,0))}
+function outerColor(look){return /^(tee|summer)$/.test(look.style)||/^(blouse|linenBlouse|indoorKnit)$/.test(look.cut)?look.top:look.coat}
+function garmentStage(looks){
+ const colors=looks.flatMap(v=>[outerColor(v),v.pants]);
+ return DESIGN_STAGES.reduce((best,stage)=>{
+   const scores=colors.map(c=>Math.log(colorContrast(c,stage.base))+.30*colorDistance(c,stage.base));
+   const score=Math.min(...scores)*.75+scores.reduce((x,y)=>x+y,0)/scores.length*.25;
+   return score>best.score?{...stage,score}:best;
+ },{...DESIGN_STAGES[0],score:-Infinity});
+}
+const COORD_PALETTES=[
+ ["#526d7b","#b17b67","#b8a16a","#708b78","#8c829a"],
+ ["#526b61","#aa8066","#768a9b","#bda97e","#997e87"],
+ ["#526679","#8a9b82","#b68175","#c4ac77","#867a92"],
+ ["#526d70","#a77d70","#c2ae83","#788ca1","#9d8d79"]
+];
+function coordinatedLooks(cast,t,rain,wind,indoor,title){
+ const looks=cast.map((p,i)=>sceneOutfit(outfitLook(t,rain,p.gender,wearIndex+i,wind),indoor,title));
+ if(cast.length===1)return looks;
+ const main=outerColor(looks[0]),rgb=colorRGB(main);
+ const group=rgb[0]>rgb[1]+.08?1:rgb[2]>rgb[0]+.06?2:rgb[1]>rgb[0]+.05?0:3;
+ const palette=COORD_PALETTES[group],used=[main];
+ return looks.map((look,i)=>{
+   if(i===0)return look;
+   const ranked=palette.map((c,j)=>({c,j,score:Math.min(...used.map(u=>colorDistance(c,u)))+.07*(j===(wearIndex+i)%palette.length?1:0)})).sort((a,b)=>b.score-a.score);
+   const c=ranked[0].c;used.push(c);
+   const isTop=outerColor(look)===look.top;
+   const pants=i===2?"#6c7c86":colorDistance(looks[0].pants,"#7c8a96")>.24?"#7c8a96":"#a29380";
+   return {...look,coat:c,top:isTop?c:(colorLum(c)<.25?"#e8dbc5":"#f0e6d4"),pants};
+ });
+}
 function littlePerson(x,y,k,o={}){
  const p=artP,skin=o.skin||p.skin,hair=o.hair||p.hair,coat=o.coat||p.green,top=o.top||p.cream,pants=o.pants||"#737c72";
  const st=o.style||"jacket",puff=st==="puffer",long=st==="coat",tee=st==="tee"||st==="summer",hem=long?82:puff?(o.cut==="longPuffer"?88:o.cut==="cropped"?61:69):tee?59:64,walking=!!o.walk,cut=o.cut||"tailored";
@@ -782,7 +890,7 @@ function littlePerson(x,y,k,o={}){
  const faceTarget=o.maskInteractive?'<g data-mask-toggle="true" data-face-key="'+o.faceKey+'" role="button" tabindex="0" aria-pressed="'+String(!!o.mask)+'" aria-label="마스크 착용 전환"><title>얼굴을 눌러 마스크 '+(o.mask?"벗기기":"쓰기")+'</title><rect class="mask-hit" x="-22" y="-12" width="44" height="46" rx="16" fill="transparent"/></g>':'';
  const umbrella=o.umbrella?'<g transform="translate(40 -2)"><path d="M-38 4Q-32-27 0-28Q32-25 38 4Q26-3 13 4Q0-4-13 4Q-26-3-38 4Z" fill="#8da9a4" stroke="#5f7d72" stroke-width="1.2"/><path d="M0-27Q-16-17-13 4M0-27Q16-17 13 4" stroke="#d1d9cb" stroke-width="1" fill="none"/><path d="M0 4v50q0 7-5 7t-5-5" stroke="#536b60" stroke-width="1.5" fill="none" stroke-linecap="round"/></g>':'';
  const bag=o.bag?(female?'<path d="M12 28Q24 39 20 58" fill="none" stroke="#927759" stroke-width="2"/><rect x="12" y="54" width="19" height="17" rx="5" fill="#b59068" stroke="#806749" stroke-width=".8"/><path d="M13 58q8 5 17 0" fill="none" stroke="#e6ca98" stroke-width="1"/><circle cx="22" cy="60" r="1" fill="#e3c38e"/>':'<path d="M-12 26L20 60" stroke="#8d6c4b" stroke-width="2"/><path d="M10 54l18-2 4 20-21 3Z" fill="#bb9567" stroke="#886c4e" stroke-width=".8"/><path d="M13 57l15-2" stroke="#e6ca98" stroke-width="1"/>'):'';
- return '<g transform="translate('+x+' '+y+') scale('+k+')">'+leg+armLeft+armRight+garment+bag+face+umbrella+faceTarget+'</g>';
+ return '<g transform="translate('+x+' '+y+') scale('+k+')">'+'<g stroke="#514d46" stroke-opacity=".50" stroke-width=".65" stroke-linejoin="round" paint-order="stroke fill">'+leg+armLeft+armRight+garment+'</g>'+bag+face+umbrella+faceTarget+'</g>';
 }
 function treeArt(x,y,k,fall=false){
  const colors=fall?["#d3aa62","#c68a61","#e2c78b"]:["#809e80","#9fb59a","#b9c9a9"];
@@ -865,12 +973,13 @@ function lifestyleArt(title,who,indoor,t,rain=0,startHour=12,wind=0){
   else if(night)props='<path d="M146 110V62q0-6-6-6h-6" stroke="#566b61" stroke-width="2.2" fill="none"/><path d="M130 56h11l4 7h-19Z" fill="#eacb85"/>';
  }
  const detail=sceneDetail(title);if(detail)props=detail;const cast=castFor(who,avatar),count=cast.length,poses=count===1?[[82,24,.83]]:count===2?[[57,29,.79],[105,35,.74]]:familyPoses(cast,"activity");
- const people=poses.map(([x,y,k],i)=>'<ellipse cx="'+x+'" cy="'+(y+116*k)+'" rx="'+(27*k)+'" ry="'+(5*k)+'" fill="url(#act-shadow)"/>'+littlePerson(x,y,k,{...sceneOutfit(outfitLook(t,rain,cast[i].gender,wearIndex+i,wind),indoor,title),...cast[i],maskInteractive:true,faceKey:"activity-"+i,walk,bag:!indoor&&i===0&&!look.umbrella,umbrella:wet&&wind<35&&i===0})).join("");
- return artSvg(id,indoor?"url(#act-paper)":"url(#act-sky)",body+props+people);
+ const looks=coordinatedLooks(cast,t,rain,wind,indoor,title),stage=garmentStage(looks);
+ const people=poses.map(([x,y,k],i)=>'<ellipse cx="'+x+'" cy="'+(y+116*k)+'" rx="'+(27*k)+'" ry="'+(5*k)+'" fill="url(#act-shadow)"/>'+littlePerson(x,y,k,{...looks[i],...cast[i],maskInteractive:true,faceKey:"activity-"+i,walk,bag:!indoor&&i===0&&!look.umbrella,umbrella:wet&&wind<35&&i===0})).join("");
+ return artSvg(id,indoor?"url(#act-paper)":"url(#act-sky)",body+'<ellipse cx="75" cy="78" rx="67" ry="66" fill="'+stage.base+'" opacity=".72"/>'+props+people);
 }
 function outfitArt(t,rain,wind){
- const look=outfitLook(t,rain,avatar,wearIndex,wind),id="wear-",st=look.style;
- let body='<rect width="180" height="148" fill="url(#wear-paper)"/><rect x="8" y="8" width="164" height="132" rx="7" fill="none" stroke="#c6c8b1" stroke-width=".65"/><circle cx="89" cy="71" r="57" fill="#e5e8d9"/><circle cx="89" cy="71" r="51" fill="none" stroke="#f8f4e5" stroke-width="1.2"/><path d="M18 122H162" stroke="#c9c8b3" stroke-width=".7"/><ellipse cx="78" cy="130" rx="39" ry="7" fill="url(#wear-shadow)"/>';
+ const look=outfitLook(t,rain,avatar,wearIndex,wind),id="wear-",st=look.style,stage=garmentStage([look]);
+ let body='<rect width="180" height="148" fill="url(#wear-paper)"/><rect x="8" y="8" width="164" height="132" rx="7" fill="none" stroke="#c6c8b1" stroke-width=".65"/><rect x="15" y="9" width="118" height="129" rx="53" fill="'+stage.base+'"/><rect x="20" y="14" width="108" height="119" rx="48" fill="none" stroke="'+stage.edge+'" stroke-width=".8"/><path d="M18 122H162" stroke="#c9c8b3" stroke-width=".7"/><ellipse cx="78" cy="130" rx="39" ry="7" fill="url(#wear-shadow)"/>';
  body+=littlePerson(76,17,.94,{...look,...castFor("혼자",avatar)[0],maskInteractive:true,faceKey:"outfit-0",bag:!look.umbrella});
  if(look.scarf){
   body+='<g transform="translate(141 49)"><path d="M-15-6q0-15 13-15 14 0 14 15l-5 5-5-5-7 9-8-2Z" fill="#be795d" stroke="#9f6e55" stroke-width=".8"/><path d="M-12-5q12 7 23-2" stroke="#e2ab8b" stroke-width="2" fill="none"/><path d="M8-5l7 25-7 2L1 0" fill="#be795d"/><path d="M7 19l3 6m3-7 3 5" stroke="#aa765c" stroke-width="1"/></g>';
@@ -1007,11 +1116,12 @@ function portrait(gender){
 function windowCharacterArt(who,self,t,rain,indoor,hour,title,wind=0){
  const cast=castFor(who,self),look=outfitLook(t,rain),night=!/노을/.test(title)&&(hour>=(plan?.sunset??18)||hour<(plan?.sunrise??7)),walk=!indoor&&/산책|걸어|나들이|데이트|투어|사진/.test(title);
  // Warm neutral fashion-editorial setting; retain the original outfit colors.
- let scenery='<defs><radialGradient id="hero-glow"><stop stop-color="#fffdf7" stop-opacity=".96"/><stop offset="1" stop-color="#fffdf7" stop-opacity="0"/></radialGradient><radialGradient id="hero-shadow"><stop stop-color="#655b49" stop-opacity=".20"/><stop offset="1" stop-color="#655b49" stop-opacity="0"/></radialGradient></defs><ellipse cx="104" cy="71" rx="87" ry="71" fill="url(#hero-glow)"/>';
+ const looks=coordinatedLooks(cast,t,rain,wind,indoor,title),stage=garmentStage(looks);
+ let scenery='<defs><radialGradient id="hero-glow"><stop stop-color="#fffdf7" stop-opacity=".96"/><stop offset="1" stop-color="#fffdf7" stop-opacity="0"/></radialGradient><radialGradient id="hero-shadow"><stop stop-color="#655b49" stop-opacity=".20"/><stop offset="1" stop-color="#655b49" stop-opacity="0"/></radialGradient></defs><path d="M12 137V76C12 32 43 8 94 8s81 26 81 68v61Z" fill="'+stage.base+'"/><path d="M12 137V76C12 32 43 8 94 8s81 26 81 68v61" fill="none" stroke="'+stage.edge+'" stroke-width=".7"/><ellipse cx="103" cy="57" rx="66" ry="52" fill="url(#hero-glow)" opacity=".18"/>';
  if(indoor)scenery+='<path d="M95 114V31q0-24 25-24t25 24v83" fill="#e2d9ca" opacity=".28"/><path d="M95 114V31q0-24 25-24t25 24v83" stroke="#d4c7b6" stroke-width=".8" fill="none"/><path d="M120 8v104M95 49h50" stroke="#d4c7b6" stroke-width=".75" opacity=".65"/>';
  else scenery+=(night?'<path d="M150 14a13 13 0 1 0 14 19 14 14 0 0 1-14-19Z" fill="#c7b99f"/>':'<circle cx="151" cy="25" r="12" fill="#e1b66c" opacity=".82"/>')+'<path d="M12 130q50-16 100-6t68-8" stroke="#c9bcaa" stroke-width=".85" fill="none" opacity=".75"/><path d="M15 139q52-14 110-7t55-4" stroke="#d7ccbc" stroke-width=".75" fill="none" opacity=".65"/>';
  const positions=cast.length===1?[[101,25,1.02]]:cast.length===2?[[67,30,.93],[126,34,.88]]:familyPoses(cast,"hero");
- const figures=positions.map(([x,y,k],i)=>'<ellipse cx="'+x+'" cy="'+(y+118*k)+'" rx="'+(31*k)+'" ry="'+(5*k)+'" fill="url(#hero-shadow)"/>'+littlePerson(x,y,k,{...sceneOutfit(outfitLook(t,rain,cast[i].gender,wearIndex+i,wind),indoor,title),...cast[i],maskInteractive:true,faceKey:"hero-"+i,bag:!indoor&&i===0&&!look.umbrella,umbrella:!indoor&&look.umbrella&&i===0,walk})).join("");
+ const figures=positions.map(([x,y,k],i)=>'<ellipse cx="'+x+'" cy="'+(y+118*k)+'" rx="'+(31*k)+'" ry="'+(5*k)+'" fill="url(#hero-shadow)"/>'+littlePerson(x,y,k,{...looks[i],...cast[i],maskInteractive:true,faceKey:"hero-"+i,bag:!indoor&&i===0&&!look.umbrella,umbrella:!indoor&&look.umbrella&&i===0,walk})).join("");
  return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 148" preserveAspectRatio="xMidYMid meet" role="group" aria-label="캐릭터 · 얼굴을 누르면 마스크 전환">'+scenery+figures+'</svg>';
 }
 function weatherAtmosphere(code,day){
@@ -1047,31 +1157,31 @@ function drawShareLine(c,str,x,y,max,size,min,color,weight=700){c.fillStyle=colo
 function shareArtImage(svg){return new Promise((resolve,reject)=>{let image=new Image(),timer=setTimeout(()=>reject(Error("그림 준비 시간 초과")),5000);image.onload=()=>{clearTimeout(timer);resolve(image)};image.onerror=()=>{clearTimeout(timer);reject(Error("그림 준비 실패"))};image.src="data:image/svg+xml;charset=utf-8,"+encodeURIComponent(svg.replace('viewBox="0 0 180 148"','width="720" height="592" viewBox="0 0 180 148"'))})}
 function renderSharePoster(snap,images){
  const canvas=document.createElement("canvas");canvas.width=1080;canvas.height=1350;const c=canvas.getContext("2d");if(!c)throw Error("이미지 생성 실패");
- c.fillStyle="#f3f1e7";c.fillRect(0,0,1080,1350);
+ c.fillStyle="#f4f2ed";c.fillRect(0,0,1080,1350);
  // Editorial cover: brand, location and time.
- c.fillStyle="#225747";c.fillRect(0,0,1080,12);
- c.fillStyle="#e8b868";c.beginPath();c.arc(103,51,12,0,Math.PI*2);c.fill();c.strokeStyle="#315b49";c.lineWidth=5;c.lineCap="round";c.lineJoin="round";c.beginPath();c.moveTo(91,55);c.bezierCurveTo(77,36,59,48,57,63);c.bezierCurveTo(54,83,73,86,93,73);c.bezierCurveTo(109,64,119,59,130,76);c.stroke();drawShareLine(c,"날씨틈",145,83,290,44,36,"#225747",850);
- c.textAlign="right";drawShareLine(c,"오늘 최고의 2시간",1016,80,500,31,23,"#225747",700);c.textAlign="left";
+ c.fillStyle="#28564e";c.fillRect(0,0,1080,12);
+ c.fillStyle="#e8b868";c.beginPath();c.arc(103,51,12,0,Math.PI*2);c.fill();c.strokeStyle="#315b49";c.lineWidth=5;c.lineCap="round";c.lineJoin="round";c.beginPath();c.moveTo(91,55);c.bezierCurveTo(77,36,59,48,57,63);c.bezierCurveTo(54,83,73,86,93,73);c.bezierCurveTo(109,64,119,59,130,76);c.stroke();drawShareLine(c,"날씨틈",145,83,290,44,36,"#28564e",850);
+ c.textAlign="right";drawShareLine(c,"오늘 최고의 2시간",1016,80,500,31,23,"#28564e",700);c.textAlign="left";
  drawShareLine(c,(snap.sample?"예시 데이터 · ":"")+snap.location,64,142,952,30,20,"#62766a",600);
- drawShareLine(c,snap.time,64,261,952,98,68,"#203f35",800);
- drawShareLine(c,snap.grade,64,314,952,32,24,"#536b5b",650);
+ drawShareLine(c,snap.time,64,261,952,98,68,"#203c35",800);
+ drawShareLine(c,snap.grade,64,314,952,32,24,"#53615b",650);
  drawShareLine(c,"체감 "+snap.feels+"°   ·   강수 "+snap.rain+"%   ·   바람 "+snap.wind+"   ·   "+snap.weather,64,361,952,29,22,"#58765f",650);
  // Main scene: the same outfit and selected companion in today's activity.
- roundedPanel(c,64,710,952,500,30,"#e5eadb");
+ roundedPanel(c,64,710,952,500,30,"#e6ede7");
  c.save();c.beginPath();c.rect(416,732,578,456);c.clip();c.drawImage(images[0],424,732,554,456);c.restore();
- drawShareLine(c,"03  /  오늘 할 일",98,774,304,26,20,"#60796a",700);
- c.fillStyle="#203f35";wrap(c,snap.activity,98,868,307,51,3);
- drawShareLine(c,snap.who==="혼자"?"나를 위한 작은 시간":snap.who+"와 함께",98,1113,307,27,21,"#536b5b",600);
+ drawShareLine(c,"03  /  오늘 할 일",98,774,304,26,20,"#53615b",700);
+ c.fillStyle="#203c35";wrap(c,snap.activity,98,868,307,51,3);
+ drawShareLine(c,snap.who==="혼자"?"나를 위한 작은 시간":snap.who+"와 함께",98,1113,307,27,21,"#53615b",600);
  // Supporting cards: a real outfit reference and the selected dish.
  for(const [i,item] of [[0,{label:"01  /  옷차림",title:snap.outfit,art:images[1]}],[1,{label:"02  /  음식",title:snap.food,art:images[2]}]]){
-   const x=64+i*484;roundedPanel(c,x,400,468,286,24,i===0?"#e8ebdf":"#eee6d7");
-   drawShareLine(c,item.label,x+23,444,422,25,20,"#5e7568",700);
+   const x=64+i*484;roundedPanel(c,x,400,468,286,24,i===0?"#e8e6df":"#f1e6d8");
+   drawShareLine(c,item.label,x+23,444,422,25,20,"#53615b",700);
    c.drawImage(item.art,x+217,461,227,187);
-   c.fillStyle="#203f35";wrap(c,item.title,x+23,511,192,37,3);
+   c.fillStyle="#203c35";wrap(c,item.title,x+23,511,192,37,3);
  }
  drawShareLine(c,"24시간 모델 평균 · "+snap.air,64,1246,952,24,18,snap.mask?"#965b35":"#64766a",600);
  drawShareLine(c,snap.sample?"실제 날씨가 아닌 예시 데이터":"예보 출처: Open-Meteo / CAMS · CC BY 4.0",64,1282,952,24,18,"#64766a",500);
- c.textAlign="right";drawShareLine(c,"오늘의 작은 틈, 날씨틈",1016,1321,952,23,18,"#225747",650);c.textAlign="left";
+ c.textAlign="right";drawShareLine(c,"오늘의 작은 틈, 날씨틈",1016,1321,952,23,18,"#28564e",650);c.textAlign="left";
  return canvas;
 }
 function prepareShareCard(){if(!current||!plan||sample)return;
