@@ -356,6 +356,10 @@ dialog::backdrop{background:#24342f66}
 #windowCharacter[data-cast="group"]{width:49%}
 @media(max-width:680px){#windowCharacter[data-cast="group"]{width:49%}}
 @media(max-width:360px){#windowCharacter[data-cast="group"]{width:46%}}
+/* V7.6: dedicated hair control, leaving face and body tap behavior intact. */
+.hair-controls{display:flex;align-items:center;justify-content:flex-end;gap:8px;margin:-2px 0 11px;color:var(--sub);font-size:11px}
+.hair-controls[hidden]{display:none!important}
+.hair-controls select{font:inherit;color:var(--ink);background:#fffefa;border:1px solid var(--line);border-radius:8px;padding:7px 10px;min-height:34px}
 </style></head><body><div class="shell">
 <header><div class="brand"><span class="mark" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 34" fill="none"><circle cx="31" cy="10" r="7.5" fill="#e8b868"/><path d="M23 12C18 1 7 7 4 17c-4 14 9 16 20 9 8-5 15-8 21 1" stroke="#315b49" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>날씨틈</div><div class="header-meta"><span class="date" id="date"></span><button type="button" id="soundToggle" class="sound-toggle" aria-pressed="true" aria-label="효과음 켜기 또는 끄기" title="효과음 켜짐"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4Z" stroke="currentColor" stroke-width="1.65" stroke-linejoin="round"/><g class="sound-waves" stroke="currentColor" stroke-width="1.55" stroke-linecap="round"><path d="M16 9q3 3 0 6M19 6q5 6 0 12"/></g><path class="sound-cross" d="m16 9 5 6m0-6-5 6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button><button id="locationBtn" class="location-btn" aria-label="지역 변경"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 21s7-6 7-12a7 7 0 0 0-14 0c0 6 7 12 7 12Z" stroke="currentColor" stroke-width="1.7"/><circle cx="12" cy="9" r="2.5" stroke="currentColor" stroke-width="1.7"/></svg><span id="locLabel">지역 선택</span><svg width="14" height="14" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button></div></header>
 <main><div class="app-intro"><div><h1>오늘 최고의 두 시간.</h1><p>날씨에 맞춰 옷차림, 음식, 할 일까지.</p></div><span class="tag">오늘의 일상 큐레이션</span></div>
@@ -364,7 +368,7 @@ dialog::backdrop{background:#24342f66}
 <section class="hero" id="weatherResults" aria-label="오늘 최고의 추천 시간" aria-busy="false">
 <article class="window" id="bestWindow" data-reveal="idle"><div id="windowCharacter" class="window-character"></div><div class="window-copy"><div class="window-heading"><div class="eyebrow"><span class="window-mark" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 34" fill="none"><circle cx="31" cy="10" r="7.5" fill="#e8b868"/><path d="M23 12C18 1 7 7 4 17c-4 14 9 16 20 9 8-5 15-8 21 1" stroke="#315b49" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>오늘 최고의 두 시간</div><div class="avatar-picker"><span class="avatar-caption" aria-hidden="true">내 캐릭터</span><div class="avatar-switch" role="group" aria-label="내 캐릭터 선택"><button type="button" data-avatar="m" aria-pressed="true" aria-label="남성 캐릭터 선택"><span class="avatar-portrait" id="avatarM" aria-hidden="true"></span><span class="avatar-tick" aria-hidden="true"><svg viewBox="0 0 12 12"><path d="m2.5 6 2.3 2.3 4.8-5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></button><button type="button" data-avatar="f" aria-pressed="false" aria-label="여성 캐릭터 선택"><span class="avatar-portrait" id="avatarF" aria-hidden="true"></span><span class="avatar-tick" aria-hidden="true"><svg viewBox="0 0 12 12"><path d="m2.5 6 2.3 2.3 4.8-5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></button></div></div></div><div class="window-time" id="windowTime" aria-live="polite">??:?? ~ ??:??</div><div class="window-grade" id="windowGrade"></div><p class="window-desc" id="windowDesc"></p><div class="window-chips" id="windowChips"></div></div><div class="window-foot"><span>기온 · 비 · 바람으로 계산</span><span id="maskHint">01 / 오늘의 틈</span></div></article><div class="air-note" id="airNote" hidden aria-label="대기질 · 최근 24시간 모델 평균" title="최근 24시간 모델 평균 · 단위 ㎍/㎥"><div class="air-main" id="airValues"></div></div></section>
 
-<section class="section" id="dailyRecs" data-ready="false"><div class="section-head"><h2>오늘 이렇게 보내요</h2><small>날씨 맞춤 추천</small></div><div class="companions" aria-label="함께할 사람"><button data-who="혼자" aria-pressed="true">혼자</button><button data-who="친구" aria-pressed="false">친구</button><button data-who="연인" aria-pressed="false">연인</button><button data-who="가족" aria-pressed="false">가족</button></div><div class="recs">
+<section class="section" id="dailyRecs" data-ready="false"><div class="section-head"><h2>오늘 이렇게 보내요</h2><small>날씨 맞춤 추천</small></div><div class="companions" aria-label="함께할 사람"><button data-who="혼자" aria-pressed="true">혼자</button><button data-who="친구" aria-pressed="false">친구</button><button data-who="연인" aria-pressed="false">연인</button><button data-who="가족" aria-pressed="false">가족</button></div><div class="hair-controls" id="hairControls" hidden><label for="femaleHair">헤어스타일</label><select id="femaleHair" aria-label="여성 캐릭터 헤어스타일"><option value="long">장발</option><option value="mediumLong">중장발</option><option value="medium">중단발</option><option value="bob">단발</option></select></div><div class="recs">
 <article class="rec"><div class="rec-label"><span class="icon-box"><svg width="21" height="21" viewBox="0 0 24 24" fill="none"><path d="m8 4 4 2 4-2 5 4-3 5-2-1v8H8v-8l-2 1-3-5 5-4Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg></span>옷차림</div><div class="rec-art" id="outfitArt"></div><h3 id="wearTitle">—</h3><p id="wearText"></p><div class="mini" id="wearMini"></div><button class="text-btn" id="moreWear">다른 코디 보기 ↻</button></article>
 <article class="rec"><div class="rec-label"><span class="icon-box"><svg width="21" height="21" viewBox="0 0 24 24" fill="none"><path d="M4 11h16a8 8 0 0 1-16 0Zm3 10h10M8 8c-1-2 1-2 0-4m4 4c-1-2 1-2 0-4m4 4c-1-2 1-2 0-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>음식</div><div class="rec-art" id="mealArt" aria-hidden="true"></div><h3 id="foodTitle">—</h3><p id="foodText"></p><div class="mini" id="foodMini"></div><button class="text-btn" id="moreFood">다른 메뉴 보기 ↻</button></article>
 <article class="rec"><div class="rec-label"><span class="icon-box"><svg width="21" height="21" viewBox="0 0 24 24" fill="none"><circle cx="16" cy="5" r="2" stroke="currentColor" stroke-width="1.6"/><path d="m4 20 6-8 4 3 3 6M8 10l5-3 3 5 5 1M11 13l-2 6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>할 일</div><div class="rec-art" id="activityArt"></div><h3 id="actTitle">—</h3><p id="actText"></p><div class="mini" id="actMini"></div><button class="text-btn" id="moreAct">다른 활동 보기 ↻</button></article></div>
@@ -974,6 +978,43 @@ function personHitTargets(key,mask){
 function castHitLayer(positions,cast,prefix){
  return '<g class="cast-hit-layer" pointer-events="none">'+positions.map(([x,y,k],i)=>'<g transform="translate('+x+' '+y+') scale('+k+')">'+personHitTargets(prefix+i,!!cast[i].mask)+'</g>').join("")+'</g>';
 }
+/* V7.6: four Korean-inspired haircuts, individually shaped, roots-to-ends flow.
+   Back hair is drawn behind the shoulders; only face-framing locks lie over the garment. */
+const HAIR_LENGTHS=["long","mediumLong","medium","bob"];
+const HAIR_LABELS={long:"장발",mediumLong:"중장발",medium:"중단발",bob:"단발"};
+let femaleHair="long";
+function femaleHairArt(kind,hair,id){
+ const variants={
+ long:{
+ back:"M-14 1C-17-7-12-15-3-15C5-17 14-12 15-3C17 8 13 20 16 31C20 43 19 52 12 60Q9 56 6 58Q0 61-5 57Q-11 62-17 57C-22 50-20 40-17 30C-14 19-17 8-14 1Z",
+ locks:"M-12 0C-13 12-11 21-15 32C-19 43-16 54-10 55C-12 49-9 40-10 33C-6 24-10 14-9 6Z M12 1C13 13 11 22 15 33C19 43 16 54 10 56C13 48 9 41 10 33C7 23 10 15 9 5Z",
+ strands:"M-13 7C-15 21-13 25-16 37Q-19 48-13 54M-10 14C-9 24-13 34-12 44Q-11 49-10 51M13 7C15 21 13 26 16 37Q19 49 12 55M11 15C9 25 13 34 12 44",
+ crown:"M-14 5C-17-5-12-13-3-14C6-16 15-10 15-1L13 7Q10 1 7-2Q5-5 3-5.6C-1-2-6-1-10 1Q-12 3-14 5Z"
+ },
+ mediumLong:{
+ back:"M-14 1C-17-7-12-15-3-15C5-17 14-12 15-3C17 8 13 20 17 30Q22 43 16 47Q11 50 7 45Q1 47-5 45Q-12 49-18 45Q-22 39-17 29C-14 18-17 8-14 1Z",
+ locks:"M-12 1C-13 12-10 21-14 29Q-19 40-13 43Q-9 45-7 40Q-12 41-11 34C-8 26-10 16-9 6Z M12 1C14 13 10 21 14 29Q20 39 14 43Q10 45 7 40Q12 41 11 34C8 26 10 16 9 6Z",
+ strands:"M-13 7Q-14 20-14 28Q-20 39-13 42M-10 15Q-9 23-12 32Q-13 39-9 41M13 7Q14 20 14 28Q20 39 13 42M10 15Q9 23 12 32Q13 39 9 41",
+ crown:"M-14 5C-17-4-12-13-3-14C5-16 14-10 15-1L13 6Q10 1 7-2Q4-5 1-5.5Q-4-2-9 0Q-12 2-14 5Z"
+ },
+ medium:{
+ back:"M-14 1C-17-7-12-15-3-15C5-17 14-12 15-3C17 8 13 19 17 26Q21 34 15 37Q10 39 6 34Q0 36-6 34Q-11 39-17 36Q-21 32-17 25C-14 17-17 8-14 1Z",
+ locks:"M-12 1Q-14 13-11 20Q-14 29-18 30Q-16 36-10 34Q-6 32-7 28Q-12 31-10 24Q-8 17-9 6Z M12 1Q14 13 11 20Q14 29 18 30Q16 36 10 34Q6 32 7 28Q12 31 10 24Q8 17 9 6Z",
+ strands:"M-13 6Q-15 18-13 23Q-15 29-16 31Q-13 34-9 32M13 6Q15 18 13 23Q15 29 16 31Q13 34 9 32",
+ crown:"M-14 5C-17-5-12-13-3-14C5-16 14-10 15-1L13 6Q11 1 8-2Q5-5 3-5.5Q-1-2-6-.8Q-11 1-14 5Z"
+ },
+ bob:{
+ back:"M-14 1C-17-7-12-15-3-15C5-17 14-12 15-3Q17 7 15 17Q15 23 9 25Q3 26 0 23Q-4 26-10 25Q-16 24-16 17Q-17 8-14 1Z",
+ locks:"M-12 1Q-14 11-12 17Q-11 23-6 22Q-9 19-9 14L-9 5Z M12 1Q14 11 12 17Q11 23 6 22Q9 19 9 14L9 5Z",
+ strands:"M-13 5Q-15 14-12 20Q-10 23-8 22M13 5Q15 14 12 20Q10 23 8 22",
+ crown:"M-14 5C-17-4-12-13-3-14C5-16 14-10 15-1L13 6Q10 1 7-2Q5-5 3-5.5Q-1-2-6-.8Q-11 1-14 5Z"
+ }};
+ const v=variants[kind]||variants.long,shadow=blendColor(hair,"#211d1b",.31),shine=blendColor(hair,"#ac9380",.30),mid=blendColor(hair,"#766251",.17);
+ const defs='<defs><linearGradient id="'+id+'-mass" x1="0" y1="0" x2="1" y2=".3"><stop stop-color="'+shadow+'"/><stop offset=".26" stop-color="'+hair+'"/><stop offset=".54" stop-color="'+mid+'"/><stop offset=".79" stop-color="'+hair+'"/><stop offset="1" stop-color="'+shadow+'"/></linearGradient><clipPath id="'+id+'-locks"><path d="'+v.locks+'"/></clipPath><clipPath id="'+id+'-crown"><path d="'+v.crown+'"/></clipPath></defs>';
+ const back=defs+'<path class="hair-back" d="'+v.back+'" fill="url(#'+id+'-mass)"/>';
+ const front='<g class="hair-front" data-hair-style="'+kind+'"><path d="'+v.locks+'" fill="url(#'+id+'-mass)"/><path d="'+v.strands+'" clip-path="url(#'+id+'-locks)" fill="none" stroke="'+shine+'" stroke-opacity=".68" stroke-width=".67" stroke-linecap="round"/><path d="'+v.crown+'" fill="url(#'+id+'-mass)"/><g clip-path="url(#'+id+'-crown)" stroke-linecap="round" fill="none"><path d="M3-7C-1-12-8-11-12-5Q-14-2-14 3M3-9Q-2-14-9-10M5-8Q10-6 13 0" stroke="'+shine+'" stroke-width=".65" stroke-opacity=".74"/><path d="M3-9L4-5.5" stroke="'+shadow+'" stroke-width=".62"/></g></g>';
+ return {back,front};
+}
 function littlePerson(x,y,k,o={}){
  const p=artP,skin=o.skin||p.skin,hair=o.hair||p.hair,coat=o.coat||p.green,top=o.top||p.cream,pants=o.pants||"#737c72";
  const st=o.style||"jacket",puff=st==="puffer",long=st==="coat",tee=st==="tee"||st==="summer",hem=long?82:puff?(o.cut==="longPuffer"?88:o.cut==="cropped"?61:69):tee?59:64,walking=!!o.walk,cut=o.cut||"tailored";
@@ -1057,13 +1098,13 @@ function littlePerson(x,y,k,o={}){
   const bob=o.faceVariant==="bob";
   const shade=blendColor(skin,"#ab6c53",.19),glow=blendColor(skin,"#fff5e6",.24);
   const hairLight=blendColor(hair,"#b09a82",.32),hairDark=blendColor(hair,"#231f1c",.36);
-  hairBack=bob?'<path d="M-14-4Q-16-12-6-14Q3-16 12-11Q17-7 16 4L17 16Q18 23 13 25Q7 28 3 24L-7 25Q-15 28-17 21Q-19 12-14-5Z" fill="'+hair+'"/><path d="M-15 5Q-17 17-11 23M14 5q4 11-2 18" fill="none" stroke="'+hairDark+'" stroke-width="1.3" stroke-linecap="round"/>':'<path d="M-14-4Q-16-12-6-14Q4-16 13-10Q18-5 16 6Q14 18 19 26Q24 34 19 42Q13 46 8 41Q5 37 1 37Q-4 40-8 43Q-15 47-20 40Q-24 33-18 24Q-14 12-14-5Z" fill="'+hair+'"/><path d="M-16 12Q-13 21-18 29Q-22 37-16 41M14 10Q12 20 18 28Q23 36 17 40" fill="none" stroke="'+hairDark+'" stroke-width="1.35" stroke-linecap="round"/><path d="M-12 15Q-11 25-15 32Q-18 37-13 40M14 16Q12 25 17 31Q19 36 15 38" fill="none" stroke="'+hairLight+'" stroke-opacity=".62" stroke-width=".72" stroke-linecap="round"/>';
   // V7.4: a single face silhouette owns every cosmetic pixel.
   const fid=("face-"+(o.faceKey||("portrait-"+o.gender+"-"+x+"-"+y))).replace(/[^a-zA-Z0-9_-]/g,"-");
   const shape="M-11.4-2Q-11.6-11.8 0-12.2Q11.5-11.8 11.7-2L11.2 9.5Q10.3 16.4 4.3 20.1Q.3 23-4.1 20.1Q-10 16.6-11.2 9.5Z";
   const warm=blendColor(skin,"#b96f5e",.28),deep=blendColor(skin,"#925e49",.10),soft=blendColor(skin,"#fff1dc",.14);
   head='<defs><clipPath id="'+fid+'-clip" clipPathUnits="userSpaceOnUse"><path d="'+shape+'"/></clipPath><radialGradient id="'+fid+'-skin" cx="43%" cy="39%" r="74%"><stop stop-color="'+soft+'"/><stop offset=".75" stop-color="'+skin+'"/><stop offset="1" stop-color="'+deep+'"/></radialGradient><radialGradient id="'+fid+'-blush"><stop stop-color="'+warm+'" stop-opacity=".66"/><stop offset=".55" stop-color="'+warm+'" stop-opacity=".25"/><stop offset="1" stop-color="'+warm+'" stop-opacity="0"/></radialGradient></defs><ellipse cx="-11" cy="9.1" rx="1.35" ry="2.3" fill="'+skin+'"/><ellipse cx="11" cy="9.1" rx="1.35" ry="2.3" fill="'+skin+'"/><path d="'+shape+'" fill="url(#'+fid+'-skin)"/>';
-  hairFront=bob?'<path d="M-14 6Q-17-4-11-11Q-4-16 5-13.5Q14-12 15.5-3L14 6Q11 2 9-1.8Q6.5-5 4-5.3Q0-2.2-5-.5Q-10 1-13 5Z" fill="'+hair+'"/><path d="M-14 2Q-16 11-13 18Q-12 22-9 23M14 2Q16 12 12 20Q10 23 8 23" stroke="'+hair+'" stroke-width="2.5" fill="none" stroke-linecap="round"/><path d="M4-5.7Q0-11-6-9Q-11-7-13 0M4-9Q10-7 13-2M-4-12Q-11-10-13-5M-14 7Q-15 15-12 20M14 7q1 8-2 13" stroke="'+hairLight+'" stroke-opacity=".68" stroke-width=".52" fill="none" stroke-linecap="round"/><path d="M4-9Q5-7 6-5" stroke="'+hairDark+'" stroke-width=".65" fill="none"/>':'<path d="M-14 6Q-17-4-11-11Q-4-16 5-13.5Q14-12 15.5-3L14 6Q11 2 8-1.2Q5.7-4.8 3-5.2Q-1-2-6-.2Q-11 1.4-14 6Z" fill="'+hair+'"/><path d="M-14 1Q-12 11-15 20Q-19 30-14 36Q-11 39-9 38M14 1Q12 13 15 21Q20 29 16 36Q13 40 11 39" stroke="'+hair+'" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M3-5.7Q-3-11-9-6.5Q-12-4-13 0M2-10Q-6-13-12-7M4-9Q10-7 13-2M-14 7Q-13 15-16 22Q-20 31-14 36M14 8q-1 9 3 16q4 8-1 12" stroke="'+hairLight+'" stroke-opacity=".65" stroke-width=".55" fill="none" stroke-linecap="round"/><path d="M3-9L5-5.5" stroke="'+hairDark+'" stroke-width=".65" fill="none"/>';
+  const hairArt=femaleHairArt(o.hairStyle||(bob?"bob":"long"),hair,fid+"-hair");
+  hairBack=hairArt.back;hairFront=hairArt.front;
   // Delicate facial details designed for the final small display size, not a large makeup overlay.
   const brow=blendColor(hair,"#936e59",.24),eye=blendColor(hair,"#352c29",.30),lip=blendColor(skin,"#a64f54",.52);
   const eyes=bob?["M-7.8 8Q-5 6.3-2.1 8","M2.3 8Q5.2 6.3 8 7.9"]:["M-7.9 8.1Q-5 6.4-2.1 8","M2.3 8Q5.2 6.3 8.1 7.9"];
@@ -1072,11 +1113,13 @@ function littlePerson(x,y,k,o={}){
  }
  const mask=o.mask?female?'<g class="pm-mask"><path d="M-9.8 11.5q-3.2-2-2.6 1.4t2.7 4M10 11.5q3-2 2.5 1.4t-2.6 4" stroke="#d8ddd3" stroke-width=".85" fill="none" stroke-linecap="round"/><path d="M-9.8 11.6Q-4 12.2 0 10.4Q4 12.1 10 11.5L8.5 17.8Q.2 22.8-8.2 17.9Z" fill="#f1f2e9" stroke="#9aada3" stroke-width=".48" stroke-linejoin="round"/><path d="M-7.7 13.7Q0 12.4 7.8 13.7M-7 15.6Q0 16.7 7 15.6M-5.8 17.4Q0 19 5.9 17.4" stroke="#c0cbc2" stroke-width=".55" fill="none" stroke-linecap="round"/></g>':'<g class="pm-mask"><path d="M-11 12Q-14 9-14 13t4 5M11 12Q15 9 15 13t-4 5" fill="none" stroke="#e4ede8" stroke-width="1.4" stroke-linecap="round"/><path d="M-10.7 11.7Q-4 12.4 1 10.7Q6 12.2 12 11.6L10 19.2Q1 25-8.4 19.5Z" fill="#f6f7ed" stroke="#7d9690" stroke-width=".65" stroke-linejoin="round"/><path d="M-8 14.3Q1 12.7 10 14.2M-7.5 16.6Q1 15.5 9 16.5M-6.5 19Q1 20 8 18.9" fill="none" stroke="#becdc5" stroke-width=".65" stroke-linecap="round"/><path d="M1 11.5v10.5" stroke="#d6e0d7" stroke-width=".6"/></g>':'';
  // Keep neck/shoulders in place; scale the entire head assembly with the mask.
- const face=female?neck+'<g class="female-head" transform="translate(0 20) scale(.94) translate(0 -20)">'+hairBack+head+features+mask+hairFront+'</g>':hairBack+neck+head+hairFront+features+mask;
+ const headTransform="translate(0 20) scale(.94) translate(0 -20)";
+ const backHairLayer=female?'<g transform="'+headTransform+'">'+hairBack+'</g>':"";
+ const face=female?neck+'<g class="female-head" transform="'+headTransform+'">'+head+features+mask+hairFront+'</g>':hairBack+neck+head+hairFront+features+mask;
  const hitTargets=o.maskInteractive&&!o.deferHitTargets?personHitTargets(o.faceKey,!!o.mask):"";
  const umbrella=o.umbrella?'<g transform="translate(40 -2)"><path d="M-38 4Q-32-27 0-28Q32-25 38 4Q26-3 13 4Q0-4-13 4Q-26-3-38 4Z" fill="#8da9a4" stroke="#5f7d72" stroke-width="1.2"/><path d="M0-27Q-16-17-13 4M0-27Q16-17 13 4" stroke="#d1d9cb" stroke-width="1" fill="none"/><path d="M0 4v50q0 7-5 7t-5-5" stroke="#536b60" stroke-width="1.5" fill="none" stroke-linecap="round"/></g>':'';
  const bag=o.bag?(female?'<path d="M12 28Q24 39 20 58" fill="none" stroke="#927759" stroke-width="2"/><rect x="12" y="54" width="19" height="17" rx="5" fill="#b59068" stroke="#806749" stroke-width=".8"/><path d="M13 58q8 5 17 0" fill="none" stroke="#e6ca98" stroke-width="1"/><circle cx="22" cy="60" r="1" fill="#e3c38e"/>':'<path d="M-12 26L20 60" stroke="#8d6c4b" stroke-width="2"/><path d="M10 54l18-2 4 20-21 3Z" fill="#bb9567" stroke="#886c4e" stroke-width=".8"/><path d="M13 57l15-2" stroke="#e6ca98" stroke-width="1"/>'):'';
- return '<g transform="translate('+x+' '+y+') scale('+k+')">'+'<g stroke="#514d46" stroke-opacity=".50" stroke-width=".65" stroke-linejoin="round" paint-order="stroke fill">'+materialFills(leg+armLeft+armRight+garment,'cloth-'+(o.faceKey||('portrait-'+o.gender+'-'+x+'-'+y)).replace(/[^a-zA-Z0-9_-]/g,'-'))+textile+'</g>'+bag+face+heldObject(gesture)+umbrella+hitTargets+'</g>';
+ return '<g transform="translate('+x+' '+y+') scale('+k+')">'+backHairLayer+'<g stroke="#514d46" stroke-opacity=".50" stroke-width=".65" stroke-linejoin="round" paint-order="stroke fill">'+materialFills(leg+armLeft+armRight+garment,'cloth-'+(o.faceKey||('portrait-'+o.gender+'-'+x+'-'+y)).replace(/[^a-zA-Z0-9_-]/g,'-'))+textile+'</g>'+bag+face+heldObject(gesture)+umbrella+hitTargets+'</g>';
 }
 function treeArt(x,y,k,fall=false){
  const colors=fall?["#d3aa62","#c68a61","#e2c78b"]:["#809e80","#9fb59a","#b9c9a9"];
@@ -1365,7 +1408,11 @@ function familyPoses(cast,scene){
 }
 function castFor(who,self="m"){
  const opposite=self==="m"?"f":"m",genders=who==="친구"?[self,self]:who==="연인"?[self,opposite]:who==="가족"?[self,opposite,"child"]:[self];
- return genders.map((gender,i)=>({gender,mask:maskWorn(),faceVariant:who==="친구"&&i===1?(gender==="f"?"bob":"crop"):"original",longHair:gender==="f"&&!(who==="친구"&&i===1),hair:i===1?"#594739":"#343c34",skin:["#e7b894","#c99275","#edc5a3"][i]}));
+ return genders.map((gender,i)=>({gender,mask:maskWorn(),faceVariant:who==="친구"&&i===1?(gender==="f"?"bob":"crop"):"original",hairStyle:gender==="f"?(who==="친구"&&i===1?HAIR_LENGTHS[(HAIR_LENGTHS.indexOf(femaleHair)+2)%4]:femaleHair):null,longHair:gender==="f",hair:i===1?"#594739":"#343c34",skin:["#e7b894","#c99275","#edc5a3"][i]}));
+}
+function syncHairPicker(){
+ $("hairControls").hidden=!(avatar==="f"||who==="연인"||who==="가족");
+ $("femaleHair").value=femaleHair;
 }
 function initAvatarPicker(){
  const buttons=Array.from(document.querySelectorAll("[data-avatar]"));
@@ -1373,7 +1420,7 @@ function initAvatarPicker(){
  buttons.forEach(b=>b.addEventListener("click",()=>{
    const next=b.dataset.avatar;if(next!=="m"&&next!=="f")return;
    if(avatar===next)return;
-   avatar=next;wearIndex=0;buttons.forEach(x=>x.setAttribute("aria-pressed",String(x.dataset.avatar===avatar)));
+   avatar=next;wearIndex=0;syncHairPicker();buttons.forEach(x=>x.setAttribute("aria-pressed",String(x.dataset.avatar===avatar)));
    if(plan)renderRecs();
  }));
 }
@@ -1602,8 +1649,8 @@ function wrap(c,str,x,y,max,preferred,maxLines=3){
 $("locationBtn").onclick=$("manualBtn").onclick=openRegion;$("gpsBtn").onclick=autoLocation;$("closeDialog").onclick=()=>$("regionDialog").close();$("retryRegion").onclick=openRegion;$("sido").onchange=onSido;$("sgg").onchange=onSgg;$("emd").onchange=onEmd;
 $("regionSearch").oninput=()=>{let q=$("regionSearch").value.trim().replace(/\s/g,""),out=$("searchResults");out.replaceChildren();if(q.length<2)return;let hits=regions.filter(r=>r.full.replace(/\s/g,"").includes(q)).slice(0,15);for(let r of hits){let b=document.createElement("button");b.type="button";b.textContent=r.full;b.onclick=()=>{selectPath(r);out.replaceChildren();$("regionSearch").value=r.name};out.append(b)}if(!hits.length){let p=document.createElement("p");p.textContent="검색 결과가 없어요.";out.append(p)}};
 $("applyRegion").onclick=()=>{let r=regions.find(r=>r.sido===$("sido").value&&r.sgg===$("sgg").value&&r.name===$("emd").value);if(!r&&!regions.length&&PROVINCES[$("sido").value]){let n=$("sido").value,[lat,lon]=PROVINCES[n];r={full:n+" 대표 지점",name:n,lat,lon}}if(r){$("regionDialog").close();fetchWeather(r)}};
-document.querySelectorAll("[data-who]").forEach(b=>b.onclick=()=>{who=b.dataset.who;actIndex=0;document.querySelectorAll("[data-who]").forEach(x=>x.setAttribute("aria-pressed",String(x===b)));renderRecs()});$("moreAct").onclick=()=>{actIndex++;renderRecs()};$("moreFood").onclick=()=>{foodIndex++;renderRecs()};$("moreWear").onclick=()=>changeWear();$("download").onclick=()=>makeCard(true);$("share").onclick=()=>makeCard(false);
-initAvatarPicker();initShareChooser();initSounds();
+document.querySelectorAll("[data-who]").forEach(b=>b.onclick=()=>{who=b.dataset.who;actIndex=0;syncHairPicker();document.querySelectorAll("[data-who]").forEach(x=>x.setAttribute("aria-pressed",String(x===b)));renderRecs()});$("moreAct").onclick=()=>{actIndex++;renderRecs()};$("moreFood").onclick=()=>{foodIndex++;renderRecs()};$("moreWear").onclick=()=>changeWear();$("download").onclick=()=>makeCard(true);$("share").onclick=()=>makeCard(false);
+initAvatarPicker();syncHairPicker();$("femaleHair").addEventListener("change",()=>{const next=$("femaleHair").value;if(!HAIR_LENGTHS.includes(next))return;femaleHair=next;$("avatarF").innerHTML=portrait("f");if(plan&&!sample)renderRecs()});initShareChooser();initSounds();
 function activateMaskFace(el,keyboard=false){
  const key=el.dataset.faceKey;
  // A real tap on the initially unmasked hero completes the lesson early.
