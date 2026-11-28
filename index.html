@@ -455,13 +455,14 @@ body{letter-spacing:-.018em;line-height:1.6}
 <script>
 (()=>{"use strict";
 const $=id=>document.getElementById(id);
-/* Original synthesized sound cues; no files, tracking or playback on page load. */
-let soundOn=true,audioCtx=null,soundBus=null,soundGeneration=0,soundUnlock=null;
+/* Original synthesized sound cues; no external audio files or tracking. Intro cue plays only when browser allows sound. */
+let soundOn=true,audioCtx=null,soundBus=null,soundGeneration=0,soundUnlock=null,gpsNudgeArmed=false,gpsNudgePlayed=false;
 // V5.8: original playful micro-interactions, with a modest volume boost.
 const SOUND_MASTER_GAIN=1.0;
 const SOUND_VOICE_GAIN=5.8;
 const SOUND_REEL_GAIN=9.2;
 const soundPalette={
+ nudge:[[345,0,.15,.020,"sine",780],[690,.025,.095,.005,"triangle",1100],[820,.115,.12,.012,"sine",510]],
  tap:[[640,0,.065,.033,"sine",490],[1250,0,.025,.007,"triangle",820]],
  open:[[520,0,.095,.030,"sine",660],[880,.055,.115,.021,"sine"]],
  close:[[700,0,.07,.027,"sine",460]],
@@ -486,16 +487,22 @@ function setSoundBus(){
  if(!audioCtx||!soundBus)return;
  try{const p=soundBus.gain,t=audioCtx.currentTime;p.cancelScheduledValues(t);p.setValueAtTime(soundOn&&!document.hidden ? SOUND_MASTER_GAIN : 0,t)}catch{}
 }
-function unlockSound(){
- if(!soundOn||document.hidden)return Promise.resolve(false);
+function ensureSoundContext(){
+ if(!soundOn||document.hidden)return false;
  try{
-  if(!audioCtx){const C=window.AudioContext||window.webkitAudioContext;if(!C)return Promise.resolve(false);audioCtx=new C();soundBus=audioCtx.createGain();
+  if(!audioCtx){const C=window.AudioContext||window.webkitAudioContext;if(!C)return false;audioCtx=new C();soundBus=audioCtx.createGain();
    if(typeof audioCtx.createDynamicsCompressor==="function"){
      const limiter=audioCtx.createDynamicsCompressor();
      limiter.threshold.value=-8;limiter.knee.value=4;limiter.ratio.value=16;limiter.attack.value=.003;limiter.release.value=.1;
      soundBus.connect(limiter);limiter.connect(audioCtx.destination);
    }else soundBus.connect(audioCtx.destination);
    setSoundBus()}
+  return true;
+ }catch{return false}
+}
+function unlockSound(){
+ if(!ensureSoundContext())return Promise.resolve(false);
+ try{
   if(audioCtx.state==="running")return Promise.resolve(true);
   // A later trusted gesture may retry if a browser rejected an earlier resume.
   if(!soundUnlock)soundUnlock=Promise.resolve(audioCtx.resume()).then(()=>audioCtx.state==="running").catch(()=>false).finally(()=>{soundUnlock=null});
@@ -521,6 +528,7 @@ function activatedSound(kind){
 }
 function controlSound(el){
  const id=el.id||"";if(el.hasAttribute("data-wear-toggle"))return "wear";if(el.hasAttribute("data-mask-toggle"))return "select";
+ if(id==="gpsBtn"&&gpsNudgeArmed&&!gpsNudgePlayed&&soundOn){gpsNudgePlayed=true;return "nudge"}
  if(id==="gpsBtn"||id==="applyRegion"||id==="retryRegion")return "search";
  if(id==="closeDialog"||id==="closeShareDialog")return "close";
  if(id==="manualBtn"||id==="locationBtn")return "open";
@@ -1763,7 +1771,16 @@ function initGpsNudge(){
  cue.setAttribute("class","gps-nudge");cue.setAttribute("viewBox","-16 -13 64 72");cue.setAttribute("preserveAspectRatio","xMidYMid meet");cue.setAttribute("aria-hidden","true");cue.setAttribute("focusable","false");
  cue.innerHTML='<g transform="rotate(-20 0 0)"><path d="M-3.7 2.5C-3.7-2.5 3.7-2.5 3.7 2.5L3.7 17.4C5.9 14.1 10.6 15.2 11.2 19.1C13.7 16.8 17.9 18.1 18.3 22.1C21.6 20.3 25 22.7 25 26.6L25 31.2C25 39.9 19.6 44.5 13.5 44.5L8.6 44.5C2.6 44.5-.5 40.6-3 35.8L-10.6 25.5C-13.1 21.7-8.5 18.5-5.6 21.3L-3.7 23.4Z" fill="#fff1d8" stroke="#594d40" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"/><path d="M3.7 17.4v9.2M11.2 19.1v7.5M18.3 22.1v5.7M-3.7 23.4l4.9 5.8" stroke="#c19c77" stroke-width=".95" fill="none" stroke-linecap="round"/><path d="M-1.5 1.5q1.5-1.8 3 0" stroke="#fffdf5" stroke-width="1.2" fill="none" stroke-linecap="round"/><path d="M3.8 42.5Q12 45.6 21.1 42.3L21.7 48.7Q13 52 4 49.1Z" fill="#87a397" stroke="#594d40" stroke-width="1.1" stroke-linejoin="round"/><path d="M8 47.1l9 .1" stroke="#c8dbca" stroke-width=".9" stroke-linecap="round"/></g>';
  const targets=[btn,$("manualBtn"),$("locationBtn")];
- function dismiss(){cue.remove();targets.forEach(el=>el.removeEventListener("click",dismiss,true));document.removeEventListener("visibilitychange",onVisibility);clearTimeout(fallback)}
+ // One gentle boing at the start of the visible cue. Never queue a sound behind autoplay permission.
+ gpsNudgeArmed=true;
+ let cueTimer=null;
+ function dismiss(e){if(e?.type==="click"&&e.currentTarget!==btn)gpsNudgeArmed=false;cue.remove();targets.forEach(el=>el.removeEventListener("click",dismiss,true));document.removeEventListener("visibilitychange",onVisibility);clearTimeout(fallback);clearTimeout(cueTimer)}
+ cue.addEventListener("animationstart",()=>{
+   cueTimer=setTimeout(()=>{
+     if(!cue.isConnected||!soundOn||document.hidden||gpsNudgePlayed||!ensureSoundContext()||audioCtx.state!=="running")return;
+     gpsNudgePlayed=true;playSound("nudge");
+   },380);
+ },{once:true});
  function onVisibility(){if(document.hidden)dismiss()}
  const fallback=setTimeout(dismiss,4100);
  targets.forEach(el=>el.addEventListener("click",dismiss,true));
