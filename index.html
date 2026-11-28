@@ -864,7 +864,7 @@ function lifestyleArt(title,who,indoor,t,rain=0,startHour=12,wind=0){
   else if(/놀이터/.test(title))props='<path d="M119 112l18-54 30 54M127 88h32" stroke="#a9886b" stroke-width="3" fill="none"/><path d="M137 60h14v25h-14Z" fill="#e5b973"/><path d="M148 85l22 24" stroke="#d5b37a" stroke-width="7"/>';else if(/사진/.test(title))props='<rect x="115" y="86" width="21" height="14" rx="3" fill="#516359"/><circle cx="125" cy="93" r="4.5" fill="#dce4d5"/><rect x="120" y="83" width="7" height="4" rx="1" fill="#516359"/>';
   else if(night)props='<path d="M146 110V62q0-6-6-6h-6" stroke="#566b61" stroke-width="2.2" fill="none"/><path d="M130 56h11l4 7h-19Z" fill="#eacb85"/>';
  }
- const detail=sceneDetail(title);if(detail)props=detail;const cast=castFor(who,avatar),count=cast.length,poses=count===1?[[82,24,.83]]:count===2?[[57,29,.79],[105,35,.74]]:[[43,30,.76],[86,26,.79],[120,61,.49]];
+ const detail=sceneDetail(title);if(detail)props=detail;const cast=castFor(who,avatar),count=cast.length,poses=count===1?[[82,24,.83]]:count===2?[[57,29,.79],[105,35,.74]]:familyPoses(cast,"activity");
  const people=poses.map(([x,y,k],i)=>'<ellipse cx="'+x+'" cy="'+(y+116*k)+'" rx="'+(27*k)+'" ry="'+(5*k)+'" fill="url(#act-shadow)"/>'+littlePerson(x,y,k,{...sceneOutfit(outfitLook(t,rain,cast[i].gender,wearIndex+i,wind),indoor,title),...cast[i],maskInteractive:true,faceKey:"activity-"+i,walk,bag:!indoor&&i===0&&!look.umbrella,umbrella:wet&&wind<35&&i===0})).join("");
  return artSvg(id,indoor?"url(#act-paper)":"url(#act-sky)",body+props+people);
 }
@@ -980,6 +980,12 @@ function mealArt(title){
 }
 
 
+/* V6.3: family proportions depend on the character, not the selected avatar's position.
+   Align adult feet, with the mother about 5% shorter in this illustrated family. */
+function familyPoses(cast,scene){
+ const hero=scene==="hero",xs=hero?[49,103,143]:[43,86,120],floor=hero?135:120;
+ return cast.map((person,i)=>{const k=person.gender==="child"?(hero?.55:.49):person.gender==="f"?(hero?.85:.75):(hero?.90:.79);return [xs[i],Math.round((floor-118*k)*100)/100,k]});
+}
 function castFor(who,self="m"){
  const opposite=self==="m"?"f":"m",genders=who==="친구"?[self,self]:who==="연인"?[self,opposite]:who==="가족"?[self,opposite,"child"]:[self];
  return genders.map((gender,i)=>({gender,mask:maskWorn(),longHair:gender==="f",hair:i===1?"#594739":"#343c34",skin:["#e7b894","#c99275","#edc5a3"][i]}));
@@ -1004,7 +1010,7 @@ function windowCharacterArt(who,self,t,rain,indoor,hour,title,wind=0){
  let scenery='<defs><radialGradient id="hero-glow"><stop stop-color="#fffdf7" stop-opacity=".96"/><stop offset="1" stop-color="#fffdf7" stop-opacity="0"/></radialGradient><radialGradient id="hero-shadow"><stop stop-color="#655b49" stop-opacity=".20"/><stop offset="1" stop-color="#655b49" stop-opacity="0"/></radialGradient></defs><ellipse cx="104" cy="71" rx="87" ry="71" fill="url(#hero-glow)"/>';
  if(indoor)scenery+='<path d="M95 114V31q0-24 25-24t25 24v83" fill="#e2d9ca" opacity=".28"/><path d="M95 114V31q0-24 25-24t25 24v83" stroke="#d4c7b6" stroke-width=".8" fill="none"/><path d="M120 8v104M95 49h50" stroke="#d4c7b6" stroke-width=".75" opacity=".65"/>';
  else scenery+=(night?'<path d="M150 14a13 13 0 1 0 14 19 14 14 0 0 1-14-19Z" fill="#c7b99f"/>':'<circle cx="151" cy="25" r="12" fill="#e1b66c" opacity=".82"/>')+'<path d="M12 130q50-16 100-6t68-8" stroke="#c9bcaa" stroke-width=".85" fill="none" opacity=".75"/><path d="M15 139q52-14 110-7t55-4" stroke="#d7ccbc" stroke-width=".75" fill="none" opacity=".65"/>';
- const positions=cast.length===1?[[101,25,1.02]]:cast.length===2?[[67,30,.93],[126,34,.88]]:[[49,31,.88],[103,28,.9],[143,72,.55]];
+ const positions=cast.length===1?[[101,25,1.02]]:cast.length===2?[[67,30,.93],[126,34,.88]]:familyPoses(cast,"hero");
  const figures=positions.map(([x,y,k],i)=>'<ellipse cx="'+x+'" cy="'+(y+118*k)+'" rx="'+(31*k)+'" ry="'+(5*k)+'" fill="url(#hero-shadow)"/>'+littlePerson(x,y,k,{...sceneOutfit(outfitLook(t,rain,cast[i].gender,wearIndex+i,wind),indoor,title),...cast[i],maskInteractive:true,faceKey:"hero-"+i,bag:!indoor&&i===0&&!look.umbrella,umbrella:!indoor&&look.umbrella&&i===0,walk})).join("");
  return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 148" preserveAspectRatio="xMidYMid meet" role="group" aria-label="캐릭터 · 얼굴을 누르면 마스크 전환">'+scenery+figures+'</svg>';
 }
