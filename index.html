@@ -940,6 +940,11 @@ function materialFills(markup,prefix,kind="fabric"){
  return (defs?"<defs>"+defs+"</defs>":"")+body;
 }
 function activityGesture(title){
+ if(/볼링/.test(title))return "bowling";
+ if(/일기|손편지/.test(title))return "writing";
+ if(/퍼즐|보드게임/.test(title))return "game";
+ if(/식물 돌보기/.test(title))return "watering";
+ if(/향초/.test(title))return "candle";
  if(/배드민턴/.test(title))return "racket";
  if(/탁구/.test(title))return "pingpong";
  if(/사진/.test(title)&&!/앨범/.test(title))return "camera";
@@ -952,6 +957,11 @@ function activityGesture(title){
 }
 function heldObject(type){
  const props={
+ bowling:'<g transform="translate(30 47)"><circle r="10" fill="#587b72" stroke="#3c5c54"/><circle cx="-2" cy="-4" r="1.2" fill="#334b45"/><circle cx="2" cy="-4" r="1.2" fill="#334b45"/><circle cx="0" cy="0" r="1.2" fill="#334b45"/><path d="M-7-4q2-5 6-5" stroke="#a2b7a9" fill="none" stroke-width="1.3"/></g>',
+ writing:'<g transform="translate(29 43)"><path d="M-11-5h19v13h-19Z" fill="#f3e8cd" stroke="#aa9a7c" stroke-width=".7"/><path d="M-8-1H5m-13 4H3" stroke="#c2b59a" stroke-width=".6"/><path d="M-2 7l14-16" stroke="#8f6d4f" stroke-width="1.8" stroke-linecap="round"/></g>',
+ game:'<g transform="translate(29 43)"><rect x="-6" y="-6" width="13" height="13" rx="2" fill="#eadaba" stroke="#a89678"/><g fill="#657c6b"><circle cx="-2" cy="-2" r="1.2"/><circle cx="3" cy="3" r="1.2"/><circle cx="3" cy="-2" r="1.2"/></g></g>',
+ watering:'<g transform="translate(30 46)"><path d="M-9-4H6L4 9H-7Z" fill="#87a39a" stroke="#5f8176"/><path d="M6 0l9-7 3 2-12 10M-9-1q-9-2-8 6t10 2" stroke="#5f8176" fill="none" stroke-width="2"/></g>',
+ candle:'<g transform="translate(29 44)"><rect x="-6" y="-8" width="12" height="17" rx="2" fill="#e6cba6" stroke="#a78c6d"/><ellipse cy="-8" rx="6" ry="2" fill="#f4ead2"/><path d="M0-8v-4" stroke="#675744" stroke-width=".8"/></g>',
  racket:'<g transform="translate(34 37) rotate(-18)"><path d="M0 16v-19" stroke="#a58a60" stroke-width="2.7" stroke-linecap="round"/><ellipse cy="-10" rx="9" ry="12" fill="#dbe5d6" stroke="#5c786e" stroke-width="1.7"/><path d="M-5-17v14m5-17v20m5-17v14M-8-12H8m-7 5h14" stroke="#8caa9b" stroke-width=".65"/></g>',
  pingpong:'<g transform="translate(34 36) rotate(-15)"><path d="M0 16V4" stroke="#a68a63" stroke-width="3.4" stroke-linecap="round"/><ellipse cy="-3" rx="8.5" ry="10" fill="#b96555" stroke="#795648" stroke-width=".8"/><ellipse cx="-1" cy="-4" rx="6.5" ry="8" fill="#cf806e"/></g>',
  camera:'<g transform="translate(29 43)"><rect x="-9" y="-6" width="20" height="14" rx="2.3" fill="#53615c" stroke="#344a43" stroke-width=".8"/><rect x="-5" y="-9" width="6" height="3" rx=".7" fill="#657971"/><circle cx="2" cy="1" r="5.2" fill="#b3c4ba" stroke="#304840" stroke-width="1.1"/><circle cx="2" cy="1" r="3.1" fill="#597a80"/><circle cx=".7" cy="-.7" r="1" fill="#dfede1"/></g>',
@@ -971,8 +981,8 @@ function littlePerson(x,y,k,o={}){
  const leg='<path d="M-13 '+hemStart+'H-1L-'+inner+' '+bottom+'H'+left+'L-14 '+(hem+9)+'Z" fill="'+pants+'"/><path d="M1 '+hemStart+'H13L14 '+(hem+10)+' '+right+' '+bottom+'H'+inner+'Z" fill="'+pants+'"/><path d="M-9 '+(hem+5)+'L'+(left+4)+' '+(bottom-4)+'M9 '+(hem+5)+'L'+(right-4)+' '+(bottom-4)+'" stroke="#34473c" stroke-opacity=".27" stroke-width=".9" fill="none"/>'+(shorts?'<path d="M'+(left+2)+' 89H-3L-4 113H'+(left+3)+'Z M3 89H'+(right-2)+'L'+(right-3)+' 113H4Z" fill="'+skin+'"/>':'')+'<path d="M'+(shorts?left+3:left)+' 112H-3V118H'+(left-7)+'Q'+(left-8)+' 114 '+(shorts?left+3:left)+' 112Z M3 112H'+(shorts?right-3:right)+'Q'+(right+7)+' 114 '+(right+7)+' 118H3Z" fill="'+foot+'" stroke="#4f594b" stroke-width=".85"/><path d="M'+(left-4)+' 116H-3M3 116H'+(right+4)+'" stroke="#c9c9b9" stroke-width=".8"/>';
  const sleeve=tee||o.cut==="vest"||o.cut==="blouse"||o.cut==="linenBlouse"?top:coat;
  const arm=tee?43:61;
- const armLeft=walking?'<path d="M-13 28Q-22 28-24 39L-27 '+(arm+3)+'Q-23 '+(arm+6)+'-18 '+(arm+4)+'L-15 43Z" fill="'+sleeve+'"/><path d="M-27 '+(arm+3)+'l-2 6q2 4 6 3l5-8Z" fill="'+skin+'"/>':'<path d="M-12 27Q-23 28-25 42L-23 '+arm+'-15 '+arm+'-14 43Z" fill="'+sleeve+'"/><path d="M-23 '+arm+'l1 10q4 4 8-2l-1-8Z" fill="'+skin+'"/>';
- const gesture=o.umbrella?"":o.gesture;const armRight=gesture?'<path d="M12 27Q24 29 24 41L27 44 31 41 35 47 27 54Q20 55 17 48L12 38Z" fill="'+sleeve+'"/><path d="M29 42q3-5 6-3l3 5q0 3-4 5l-3-2Z" fill="'+skin+'"/>':o.umbrella?'<path d="M12 27q12 1 13 16l-1 11 12-11 6 7-17 19q-5 3-9-1l-5-24Z" fill="'+sleeve+'"/><path d="M35 44l5-8q4-2 6 2l-3 12Z" fill="'+skin+'"/>':walking?'<path d="M12 28Q22 28 24 41L27 '+(arm-2)+'l-7 5-9-18Z" fill="'+sleeve+'"/><path d="M20 '+(arm+3)+'l7-5 4 7q0 4-5 5Z" fill="'+skin+'"/>':'<path d="M12 27Q23 28 25 42L23 '+arm+'H15L14 43Z" fill="'+sleeve+'"/><path d="M15 '+arm+'l-1 9q4 5 8 0l1-9Z" fill="'+skin+'"/>';
+ const armLeft=o.stretch?'<path d="M-13 28Q-22 24-31 10L-39 3-33-3-20 7-8 22Z" fill="'+sleeve+'"/><path d="M-39 3l-5-4q-1-5 4-6l7 4Z" fill="'+skin+'"/>':walking?'<path d="M-13 28Q-22 28-24 39L-27 '+(arm+3)+'Q-23 '+(arm+6)+'-18 '+(arm+4)+'L-15 43Z" fill="'+sleeve+'"/><path d="M-27 '+(arm+3)+'l-2 6q2 4 6 3l5-8Z" fill="'+skin+'"/>':'<path d="M-12 27Q-23 28-25 42L-23 '+arm+'-15 '+arm+'-14 43Z" fill="'+sleeve+'"/><path d="M-23 '+arm+'l1 10q4 4 8-2l-1-8Z" fill="'+skin+'"/>';
+ const gesture=o.umbrella?"":o.gesture;const armRight=o.stretch?'<path d="M13 28Q22 24 31 10L39 3 33-3 20 7 8 22Z" fill="'+sleeve+'"/><path d="M39 3l5-4q1-5-4-6l-7 4Z" fill="'+skin+'"/>':gesture?'<path d="M12 27Q24 29 24 41L27 44 31 41 35 47 27 54Q20 55 17 48L12 38Z" fill="'+sleeve+'"/><path d="M29 42q3-5 6-3l3 5q0 3-4 5l-3-2Z" fill="'+skin+'"/>':o.umbrella?'<path d="M12 27q12 1 13 16l-1 11 12-11 6 7-17 19q-5 3-9-1l-5-24Z" fill="'+sleeve+'"/><path d="M35 44l5-8q4-2 6 2l-3 12Z" fill="'+skin+'"/>':walking?'<path d="M12 28Q22 28 24 41L27 '+(arm-2)+'l-7 5-9-18Z" fill="'+sleeve+'"/><path d="M20 '+(arm+3)+'l7-5 4 7q0 4-5 5Z" fill="'+skin+'"/>':'<path d="M12 27Q23 28 25 42L23 '+arm+'H15L14 43Z" fill="'+sleeve+'"/><path d="M15 '+arm+'l-1 9q4 5 8 0l1-9Z" fill="'+skin+'"/>';
  let garment='';
  const outline="#4d6050",light="#f5edda",collar='<path d="M-7 26Q0 34 7 26" stroke="#a2967e" stroke-width=".8" fill="none"/>';
  const buttonRow=(x,ys)=>ys.map(y=>'<circle cx="'+x+'" cy="'+y+'" r="1.05" fill="'+outline+'"/>').join("");
@@ -1173,10 +1183,10 @@ function venueBackdrop(title,indoor,night=false,wet=false,cold=false){
 function lifestyleArt(title,who,indoor,t,rain=0,startHour=12,wind=0){
  const id="act-",night=!indoor&&!/노을/.test(title)&&(startHour>=(plan?.sunset??18)||startHour<(plan?.sunrise??7)),wet=!indoor&&rain>=40;
  const venue=venueBackdrop(title,indoor,night,wet,t<8),cast=castFor(who,avatar),looks=coordinatedLooks(cast,t,rain,wind,indoor,title);
- const n=cast.length,positions=n===1?[[88,26,.80]]:n===2?[[54,28,.76],[116,32,.72]]:familyPoses(cast,"activity");
+ const n=cast.length,positions=venue.pose==="table"?(n===1?[[90,25,.77]]:n===2?[[52,27,.74],[124,29,.72]]:[[43,29,.72],[100,30,.70],[145,52,.49]]):n===1?[[88,26,.80]]:n===2?[[54,28,.76],[116,32,.72]]:familyPoses(cast,"activity");
  const walk=!indoor&&/산책|걸어|나들이|투어/.test(title)&&!["bench","picnic","badminton","playground"].includes(venue.v);
  const gesture=activityGesture(title);
- const people=positions.map(([x,y,k],i)=>'<ellipse cx="'+x+'" cy="'+(y+118*k)+'" rx="'+(24*k)+'" ry="'+(4*k)+'" fill="url(#act-shadow)"/>'+littlePerson(x,y,k,{...looks[i],...cast[i],maskInteractive:true,faceKey:"activity-"+i,gesture:i===0||["racket","pingpong","book"].includes(gesture)?gesture:"",walk,bag:!indoor&&walk&&!gesture&&i===0,umbrella:wet&&wind<35&&i===0})).join("");
+ const people=positions.map(([x,y,k],i)=>'<ellipse cx="'+x+'" cy="'+(y+118*k)+'" rx="'+(24*k)+'" ry="'+(4*k)+'" fill="url(#act-shadow)"/>'+littlePerson(x,y,k,{...looks[i],...cast[i],maskInteractive:true,faceKey:"activity-"+i,gesture:i===0||["racket","pingpong","book"].includes(gesture)?gesture:"",stretch:venue.v==="exercise",walk,bag:!indoor&&walk&&!gesture&&i===0,umbrella:wet&&wind<35&&i===0})).join("");
  return artSvg(id,"url(#act-paper)",materialFills(venue.back,id+"venue","scene")+people+'<g pointer-events="none">'+materialFills(venue.front,id+"foreground","scene")+'</g>');
 }
 function outfitArt(t,rain,wind){
@@ -1196,6 +1206,9 @@ function outfitArt(t,rain,wind){
 }
 function mealArt(title){
  const id="meal-",g=(x)=>"url(#meal-"+x+")";
+ // Deterministic food textures, so repeated rendering never changes the recipe.
+ const flecks=(cx,cy,rx,ry,count,color,size=.6)=>Array.from({length:count},(_,i)=>{let angle=i*2.399963,r=Math.sqrt((i+.5)/count),x=cx+Math.cos(angle)*rx*r,y=cy+Math.sin(angle)*ry*r;return '<ellipse cx="'+x.toFixed(2)+'" cy="'+y.toFixed(2)+'" rx="'+size+'" ry="'+(size*.62)+'" fill="'+color+'" opacity="'+(.25+(i%4)*.13)+'"/>'}).join("");
+ const greenOnion=(x,y)=>'<g transform="translate('+x+' '+y+') rotate(-23)"><ellipse rx="3.1" ry="1.7" fill="#91ab67" stroke="#648c53" stroke-width=".7"/><ellipse rx="1.5" ry=".7" fill="#d9dd9d"/></g>';
  let body='<defs><radialGradient id="meal-liquid" cx="35%" cy="24%" r="80%"><stop stop-color="#fff5db" stop-opacity=".32"/><stop offset=".56" stop-color="#fff5db" stop-opacity="0"/><stop offset="1" stop-color="#604732" stop-opacity=".17"/></radialGradient></defs><rect width="180" height="148" fill="'+g("paper")+'"/><path d="M0 108L180 99V148H0Z" fill="#ddd3b9"/><path d="M0 128L180 118M0 143L180 133" stroke="#b8a789" stroke-opacity=".32" stroke-width=".65"/><ellipse cx="89" cy="125" rx="74" ry="14" fill="'+g("shadow")+'"/>';
  const linen='<path d="M7 104l49-15 24 46-52 13Z" fill="#e9e5d2"/><path d="M17 103l24 43m-10-47 24 42m-38-23 45-13m-40 25 45-13" stroke="#a4b59d" stroke-width="1" stroke-opacity=".48"/>';
  const steam='<g fill="none" stroke="#b9aa8d" stroke-width="1.3" stroke-linecap="round" opacity=".58"><path d="M67 51q-9-10 1-19t0-14M92 48q-9-9 0-19t0-13M117 52q-9-10 0-20t1-11"/></g>';
@@ -1220,23 +1233,23 @@ function mealArt(title){
   inner=radish(51,82,.85)+radish(113,87,.78)+radish(88,93,.62)+ '<g fill="none" stroke="#6c975d" stroke-width="2">'+[0,1,2,3,4,5,6].map(i=>'<ellipse cx="'+(57+i*17%66)+'" cy="'+(70+i*7%21)+'" rx="3" ry="1.7" transform="rotate('+i*23+' '+(57+i*17%66)+' '+(70+i*7%21)+')"/>').join("")+'</g>'+fold(68,72,-28,.85)+fold(91,70,-6,.90)+fold(113,72,22,.82)+'<path d="M48 87q8 4 16 2m45 5q10 0 17-4" fill="none" stroke="#f4d9a3" stroke-width="1.1" opacity=".65"/>';
  }
  else if(kong)inner=Array.from({length:7},(_,i)=>'<path d="M49 '+(66+i*4)+'q20-9 39 0t40 0" fill="none" stroke="#f7efd7" stroke-width="3"/>').join("")+'<path d="M72 64l18 12m-12-15 18 12m-12-14 17 12" stroke="#6e9a68" stroke-width="3.4"/><path d="M109 65l12 5-9 8-8-6Z" fill="#bd7867"/>';
- else inner='<path d="M56 79q19-24 44-6t-14 19q-26-3-9-13t21 3" fill="none" stroke="#f6e8c7" stroke-width="3.4"/><g fill="#b48a56"><rect x="65" y="68" width="9" height="8" rx="2"/><rect x="104" y="78" width="10" height="9" rx="2"/></g>';
+ else inner='<ellipse cx="90" cy="78" rx="47" ry="19" fill="#e9d7aa"/><path d="M61 80q7-13 27-10t21 8q-1 12-22 10t-18-9q7-7 22-3t-1 6" fill="none" stroke="#fff1d2" stroke-width="2.2"/>'+[[62,72],[109,81],[78,91]].map(([x,y])=>'<g transform="translate('+x+' '+y+')"><path d="M-5-3l8-2 5 4-1 6-9 2-4-5Z" fill="#c79d63" stroke="#ac7c46" stroke-width=".6"/><path d="M-5-3l8-2 5 4-9 2Z" fill="#edd29a"/></g>').join("")+flecks(90,78,37,16,26,"#7f7154",.45);
  if(eom){
   body+=linen+steam+'<path d="M34 70q-15-5-19 5t19 14m112-19q15-5 19 5t-19 14" fill="none" stroke="#424845" stroke-width="5"/><path d="M28 77q5 48 62 53 57-5 62-53Z" fill="#414b48" stroke="#283b37" stroke-width="1.2"/><path d="M40 108q50 26 100 0" stroke="#626c61" stroke-width="2" fill="none"/><ellipse cx="90" cy="77" rx="62" ry="28" fill="#5b6255" stroke="#293a36" stroke-width="1.1"/><ellipse cx="90" cy="77" rx="55" ry="23" fill="#cda66a" stroke="#8e774e" stroke-width=".9"/><ellipse cx="90" cy="77" rx="54" ry="22" fill="url(#meal-liquid)"/>'+inner+'<path d="M30 80q7 27 60 27t60-27" stroke="#777b69" stroke-width="2" fill="none"/>';
  }else body+=linen+(kong?"":steam)+bowl(base,inner);
  if(kim)body+='<g transform="translate(30 49)"><ellipse rx="23" ry="9" fill="#f6edd7" stroke="#b8b8a4"/><path d="M-20 0q2 20 20 20T20 0" fill="#d7dfcc" stroke="#a1ad9d"/><ellipse rx="20" ry="7" fill="#f7efdc"/><path d="M-12-1l3-1m8 1 4-2m6 3 3-1" stroke="#d8ccb1" stroke-width="1.4"/></g>';
  }else if(/호떡|크루아상|달걀 토스트|채소 치킨 랩/.test(title)){
  let dish='<ellipse cx="75" cy="111" rx="59" ry="24" fill="#f9f1de" stroke="#bcb29e"/>';
- if(title.includes("호떡"))dish+=[0,1].map(i=>'<g transform="translate('+(57+i*38)+' '+(94-i*15)+')"><ellipse rx="30" ry="19" fill="#b98646" stroke="#986a38"/><ellipse rx="26" ry="15" fill="#d4a05a"/><path d="M-15-4q12-7 26 1m-20 8 15-5" stroke="#9d6d3e" opacity=".55" fill="none"/></g>').join("");
- else if(title.includes("크루아상"))dish+='<path d="M29 107Q14 85 38 63Q48 53 66 59Q77 45 92 57Q113 57 121 78L112 112 99 92 79 106 57 96Z" fill="#c48c47" stroke="#a57441"/><path d="M36 100Q44 74 57 67m5 31q6-27 15-38m12 42q5-21 2-40m18 39 1-25" stroke="#e8bc78" stroke-width="6" fill="none" stroke-linecap="round"/>';
+ if(title.includes("호떡"))dish+=[0,1].map(i=>'<g transform="translate('+(57+i*38)+' '+(94-i*15)+')"><ellipse rx="30" ry="19" fill="#b98646" stroke="#986a38"/><ellipse rx="26" ry="15" fill="#d4a05a"/><path d="M-15-4q12-7 26 1m-20 8 15-5" stroke="#9d6d3e" opacity=".55" fill="none"/>'+flecks(0,0,24,13,55,"#986237",.65)+'</g>').join("");
+ else if(title.includes("크루아상"))dish+='<path d="M25 105Q20 89 32 73Q44 59 58 65Q66 54 79 61Q92 57 104 71Q124 78 121 98L112 113 101 104 92 90Q75 107 59 96L39 115Z" fill="#b87a3c" stroke="#936333" stroke-width="1"/>'+[0,1,2,3,4].map(i=>{let x=40+i*15,y=80+Math.abs(i-2)*4;return '<g transform="translate('+x+' '+y+') rotate('+((i-2)*12)+')"><path d="M-10 19Q-20-9-5-16Q8-20 13-5Q15 9 5 20L-1 14Z" fill="'+["#d69b50","#e2ad64","#e8b96d","#dba15a","#cd8e48"][i]+'" stroke="#a36b37" stroke-width=".7"/><path d="M-9-9Q-2-17 5-10M-11-4Q0-13 9-5M-10 2Q1-7 10 1M-8 8Q2 0 9 6" stroke="#f3cf91" fill="none" stroke-width="1.3" stroke-linecap="round"/></g>'}).join("")+flecks(75,82,37,16,40,"#9c6336",.45);
  else if(title.includes("토스트"))dish+='<path d="M33 109V71q0-15 31-17t38 16v39q-35 14-69 0Z" fill="#c08d55"/><path d="M39 104V73q0-14 29-14t28 14v30Z" fill="#efd1a0"/><path d="M52 74q15-13 30 1t4 20q-12 12-29 1t-5-22" fill="#fcf3db"/><circle cx="70" cy="85" r="10" fill="#e4ad4c"/>';
  else dish+='<path d="M32 111l19-53 61 16-19 50Z" fill="#e5cf9e" stroke="#b49b74"/><ellipse cx="82" cy="66" rx="31" ry="12" transform="rotate(15 82 66)" fill="#f5e3b9"/><path d="M55 63l14-7 10 10 11-7 14 9-8 8-24-2Z" fill="#80a066"/><g fill="#c98268"><rect x="68" y="61" width="10" height="7" rx="2"/><rect x="88" y="65" width="10" height="7" rx="2"/></g>';
  body+=linen+dish+(title.includes("차")||title.includes("라테")?cup(144,78,.87,title.includes("라테")?"#b88960":"#bf995f"):"");
  }else if(/떡볶이|고등어구이 정식|오므라이스/.test(title)){
  let dish='<ellipse cx="90" cy="96" rx="69" ry="37" fill="#faf1db" stroke="#bcb39c"/>';
  if(title.includes("떡볶이"))dish+='<ellipse cx="90" cy="95" rx="56" ry="28" fill="#be624a"/>'+Array.from({length:9},(_,i)=>'<rect x="'+(49+i*17%73)+'" y="'+(76+i*13%32)+'" width="22" height="8" rx="4" transform="rotate('+(-30+i*17)+' '+(60+i*17%73)+' '+(80+i*13%32)+')" fill="#e5a273" stroke="#b65d48" stroke-width=".7"/>').join("");
- else if(title.includes("고등어"))dish+='<path d="M29 101Q38 72 83 77L108 93 83 115Q40 120 29 101Z" fill="#9c9b8e" stroke="#68776f"/><path d="M36 100q28-14 58-9" stroke="#e3c390" stroke-width="7" fill="none"/><path d="M50 83l5 12m10-15 7 13m9-13 8 13" stroke="#766c52" stroke-width="2"/><ellipse cx="123" cy="76" rx="21" ry="16" fill="#f0e5c8"/><path d="M109 76l24-6m-23 13 21-6" stroke="#d3c49f" stroke-width="1.2"/>';
- else dish+='<path d="M40 102q0-32 43-36t55 31q-7 25-48 27t-50-22Z" fill="#e4b357" stroke="#b58f4a"/><path d="M53 91q24-23 55-13m-42 30q23-8 47-2" stroke="#f6d987" stroke-width="3" fill="none"/><path d="M65 82q16 14 28 4t19 10" stroke="#b7654d" stroke-width="4" fill="none" stroke-linecap="round"/>';
+ else if(title.includes("고등어"))dish+='<g transform="translate(71 93) rotate(-14)"><path d="M-38-10Q-20-25 12-16Q30-11 38 3L29 15Q-1 24-32 14Z" fill="#bd995f" stroke="#8d7957" stroke-width=".9"/><path d="M-37-10Q-20-24 12-16Q26-14 37 1Q7-6-8 4Q-20 11-32 13Z" fill="#7e9591" stroke="#586e69" stroke-width=".7"/>'+Array.from({length:8},(_,i)=>'<path d="M'+(-29+i*7)+' -15q-5 5 3 8t-1 8" stroke="#354e52" stroke-width="1.6" fill="none" opacity=".72"/>').join("")+'<path d="M-28 13Q3 18 29 9M-21 10l8 5m7-9 8 7m9-9 8 6" stroke="#f1d19b" stroke-width="1.6" fill="none"/>'+flecks(0,0,27,10,28,"#755534",.6)+'</g><path d="M113 105l20-13 12 12-12 12Z" fill="#e7dba9" stroke="#b0a276"/><path d="M125 105l8-8m-4 12 8-8" stroke="#c8b676"/>';
+ else dish+='<path d="M40 102q0-32 43-36t55 31q-7 25-48 27t-50-22Z" fill="#e6b54d" stroke="#b58f4a"/><path d="M48 99q0-18 30-27 29-5 46 11M53 108q23 11 53 4" stroke="#f8da83" stroke-width="2.2" fill="none"/><path d="M63 82q10 12 20 9t19-6 17 14" stroke="#a84f39" stroke-width="4.2" fill="none" stroke-linecap="round"/><path d="M64 81q10 10 20 8t18-6 16 14" stroke="#dc8260" stroke-width="1.1" fill="none" stroke-linecap="round"/>'+flecks(88,95,32,18,31,"#b5853f",.45);
  body+=linen+steam+dish;
  if(title.includes("고등어"))body+='<g transform="translate(41 48)"><ellipse rx="22" ry="9" fill="#f3ead3" stroke="#b1b6a1"/><path d="M-20 0q2 18 20 18T20 0" fill="#d5ddc7"/><ellipse rx="20" ry="7" fill="#f8f2dd"/></g><g transform="translate(128 42)"><ellipse rx="22" ry="9" fill="#f8eed8" stroke="#b5ad95"/><path d="M-14-1l9-4 5 6 9-4 6 5" stroke="#b87554" stroke-width="5" fill="none"/></g>';
  }else if(/팥빙수|과일 스무디/.test(title)){
@@ -1254,9 +1267,9 @@ function mealArt(title){
    else inside+='<path d="M63 69l6-5 7 4-5 6Z" fill="#d6c7a0"/><path d="M106 82l9-6 6 3-6 7" fill="#d5a374"/>';
   }
   if(dumpling)inside=Array.from({length:5},(_,i)=>'<g transform="translate('+(59+i*15)+' '+(78+i%2*8)+')"><path d="M-9 4Q-7-12 0-9Q7-12 9 4Q0 10-9 4Z" fill="#f1dfb6" stroke="#b8a282" stroke-width=".8"/><path d="M-5 0l2-5m3 5v-6m3 6 2-5" stroke="#bea889" stroke-width=".6"/><path d="M-7 2Q0 7 7 2" stroke="#fff3d8" stroke-width=".9" fill="none"/><path d="M-5-2q2-5 4-6" stroke="#fff4db" stroke-width=".7" fill="none"/></g>').join("");
- if(tofu)inside=Array.from({length:6},(_,i)=>'<rect x="'+(52+i*13)+'" y="'+(66+i%2*11)+'" width="15" height="12" rx="3" fill="#f6e6cc" stroke="#c28c71" stroke-width=".7"/>').join("")+'<ellipse cx="95" cy="84" rx="9" ry="6" fill="#efd9a0"/>';
+ if(tofu)inside=[[56,72],[74,67],[90,76],[109,68],[120,85],[69,88]].map(([x,y],i)=>'<g transform="translate('+x+' '+y+') rotate('+(i*19-28)+')"><path d="M-10 1Q-11-5-5-7L6-6Q12-3 9 4L3 7-8 5Z" fill="#f2dfbd" stroke="#ba9275" stroke-width=".6"/><path d="M-8-1q4-5 13-3l4 3-5 3-9-1Z" fill="#fff1d4"/></g>').join("")+'<path d="M85 85q-9-7-1-12t16-1 4 11-19 2Z" fill="#f8e9cb"/><ellipse cx="95" cy="79" rx="6" ry="4.5" fill="#e2ae52"/>';
  if(soba)inside=Array.from({length:13},(_,i)=>'<path d="M'+(48+i%4*3)+' '+(65+i*2.3)+'q16-11 31 0t36 0" stroke="#9b886b" stroke-width="1.8" fill="none"/>').join("")+'<path d="M82 62l20 10m-18-14 20 10m-22 0 18 9" stroke="#435f50" stroke-width="2"/><ellipse cx="120" cy="70" rx="7" ry="5" fill="#9fb985"/>';
- inside+=Array.from({length:13},(_,i)=>'<path d="M'+(60+i*13%61)+' '+(64+i*7%27)+'l'+(2+i%4)+' '+(-1-i%3)+'" stroke="'+["#6c985f","#91ad70","#ba7858"][i%3]+'" stroke-width="1.7" stroke-linecap="round"/>').join("");
+ inside+=Array.from({length:9},(_,i)=>greenOnion(60+i*13%61,64+i*7%27)).join("")+flecks(90,78,40,18,22,"#ac8359",.45);
   if(title.includes("칼국수"))inside+='<path d="M59 62l8 14m-2-16 8 14m36 7 12-7" stroke="#8fa36b" stroke-width="3"/><g fill="#c2b69a" stroke="#8f806a" stroke-width=".8"><path d="M74 79q9-14 19 1-9 10-19-1Z"/><path d="M89 86q10-12 20 1-10 10-20-1Z"/></g><path d="M54 74q23-9 43 1t27-2" stroke="#f7e5b7" stroke-width="4.5" fill="none"/>';
   body+=linen+(cold?'<path d="M52 43h7m-3-4v8m68-8h8m-4-4v8" stroke="#86a6a9" stroke-width="1.3" stroke-linecap="round"/>':steam)+bowl(tofu?"#b87654":cold?"#b6b29a":rice?"#bb956b":"#d7b57d",inside);
  }else if(/김밥/.test(title)){
@@ -1292,7 +1305,8 @@ function mealArt(title){
  const forkOnly=/파스타|샐러드|떡볶이/.test(title);
  const both=/국밥|김치찌개|순두부찌개|만둣국|고등어구이/.test(title);
  const chopOnly=/칼국수|우동|냉면|메밀국수|콩국수|김밥/.test(title);
- if(spoonOnly)body+=spoon;
+ if(title.includes("떡볶이"))body+=chop;
+ else if(spoonOnly)body+=spoon;
  else if(forkOnly)body+=fork;
  else if(both)body+=chop.replace('rotate(-25 150 101)','translate(-120 0) rotate(-25 150 101)')+spoon;
  else if(chopOnly)body+=chop;
