@@ -341,7 +341,7 @@ dialog::backdrop{background:#24342f66}
 
 /* V6.8 — first-visit location nudge: visual guidance only. */
 #gpsBtn{position:relative;overflow:visible}
-#gpsBtn .gps-nudge{position:absolute;z-index:4;right:-5px;bottom:-22px;width:43px;height:55px;overflow:visible;pointer-events:none;opacity:0;filter:drop-shadow(0 2px 2px #273c3240);animation:gpsNudge 3.2s .65s ease-in-out both}
+#gpsBtn .gps-nudge{position:absolute;z-index:4;right:0;bottom:-12px;width:54px;height:60px;overflow:visible;pointer-events:none;opacity:0;filter:drop-shadow(0 2px 2px #273c3240);animation:gpsNudge 3.2s .65s ease-in-out both}
 #gpsBtn .gps-nudge *{pointer-events:none}
 @keyframes gpsNudge{0%{opacity:0;transform:translate(9px,10px)}12%{opacity:1;transform:translate(5px,7px)}28%{opacity:1;transform:translate(0,0)}42%{opacity:1;transform:translate(5px,7px)}58%{opacity:1;transform:translate(0,0)}73%{opacity:1;transform:translate(5px,7px)}85%{opacity:1;transform:translate(5px,7px)}100%{opacity:0;transform:translate(9px,10px)}}
 @media(prefers-reduced-motion:reduce){#gpsBtn .gps-nudge{display:none!important;animation:none!important}}
@@ -360,6 +360,52 @@ dialog::backdrop{background:#24342f66}
 .hair-controls{display:flex;align-items:center;justify-content:flex-end;gap:8px;margin:-2px 0 11px;color:var(--sub);font-size:11px}
 .hair-controls[hidden]{display:none!important}
 .hair-controls select{font:inherit;color:var(--ink);background:#fffefa;border:1px solid var(--line);border-radius:8px;padding:7px 10px;min-height:34px}
+/* V7.8 — mobile fit: the cue remains inside the first card, and time stays left aligned. */
+.start{position:relative;overflow:visible;isolation:isolate}
+#gpsBtn .gps-nudge{flex:none;max-width:none;max-height:none}
+.window-copy{min-width:0;width:100%;text-align:left}
+.window-time,.window-time[data-reel="on"],.window-time[data-reel="settled"]{text-align:left;justify-content:flex-start;align-self:flex-start;max-width:100%;padding:0;margin-left:0;direction:ltr}
+.window-time[data-reel="on"],.window-time[data-reel="settled"]{margin-left:-.055em}
+.reel-separator{flex:none}
+@keyframes gpsNudge{0%{opacity:0;transform:translate(3px,4px)}12%{opacity:1;transform:translate(2px,3px)}28%{opacity:1;transform:translate(0,0)}42%{opacity:1;transform:translate(2px,3px)}58%{opacity:1;transform:translate(0,0)}73%{opacity:1;transform:translate(2px,3px)}85%{opacity:1;transform:translate(2px,3px)}100%{opacity:0;transform:translate(3px,4px)}}
+@media(max-width:680px){
+ .shell{width:calc(100% - 28px);max-width:100%;padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px)}
+ header,.header-meta,.hero,.start,.window,.recs,.rec,.panel,.share,.share-actions{min-width:0}
+ .header-meta{gap:5px}
+ .location-btn{min-width:0;max-width:min(42vw,175px);min-height:44px}
+ .start{grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);padding:11px 12px 22px;gap:8px}
+ #gpsBtn .gps-nudge{right:3px;bottom:-13px;width:48px;height:54px}
+ .window{padding:16px 17px 14px;min-height:249px}
+ .window .window-time,.window .window-time[data-reel="on"],.window .window-time[data-reel="settled"]{font-size:clamp(25px,7.45vw,34px);line-height:1.18}
+ .window-heading{gap:6px;min-width:0}
+ .eyebrow{font-size:clamp(10px,2.8vw,11px)}
+ .window-chips{gap:4px;max-width:100%}
+ .window-foot{gap:8px;align-items:flex-start}
+ .window-foot>span{min-width:0;overflow-wrap:anywhere}
+ .window-foot>span:first-child{flex:1}
+ #maskHint{max-width:58%}
+ .rec .rec-art{margin:0;align-self:center;min-height:0;aspect-ratio:180/148;overflow:hidden;border-radius:10px;-webkit-mask-image:none;mask-image:none}
+ .rec .rec-art svg{min-height:0;object-fit:contain}
+ .rec h3,.rec p,.rec .mini{min-width:0;overflow-wrap:anywhere}
+ .hair-controls select{min-height:44px}
+ .share-actions button{min-width:0;white-space:normal}
+ .field select,.field input{font-size:16px}
+}
+@media(max-width:360px){
+ .shell{width:calc(100% - 24px)}
+ .window{padding:14px 13px 13px}
+ .window .window-time,.window .window-time[data-reel="on"],.window .window-time[data-reel="settled"]{font-size:clamp(23px,7.5vw,27px)}
+ .window-character{width:43%}
+ .avatar-caption{display:none}
+ .avatar-switch{gap:2px}
+ .window-heading .avatar-switch button{width:39px;min-width:39px;height:44px}
+ .start .primary,.start .secondary{font-size:11px;padding-inline:5px;gap:4px}
+ .rec{grid-template-columns:minmax(0,1fr) minmax(94px,40%)}
+ .hours{gap:0}
+ .hour b{font-size:14px}
+ .hour svg{width:21px;height:21px}
+ .window-chips span{font-size:9px;padding:5px 6px}
+}
 </style></head><body><div class="shell">
 <header><div class="brand"><span class="mark" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 34" fill="none"><circle cx="31" cy="10" r="7.5" fill="#e8b868"/><path d="M23 12C18 1 7 7 4 17c-4 14 9 16 20 9 8-5 15-8 21 1" stroke="#315b49" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>날씨틈</div><div class="header-meta"><span class="date" id="date"></span><button type="button" id="soundToggle" class="sound-toggle" aria-pressed="true" aria-label="효과음 켜기 또는 끄기" title="효과음 켜짐"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4Z" stroke="currentColor" stroke-width="1.65" stroke-linejoin="round"/><g class="sound-waves" stroke="currentColor" stroke-width="1.55" stroke-linecap="round"><path d="M16 9q3 3 0 6M19 6q5 6 0 12"/></g><path class="sound-cross" d="m16 9 5 6m0-6-5 6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button><button id="locationBtn" class="location-btn" aria-label="지역 변경"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 21s7-6 7-12a7 7 0 0 0-14 0c0 6 7 12 7 12Z" stroke="currentColor" stroke-width="1.7"/><circle cx="12" cy="9" r="2.5" stroke="currentColor" stroke-width="1.7"/></svg><span id="locLabel">지역 선택</span><svg width="14" height="14" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button></div></header>
 <main><div class="app-intro"><div><h1>오늘 최고의 두 시간.</h1><p>날씨에 맞춰 옷차림, 음식, 할 일까지.</p></div><span class="tag">오늘의 일상 큐레이션</span></div>
@@ -1657,7 +1703,7 @@ function initGpsNudge(){
  const btn=$("gpsBtn");
  if(!btn||btn.disabled)return;
  const cue=document.createElementNS("http://www.w3.org/2000/svg","svg");
- cue.setAttribute("class","gps-nudge");cue.setAttribute("viewBox","-13 -4 41 55");cue.setAttribute("aria-hidden","true");cue.setAttribute("focusable","false");
+ cue.setAttribute("class","gps-nudge");cue.setAttribute("viewBox","-16 -13 64 72");cue.setAttribute("preserveAspectRatio","xMidYMid meet");cue.setAttribute("aria-hidden","true");cue.setAttribute("focusable","false");
  cue.innerHTML='<g transform="rotate(-20 0 0)"><path d="M-3.7 2.5C-3.7-2.5 3.7-2.5 3.7 2.5L3.7 17.4C5.9 14.1 10.6 15.2 11.2 19.1C13.7 16.8 17.9 18.1 18.3 22.1C21.6 20.3 25 22.7 25 26.6L25 31.2C25 39.9 19.6 44.5 13.5 44.5L8.6 44.5C2.6 44.5-.5 40.6-3 35.8L-10.6 25.5C-13.1 21.7-8.5 18.5-5.6 21.3L-3.7 23.4Z" fill="#fff1d8" stroke="#594d40" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"/><path d="M3.7 17.4v9.2M11.2 19.1v7.5M18.3 22.1v5.7M-3.7 23.4l4.9 5.8" stroke="#c19c77" stroke-width=".95" fill="none" stroke-linecap="round"/><path d="M-1.5 1.5q1.5-1.8 3 0" stroke="#fffdf5" stroke-width="1.2" fill="none" stroke-linecap="round"/><path d="M3.8 42.5Q12 45.6 21.1 42.3L21.7 48.7Q13 52 4 49.1Z" fill="#87a397" stroke="#594d40" stroke-width="1.1" stroke-linejoin="round"/><path d="M8 47.1l9 .1" stroke="#c8dbca" stroke-width=".9" stroke-linecap="round"/></g>';
  const targets=[btn,$("manualBtn"),$("locationBtn")];
  function dismiss(){cue.remove();targets.forEach(el=>el.removeEventListener("click",dismiss,true));document.removeEventListener("visibilitychange",onVisibility);clearTimeout(fallback)}
