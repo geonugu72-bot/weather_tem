@@ -350,6 +350,12 @@ dialog::backdrop{background:#24342f66}
 [data-wear-toggle]:focus-visible .wear-hit{stroke:#587961;stroke-width:1.7;stroke-dasharray:3 2}
 [data-wear-toggle]:hover .wear-hit{fill:#ffffff12}
 #maskHint{white-space:normal;line-height:1.35}
+/* V7.1: topmost per-person controls never sit behind other SVG artwork. */
+.cast-hit-layer{pointer-events:none!important}
+.window-character .cast-hit-layer [data-wear-toggle],.window-character .cast-hit-layer [data-mask-toggle],.rec-art .cast-hit-layer [data-wear-toggle],.rec-art .cast-hit-layer [data-mask-toggle],.cast-hit-layer .wear-hit,.cast-hit-layer .mask-hit{pointer-events:all!important;cursor:pointer;touch-action:manipulation}
+#windowCharacter[data-cast="group"]{width:49%}
+@media(max-width:680px){#windowCharacter[data-cast="group"]{width:49%}}
+@media(max-width:360px){#windowCharacter[data-cast="group"]{width:46%}}
 </style></head><body><div class="shell">
 <header><div class="brand"><span class="mark" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 34" fill="none"><circle cx="31" cy="10" r="7.5" fill="#e8b868"/><path d="M23 12C18 1 7 7 4 17c-4 14 9 16 20 9 8-5 15-8 21 1" stroke="#315b49" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>날씨틈</div><div class="header-meta"><span class="date" id="date"></span><button type="button" id="soundToggle" class="sound-toggle" aria-pressed="true" aria-label="효과음 켜기 또는 끄기" title="효과음 켜짐"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4Z" stroke="currentColor" stroke-width="1.65" stroke-linejoin="round"/><g class="sound-waves" stroke="currentColor" stroke-width="1.55" stroke-linecap="round"><path d="M16 9q3 3 0 6M19 6q5 6 0 12"/></g><path class="sound-cross" d="m16 9 5 6m0-6-5 6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button><button id="locationBtn" class="location-btn" aria-label="지역 변경"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 21s7-6 7-12a7 7 0 0 0-14 0c0 6 7 12 7 12Z" stroke="currentColor" stroke-width="1.7"/><circle cx="12" cy="9" r="2.5" stroke="currentColor" stroke-width="1.7"/></svg><span id="locLabel">지역 선택</span><svg width="14" height="14" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button></div></header>
 <main><div class="app-intro"><div><h1>오늘 최고의 두 시간.</h1><p>날씨에 맞춰 옷차림, 음식, 할 일까지.</p></div><span class="tag">오늘의 일상 큐레이션</span></div>
@@ -903,19 +909,9 @@ const COORD_PALETTES=[
  ["#526d70","#a77d70","#c2ae83","#788ca1","#9d8d79"]
 ];
 function coordinatedLooks(cast,t,rain,wind,indoor,title){
- const looks=cast.map((p,i)=>sceneOutfit(outfitLook(t,rain,p.gender,wearIndex+i,wind),indoor,title));
- if(cast.length===1)return looks;
- const main=outerColor(looks[0]),rgb=colorRGB(main);
- const group=rgb[0]>rgb[1]+.08?1:rgb[2]>rgb[0]+.06?2:rgb[1]>rgb[0]+.05?0:3;
- const palette=COORD_PALETTES[group],used=[main];
- return looks.map((look,i)=>{
-   if(i===0)return look;
-   const ranked=palette.map((c,j)=>({c,j,score:Math.min(...used.map(u=>colorDistance(c,u)))+.07*(j===(wearIndex+i)%palette.length?1:0)})).sort((a,b)=>b.score-a.score);
-   const c=ranked[0].c;used.push(c);
-   const isTop=outerColor(look)===look.top;
-   const pants=i===2?"#6c7c86":colorDistance(looks[0].pants,"#7c8a96")>.24?"#7c8a96":"#a29380";
-   return {...look,coat:c,top:isTop?c:(colorLum(c)<.25?"#e8dbc5":"#f0e6d4"),pants};
- });
+ // Keep each prepared outfit intact; a shared index cycles every cast member.
+ // A companion's offset is stable and does not repaint their clothes to match another person.
+ return cast.map((p,i)=>sceneOutfit(outfitLook(t,rain,p.gender,wearIndex+i,wind),indoor,title,wearIndex+i));
 }
 /* V6.7: hand-authored material shading, fabric folds and activity props. */
 function blendColor(c,other,amount){
@@ -971,6 +967,12 @@ function heldObject(type){
  book:'<g transform="translate(28 43) rotate(-12)"><path d="M-12-8Q-5-10 0-5Q6-10 12-8V9Q5 7 0 12Q-6 7-12 9Z" fill="#8c9c88" stroke="#596e5b" stroke-width=".8"/><path d="M-11-7Q-5-8 0-4Q6-8 11-7V7Q5 6 0 10Q-6 6-11 7Z" fill="#faf2df"/><path d="M0-4V10M-8-3l5 1m-5 3 5 1m6-4 5-1m-5 5 5-1" stroke="#b9aa8c" stroke-width=".6" fill="none"/></g>',
  cup:'<g transform="translate(29 43)"><path d="M-6-6H7L5 8Q0 11-5 8Z" fill="#f4e7cd" stroke="#9a876a" stroke-width=".8"/><ellipse cy="-6" rx="6.5" ry="2.5" fill="#a16c47"/><path d="M7-3q7-1 5 4-1 3-6 3" fill="none" stroke="#9a876a" stroke-width="1.4"/></g>'
  };return props[type]||"";
+}
+function personHitTargets(key,mask){
+ return '<g data-mask-toggle="true" data-face-key="'+key+'" role="button" tabindex="0" aria-pressed="'+String(mask)+'" aria-label="마스크 착용 전환"><title>얼굴을 눌러 마스크 '+(mask?"벗기기":"쓰기")+'</title><rect class="mask-hit" x="-23" y="-15" width="46" height="44" rx="13" fill="transparent"/></g><g data-wear-toggle="true" data-wear-key="'+key+'" role="button" tabindex="0" aria-label="다음 옷차림으로 변경"><title>몸을 눌러 함께 옷차림 바꾸기</title><rect class="wear-hit" x="-25" y="29" width="50" height="90" rx="10" fill="transparent"/></g>';
+}
+function castHitLayer(positions,cast,prefix){
+ return '<g class="cast-hit-layer" pointer-events="none">'+positions.map(([x,y,k],i)=>'<g transform="translate('+x+' '+y+') scale('+k+')">'+personHitTargets(prefix+i,!!cast[i].mask)+'</g>').join("")+'</g>';
 }
 function littlePerson(x,y,k,o={}){
  const p=artP,skin=o.skin||p.skin,hair=o.hair||p.hair,coat=o.coat||p.green,top=o.top||p.cream,pants=o.pants||"#737c72";
@@ -1044,11 +1046,10 @@ function littlePerson(x,y,k,o={}){
  }
  const mask=o.mask?'<g class="pm-mask"><path d="M-11 12Q-14 9-14 13t4 5M11 12Q15 9 15 13t-4 5" fill="none" stroke="#e4ede8" stroke-width="1.4" stroke-linecap="round"/><path d="M-10.7 11.7Q-4 12.4 1 10.7Q6 12.2 12 11.6L10 19.2Q1 25-8.4 19.5Z" fill="#f6f7ed" stroke="#7d9690" stroke-width=".65" stroke-linejoin="round"/><path d="M-8 14.3Q1 12.7 10 14.2M-7.5 16.6Q1 15.5 9 16.5M-6.5 19Q1 20 8 18.9" fill="none" stroke="#becdc5" stroke-width=".65" stroke-linecap="round"/><path d="M1 11.5v10.5" stroke="#d6e0d7" stroke-width=".6"/></g>':'';
  const face=hairBack+neck+head+hairFront+features+mask;
- const faceTarget=o.maskInteractive?'<g data-mask-toggle="true" data-face-key="'+o.faceKey+'" role="button" tabindex="0" aria-pressed="'+String(!!o.mask)+'" aria-label="마스크 착용 전환"><title>얼굴을 눌러 마스크 '+(o.mask?"벗기기":"쓰기")+'</title><rect class="mask-hit" x="-22" y="-12" width="44" height="46" rx="16" fill="transparent"/></g>':'';
- const wearTarget=o.maskInteractive?'<g data-wear-toggle="true" data-wear-key="'+o.faceKey+'" role="button" tabindex="0" aria-label="다음 옷차림으로 변경"><title>몸을 눌러 옷차림 바꾸기</title><rect class="wear-hit" x="-23" y="34" width="46" height="82" rx="12" fill="transparent"/></g>':'';
+ const hitTargets=o.maskInteractive&&!o.deferHitTargets?personHitTargets(o.faceKey,!!o.mask):"";
  const umbrella=o.umbrella?'<g transform="translate(40 -2)"><path d="M-38 4Q-32-27 0-28Q32-25 38 4Q26-3 13 4Q0-4-13 4Q-26-3-38 4Z" fill="#8da9a4" stroke="#5f7d72" stroke-width="1.2"/><path d="M0-27Q-16-17-13 4M0-27Q16-17 13 4" stroke="#d1d9cb" stroke-width="1" fill="none"/><path d="M0 4v50q0 7-5 7t-5-5" stroke="#536b60" stroke-width="1.5" fill="none" stroke-linecap="round"/></g>':'';
  const bag=o.bag?(female?'<path d="M12 28Q24 39 20 58" fill="none" stroke="#927759" stroke-width="2"/><rect x="12" y="54" width="19" height="17" rx="5" fill="#b59068" stroke="#806749" stroke-width=".8"/><path d="M13 58q8 5 17 0" fill="none" stroke="#e6ca98" stroke-width="1"/><circle cx="22" cy="60" r="1" fill="#e3c38e"/>':'<path d="M-12 26L20 60" stroke="#8d6c4b" stroke-width="2"/><path d="M10 54l18-2 4 20-21 3Z" fill="#bb9567" stroke="#886c4e" stroke-width=".8"/><path d="M13 57l15-2" stroke="#e6ca98" stroke-width="1"/>'):'';
- return '<g transform="translate('+x+' '+y+') scale('+k+')">'+'<g stroke="#514d46" stroke-opacity=".50" stroke-width=".65" stroke-linejoin="round" paint-order="stroke fill">'+materialFills(leg+armLeft+armRight+garment,'cloth-'+(o.faceKey||('portrait-'+o.gender+'-'+x+'-'+y)).replace(/[^a-zA-Z0-9_-]/g,'-'))+textile+'</g>'+bag+face+heldObject(gesture)+umbrella+wearTarget+faceTarget+'</g>';
+ return '<g transform="translate('+x+' '+y+') scale('+k+')">'+'<g stroke="#514d46" stroke-opacity=".50" stroke-width=".65" stroke-linejoin="round" paint-order="stroke fill">'+materialFills(leg+armLeft+armRight+garment,'cloth-'+(o.faceKey||('portrait-'+o.gender+'-'+x+'-'+y)).replace(/[^a-zA-Z0-9_-]/g,'-'))+textile+'</g>'+bag+face+heldObject(gesture)+umbrella+hitTargets+'</g>';
 }
 function treeArt(x,y,k,fall=false){
  const colors=fall?["#d3aa62","#c68a61","#e2c78b"]:["#809e80","#9fb59a","#b9c9a9"];
@@ -1094,9 +1095,18 @@ function sceneDetail(title){
  ];
  const found=groups.find(([re])=>re.test(title));return found?D[found[1]]:"";
 }
-function sceneOutfit(look,indoor,title){
- if(!indoor||!["craft","kitchen","living","exercise","homeplant","pottery","candle","workshop","pingpong","bowling","cafe","gamecafe"].includes(activityVenue(title,indoor)))return look;
- return {...look,style:look.style==="tee"||look.style==="summer"?look.style:"shirt",cut:look.style==="tee"||look.style==="summer"?look.cut:"indoorKnit",coat:look.top,scarf:false,umbrella:false};
+function sceneOutfit(look,indoor,title,variant=0){
+ if(!indoor)return look;
+ const base={...look,scarf:false,umbrella:false};
+ const venue=activityVenue(title,indoor);
+ if(!["craft","kitchen","living","exercise","homeplant","pottery","candle","workshop","pingpong","bowling","cafe","gamecafe"].includes(venue))return base;
+ if(look.style==="tee"||look.style==="summer")return base;
+ // Remove heavy outerwear only, preserve real color differences and distinct indoor cuts.
+ if(["puffer","coat"].includes(look.style)||["shearling","windbreaker"].includes(look.cut)){
+   const cut=["indoorKnit","cardigan","hoodie"][((variant%3)+3)%3];
+   return {...base,style:cut==="indoorKnit"?"shirt":"jacket",cut,coat:look.coat,top:cut==="indoorKnit"?blendColor(look.coat,look.top,.24):look.top};
+ }
+ return base;
 }
 function sceneAtmosphere(indoor,night,wet){
  if(indoor)return '<g pointer-events="none"><path d="M16 16L61 16 137 148H83Z" fill="#fff6d8" opacity=".12"/><path d="M0 103H180" stroke="#8a816e" stroke-width=".8" opacity=".28"/><path d="M0 122l180-4M0 139l180-5" stroke="#968c76" stroke-width=".6" opacity=".18"/></g>';
@@ -1186,8 +1196,8 @@ function lifestyleArt(title,who,indoor,t,rain=0,startHour=12,wind=0){
  const n=cast.length,positions=venue.pose==="table"?(n===1?[[90,25,.77]]:n===2?[[52,27,.74],[124,29,.72]]:[[43,29,.72],[100,30,.70],[145,52,.49]]):n===1?[[88,26,.80]]:n===2?[[54,28,.76],[116,32,.72]]:familyPoses(cast,"activity");
  const walk=!indoor&&/산책|걸어|나들이|투어/.test(title)&&!["bench","picnic","badminton","playground"].includes(venue.v);
  const gesture=activityGesture(title);
- const people=positions.map(([x,y,k],i)=>'<ellipse cx="'+x+'" cy="'+(y+118*k)+'" rx="'+(24*k)+'" ry="'+(4*k)+'" fill="url(#act-shadow)"/>'+littlePerson(x,y,k,{...looks[i],...cast[i],maskInteractive:true,faceKey:"activity-"+i,gesture:i===0||["racket","pingpong","book"].includes(gesture)?gesture:"",stretch:venue.v==="exercise",walk,bag:!indoor&&walk&&!gesture&&i===0,umbrella:wet&&wind<35&&i===0})).join("");
- return artSvg(id,"url(#act-paper)",materialFills(venue.back,id+"venue","scene")+people+'<g pointer-events="none">'+materialFills(venue.front,id+"foreground","scene")+'</g>');
+ const people=positions.map(([x,y,k],i)=>'<ellipse cx="'+x+'" cy="'+(y+118*k)+'" rx="'+(24*k)+'" ry="'+(4*k)+'" fill="url(#act-shadow)"/>'+littlePerson(x,y,k,{...looks[i],...cast[i],maskInteractive:true,deferHitTargets:true,faceKey:"activity-"+i,gesture:i===0||["racket","pingpong","book"].includes(gesture)?gesture:"",stretch:venue.v==="exercise",walk,bag:!indoor&&walk&&!gesture&&i===0,umbrella:wet&&wind<35&&i===0})).join("");
+ return artSvg(id,"url(#act-paper)",materialFills(venue.back,id+"venue","scene")+people+'<g pointer-events="none">'+materialFills(venue.front,id+"foreground","scene")+'</g>'+castHitLayer(positions,cast,"activity-"));
 }
 function outfitArt(t,rain,wind){
  const look=outfitLook(t,rain,avatar,wearIndex,wind),id="wear-",st=look.style,stage=garmentStage([look]);
@@ -1341,15 +1351,15 @@ function portrait(gender){
 function windowCharacterArt(who,self,t,rain,indoor,hour,title,wind=0){
  const cast=castFor(who,self),look=outfitLook(t,rain,self,wearIndex,wind),night=!/노을/.test(title)&&(hour>=(plan?.sunset??18)||hour<(plan?.sunrise??7)),walk=!indoor&&/산책|걸어|나들이|데이트|투어|사진/.test(title);
  // Warm neutral fashion-editorial setting; retain the original outfit colors.
- const looks=coordinatedLooks(cast,t,rain,wind,indoor,title),stage=garmentStage(looks);
+ const looks=coordinatedLooks(cast,t,rain,wind,false,title),stage=garmentStage(looks);
  let scenery='<defs><radialGradient id="hero-glow"><stop stop-color="#fffdf7" stop-opacity=".96"/><stop offset="1" stop-color="#fffdf7" stop-opacity="0"/></radialGradient><radialGradient id="hero-shadow"><stop stop-color="#655b49" stop-opacity=".20"/><stop offset="1" stop-color="#655b49" stop-opacity="0"/></radialGradient></defs><path d="M12 137V76C12 32 43 8 94 8s81 26 81 68v61Z" fill="'+stage.base+'"/><path d="M12 137V76C12 32 43 8 94 8s81 26 81 68v61" fill="none" stroke="'+stage.edge+'" stroke-width=".7"/><ellipse cx="103" cy="57" rx="66" ry="52" fill="url(#hero-glow)" opacity=".18"/>';
  if(indoor)scenery+='<path d="M95 114V31q0-24 25-24t25 24v83" fill="#e2d9ca" opacity=".28"/><path d="M95 114V31q0-24 25-24t25 24v83" stroke="#d4c7b6" stroke-width=".8" fill="none"/><path d="M120 8v104M95 49h50" stroke="#d4c7b6" stroke-width=".75" opacity=".65"/>';
  else scenery+=(night?'<path d="M150 14a13 13 0 1 0 14 19 14 14 0 0 1-14-19Z" fill="#c7b99f"/>':'<circle cx="151" cy="25" r="12" fill="#e1b66c" opacity=".82"/>')+'<path d="M12 130q50-16 100-6t68-8" stroke="#c9bcaa" stroke-width=".85" fill="none" opacity=".75"/><path d="M15 139q52-14 110-7t55-4" stroke="#d7ccbc" stroke-width=".75" fill="none" opacity=".65"/>';
  const venue=venueBackdrop(title,indoor,night,!indoor&&rain>=40,t<8);
  scenery+='<defs><clipPath id="hero-venue-clip"><path d="M12 137V76C12 32 43 8 94 8s81 26 81 68v61Z"/></clipPath></defs><g clip-path="url(#hero-venue-clip)" opacity=".64" pointer-events="none">'+venue.back+'</g>';
  const positions=cast.length===1?[[101,25,1.02]]:cast.length===2?[[67,30,.93],[126,34,.88]]:familyPoses(cast,"hero");
- const figures=positions.map(([x,y,k],i)=>'<ellipse cx="'+x+'" cy="'+(y+118*k)+'" rx="'+(31*k)+'" ry="'+(5*k)+'" fill="url(#hero-shadow)"/>'+littlePerson(x,y,k,{...looks[i],...cast[i],maskInteractive:true,faceKey:"hero-"+i,bag:!indoor&&i===0&&!look.umbrella,umbrella:!indoor&&look.umbrella&&i===0,walk})).join("");
- return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 148" preserveAspectRatio="xMidYMid meet" role="group" aria-label="캐릭터 · 얼굴은 마스크, 몸은 옷차림 변경">'+scenery+figures+'</svg>';
+ const figures=positions.map(([x,y,k],i)=>'<ellipse cx="'+x+'" cy="'+(y+118*k)+'" rx="'+(31*k)+'" ry="'+(5*k)+'" fill="url(#hero-shadow)"/>'+littlePerson(x,y,k,{...looks[i],...cast[i],maskInteractive:true,deferHitTargets:true,faceKey:"hero-"+i,bag:!indoor&&i===0&&!look.umbrella,umbrella:!indoor&&look.umbrella&&i===0,walk})).join("");
+ return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 148" preserveAspectRatio="xMidYMid meet" role="group" aria-label="캐릭터 · 얼굴은 마스크, 몸은 옷차림 변경">'+scenery+figures+castHitLayer(positions,cast,"hero-")+'</svg>';
 }
 function weatherAtmosphere(code,day){
  const cloudy=code>=2,rainy=code>=51&&!(code>=71&&code<=77||code===85||code===86),snow=code>=71&&code<=77||code===85||code===86;
@@ -1358,7 +1368,7 @@ function weatherAtmosphere(code,day){
  return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 190" preserveAspectRatio="xMidYMid slice"><defs><linearGradient id="wx-sky" x1="0" y1="0" x2="1" y2=".7"><stop stop-color="#f1eee2"/><stop offset=".45" stop-color="#e5e9dc"/><stop offset="1" stop-color="'+sky+'"/></linearGradient><linearGradient id="wx-haze" x2="0" y2="1"><stop stop-color="#fff8df" stop-opacity="0"/><stop offset="1" stop-color="#f3f1e5" stop-opacity=".95"/></linearGradient></defs><rect width="400" height="190" fill="url(#wx-sky)"/>'+(day&&!rainy&&!snow?'<circle cx="302" cy="44" r="24" fill="#edcd85" opacity="'+(cloudy?".5":".9")+'"/>':!day?'<path d="M314 22a22 22 0 1 0 23 30 24 24 0 0 1-23-30Z" fill="#f3e6bb"/>':'')+(cloudy?cloud:'')+(rainy?'<g stroke="#789ca8" stroke-opacity=".55" stroke-width="1.2">'+Array.from({length:15},(_,i)=>'<path d="M'+(215+i*23%179)+' '+(69+i*17%60)+'l-5 10"/>').join("")+'</g>':snow?'<g fill="#fff" opacity=".85">'+Array.from({length:15},(_,i)=>'<circle cx="'+(212+i*29%179)+'" cy="'+(70+i*13%62)+'" r="2"/>').join("")+'</g>':'')+'<rect y="65" width="400" height="125" fill="url(#wx-haze)"/></svg>';
 }
 
-function renderRecs(){if(!plan||!current||sample)return;if(maskDemoPhase==="approach"||maskDemoPhase==="tap")finishMaskDemo();let hour=plan.start?Number(plan.start.slice(11,13)):kst().hour,arr=selectedActivityOptions(hour),a=arr[actIndex%arr.length],opts={indoor:a[3]};updateHeroMessage(opts.indoor,hour,a[0]);$("actTitle").textContent=a[0];$("actText").textContent=a[1];$("actMini").textContent=a[2];let t=plan.temp,wear=outfitLook(t,plan.rain,avatar,wearIndex,plan.wind);$("wearTitle").textContent=wear.title;$("wearText").textContent=wear.detail+(maskNeeded()?" 외출 시 밀착되는 보건용 마스크도 챙겨요.":"");$("wearMini").textContent=(plan.wind>=35?"강풍 · 야외 노출 줄이기":plan.rain>=40?"접이식 우산 챙기기":plan.wind>=20?"바람막이 챙기기":"체감온도 "+fmt(t)+"° 기준");let food=selectedFoodOptions();let f=food[foodIndex%food.length];$("foodTitle").textContent=f[0];$("foodText").textContent=f[1];$("foodMini").textContent="기온 맞춤 · "+(foodIndex%food.length+1)+"/"+food.length;const wCount=selectedWearOptions().length;$("wearMini").textContent+=(maskWorn()?" · 마스크":"")+" · "+(wearIndex%wCount+1)+"/"+wCount;$("actMini").textContent+=" · "+(actIndex%arr.length+1)+"/"+arr.length;$("activityArt").innerHTML=lifestyleArt(a[0],who,opts.indoor,t,plan.rain,plan.start?Number(plan.start.slice(11,13)):kst().hour,plan.wind);$("outfitArt").innerHTML=outfitArt(t,plan.rain,plan.wind);$("mealArt").innerHTML=mealArt(f[0]);$("windowCharacter").innerHTML=windowCharacterArt(who,avatar,t,plan.rain,opts.indoor,plan.start?Number(plan.start.slice(11,13)):kst().hour,a[0],plan.wind);prepareShareCard();$("planBTitle").textContent=opts.indoor?"오늘은 실내 계획을 먼저":"날씨가 바뀐다면 · PLAN B";$("planBText").textContent=opts.indoor?"가까운 서점, 카페, 집에서 보내는 시간을 추천해요.":"갑자기 비가 오거나 바람이 강해지면 가까운 실내 전시나 카페로 바꿔요."}
+function renderRecs(){if(!plan||!current||sample)return;if(maskDemoPhase==="approach"||maskDemoPhase==="tap")finishMaskDemo();let hour=plan.start?Number(plan.start.slice(11,13)):kst().hour,arr=selectedActivityOptions(hour),a=arr[actIndex%arr.length],opts={indoor:a[3]};updateHeroMessage(opts.indoor,hour,a[0]);$("actTitle").textContent=a[0];$("actText").textContent=a[1];$("actMini").textContent=a[2];let t=plan.temp,wear=outfitLook(t,plan.rain,avatar,wearIndex,plan.wind);$("wearTitle").textContent=wear.title;$("wearText").textContent=wear.detail+(maskNeeded()?" 외출 시 밀착되는 보건용 마스크도 챙겨요.":"");$("wearMini").textContent=(plan.wind>=35?"강풍 · 야외 노출 줄이기":plan.rain>=40?"접이식 우산 챙기기":plan.wind>=20?"바람막이 챙기기":"체감온도 "+fmt(t)+"° 기준");let food=selectedFoodOptions();let f=food[foodIndex%food.length];$("foodTitle").textContent=f[0];$("foodText").textContent=f[1];$("foodMini").textContent="기온 맞춤 · "+(foodIndex%food.length+1)+"/"+food.length;const wCount=selectedWearOptions().length;$("wearMini").textContent+=(maskWorn()?" · 마스크":"")+" · "+(wearIndex%wCount+1)+"/"+wCount;$("actMini").textContent+=" · "+(actIndex%arr.length+1)+"/"+arr.length;$("activityArt").innerHTML=lifestyleArt(a[0],who,opts.indoor,t,plan.rain,plan.start?Number(plan.start.slice(11,13)):kst().hour,plan.wind);$("outfitArt").innerHTML=outfitArt(t,plan.rain,plan.wind);$("mealArt").innerHTML=mealArt(f[0]);$("windowCharacter").dataset.cast=who==="혼자"?"solo":"group";$("windowCharacter").innerHTML=windowCharacterArt(who,avatar,t,plan.rain,opts.indoor,plan.start?Number(plan.start.slice(11,13)):kst().hour,a[0],plan.wind);prepareShareCard();$("planBTitle").textContent=opts.indoor?"오늘은 실내 계획을 먼저":"날씨가 바뀐다면 · PLAN B";$("planBText").textContent=opts.indoor?"가까운 서점, 카페, 집에서 보내는 시간을 추천해요.":"갑자기 비가 오거나 바람이 강해지면 가까운 실내 전시나 카페로 바꿔요."}
 async function fetchWeather(r,source="manual"){locationMode=source;let id=++requestId;selected=r;actIndex=foodIndex=wearIndex=0;setBusy(true);setStatus(r.full+"의 실제 예보를 확인하고 있어요.","loading","동네 날씨 불러오는 중");let ctrl=new AbortController(),timer=setTimeout(()=>ctrl.abort(),18000);try{const q=new URLSearchParams({latitude:(Math.round(r.lat/0.05)*0.05).toFixed(2),longitude:(Math.round(r.lon/0.05)*0.05).toFixed(2),current:"temperature_2m,apparent_temperature,weather_code,wind_speed_10m,is_day",hourly:"temperature_2m,apparent_temperature,precipitation_probability,precipitation,weather_code,wind_speed_10m,wind_gusts_10m,uv_index",daily:"temperature_2m_min,temperature_2m_max,precipitation_probability_max,weather_code,sunrise,sunset",timezone:"Asia/Seoul",forecast_days:"7",wind_speed_unit:"kmh"});const aqPromise=fetchAirQuality(q);let res=await fetch("https://api.open-meteo.com/v1/forecast?"+q,{signal:ctrl.signal,referrerPolicy:"no-referrer"});if(!res.ok)throw Error("예보 요청 실패");let data=await res.json();if(!data.current||!data.hourly?.time?.length||!data.daily?.time?.length)throw Error("예보 데이터 부족");if(id!==requestId)return;clearTimeout(timer);const aq=await aqPromise;if(id!==requestId)return;if(!await waitForReelMinimum(id)||id!==requestId)return;airQuality=aq;render(data,false);setStatus(r.full+" · 실제 모델 예보가 적용됐어요.","live")}catch(e){if(id!==requestId)return;setStatus("예보를 불러오지 못했어요. 연결 상태를 확인하고 다시 시도해 주세요.","error")}finally{clearTimeout(timer);if(id===requestId)setBusy(false)}}
 function outerRings(g){if(!g)return[];return g.type==="Polygon"?[g.coordinates]:g.type==="MultiPolygon"?g.coordinates:[]}
 function bbox(polys){let minX=Infinity,minY=Infinity,maxX=-Infinity,maxY=-Infinity;for(const p of polys)for(const v of p[0]||[]){minX=Math.min(minX,v[0]);minY=Math.min(minY,v[1]);maxX=Math.max(maxX,v[0]);maxY=Math.max(maxY,v[1])}return[minX,minY,maxX,maxY]}
@@ -1570,12 +1580,13 @@ function activateMaskFace(el,keyboard=false){
  if(keyboard){activatedSound("select");document.querySelector('[data-face-key="'+key+'"]')?.focus()}
 }
 function changeWear(el=null,keyboard=false){
- if(!plan||!current||sample||$("gpsBtn").disabled)return;
- const count=selectedWearOptions().length;if(count<2)return;
+ if(!plan||!current||sample)return false;
+ const count=selectedWearOptions().length;if(count<2)return false;
  const key=el?.dataset.wearKey;
  if(maskDemoPhase!=="idle")finishMaskDemo();
  wearIndex=(wearIndex+1)%count;renderRecs();
  if(keyboard&&key){activatedSound("wear");document.querySelector('[data-wear-key="'+key+'"]')?.focus()}
+ return true;
 }
 document.addEventListener("click",e=>{const el=e.target?.closest?.("[data-mask-toggle],[data-wear-toggle]");if(el?.hasAttribute("data-wear-toggle"))changeWear(el);else if(el)activateMaskFace(el)});
 document.addEventListener("keydown",e=>{const el=e.target?.closest?.("[data-mask-toggle],[data-wear-toggle]");if(el&&(e.key==="Enter"||e.key===" ")){e.preventDefault();if(!e.repeat){if(el.hasAttribute("data-wear-toggle"))changeWear(el,true);else activateMaskFace(el,true)}}});
