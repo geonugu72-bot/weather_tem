@@ -1085,7 +1085,7 @@ function sceneDetail(title){
  const found=groups.find(([re])=>re.test(title));return found?D[found[1]]:"";
 }
 function sceneOutfit(look,indoor,title){
- if(!indoor||!/집에서|퍼즐|수채화|베이킹|쿠키|앨범|식물 돌보기|종이접기|미술 놀이|가족 영화|가족 보드게임|함께 요리/.test(title))return look;
+ if(!indoor||!["craft","kitchen","living","exercise","homeplant","pottery","candle","workshop","pingpong","bowling","cafe","gamecafe"].includes(activityVenue(title,indoor)))return look;
  return {...look,style:look.style==="tee"||look.style==="summer"?look.style:"shirt",cut:look.style==="tee"||look.style==="summer"?look.cut:"indoorKnit",coat:look.top,scarf:false,umbrella:false};
 }
 function sceneAtmosphere(indoor,night,wet){
@@ -1093,43 +1093,91 @@ function sceneAtmosphere(indoor,night,wet){
  const detail=Array.from({length:17},(_,i)=>{const x=5+i*31%173,y=95+i*11%37;return '<path d="M'+x+' '+y+'q-2-3-4-4m4 4 2-4" fill="none" stroke="'+(night?"#638276":"#799c77")+'" stroke-opacity=".42" stroke-width=".65"/>'}).join("");
  return '<g pointer-events="none">'+detail+(wet?'<ellipse cx="111" cy="135" rx="19" ry="3" fill="#b0c4c3" opacity=".42"/><path d="M98 135h26" stroke="#e4eeea" stroke-width=".7"/>':"")+'</g>';
 }
-function lifestyleArt(title,who,indoor,t,rain=0,startHour=12,wind=0){
- const id="act-",p=artP,night=!indoor&&!/노을/.test(title)&&(startHour>=(plan?.sunset??18)||startHour<(plan?.sunrise??7)),wet=!indoor&&rain>=40,cold=t<8,walk=!indoor&&/산책|걸어|나들이|데이트|투어|사진/.test(title),look=outfitLook(t,rain);
- let body="",props="",floor="";
- if(indoor){
-  body='<rect width="180" height="148" fill="url(#act-paper)"/><path d="M0 102H180V148H0Z" fill="url(#act-floor)"/><path d="M0 102H180M12 148l32-46m35 46 9-46m38 46-2-46m36 46-12-46" stroke="#b9af95" stroke-opacity=".5" stroke-width=".8"/><rect x="12" y="12" width="53" height="60" rx="2" fill="#b69d7b"/><rect x="15" y="15" width="47" height="54" fill="#d9e6df"/><path d="M15 57q16-16 47-9v21H15Z" fill="#aabfa6"/><path d="M38 15V69M15 41H62" stroke="#b69d7b" stroke-width="2"/><path d="M6 9H70M10 75H66" stroke="#9d896a" stroke-width="1.2"/><rect x="78" y="11" width="84" height="3" rx="1" fill="#d5c5a5"/><circle cx="120" cy="14" r="10" fill="#e6d6ae" opacity=".52"/>';
-  if(/서점|도서|체험|일기/.test(title)){
-   props='<rect x="115" y="23" width="55" height="88" rx="1" fill="#aa8d69"/><rect x="119" y="27" width="47" height="80" fill="#e7d9ba"/>'+[0,1,2].map(row=>'<path d="M119 '+(51+row*26)+'h47" stroke="#af9675" stroke-width="3"/>'+[0,1,2,3,4].map((j)=>'<rect x="'+(121+j*8)+'" y="'+(30+row*26+j%3*2)+'" width="'+(5+j%2)+'" height="'+(20-j%3*2)+'" rx=".6" fill="'+["#7f9a80","#b6755f","#d0ac6d","#8d9faa","#e2d5b3"][(j+row)%5]+'"/><path d="M'+(123+j*8)+' '+(35+row*26+j%3*2)+'v10" stroke="#f8edcf" stroke-width=".5"/>').join("")).join("");
-  }else if(/볼링/.test(title)){props='<path d="M111 95h64l-13 35h-38Z" fill="#b99a71"/><circle cx="125" cy="105" r="8" fill="#5d7d72"/><g fill="#f5eddc" stroke="#b7aa91"><path d="M145 91q-5-9 0-15q5 6 0 15l5 9h-10Z"/><path d="M158 91q-5-9 0-15q5 6 0 15l5 9h-10Z"/></g>';}else if(/스트레칭/.test(title)){props='<path d="M105 107l52-10 18 25-53 12Z" fill="#8fae9c"/><path d="M113 111l46-9" stroke="#c2d6bf" stroke-width="2"/><circle cx="147" cy="75" r="12" fill="#c49a7a"/>';}else if(/사진/.test(title)){props='<rect x="113" y="22" width="52" height="72" rx="4" fill="#d8b6a2"/><rect x="119" y="31" width="40" height="39" rx="4" fill="#f6ebd5"/><circle cx="139" cy="51" r="12" fill="#7d9b8a"/><rect x="131" y="77" width="16" height="4" fill="#b18d75"/>';}else if(/전시/.test(title)){
-   props='<rect x="112" y="23" width="47" height="57" rx="1" fill="#a88d69"/><rect x="116" y="27" width="39" height="49" fill="#f3e7cd"/><circle cx="142" cy="40" r="8" fill="#d2a06e"/><path d="M117 68l12-18 14 18 11-12v19h-37Z" fill="#8ca58b"/><rect x="128" y="84" width="18" height="3" fill="#c4baa2"/>';
-  }else if(/영화/.test(title)){
-   props='<rect x="105" y="21" width="64" height="43" rx="3" fill="#3f514a"/><rect x="109" y="25" width="56" height="35" fill="#9cb2b3"/><circle cx="140" cy="40" r="12" fill="#ead4a5"/><path d="M109 60l14-17 16 15 14-12 12 14" fill="#788e7f"/><path d="M132 66h15" stroke="#758478" stroke-width="3"/><rect x="100" y="91" width="75" height="22" rx="7" fill="#a5b4a0"/>';
-  }else if(/음악/.test(title)){
-   props='<rect x="117" y="74" width="47" height="27" rx="2" fill="#ae916d"/><ellipse cx="137" cy="84" rx="13" ry="8" fill="#465b50"/><ellipse cx="137" cy="84" rx="4" ry="2.5" fill="#deb477"/><path d="M156 78l-12 8" stroke="#e4d4b1" stroke-width="1.7"/><path d="M117 101v22m47-22v22" stroke="#917c60" stroke-width="2"/><path d="M137 54V37l12-3v15m-12 5q-8-4-5 3m17-8q-8-4-5 3" stroke="#79937c" stroke-width="1.4" fill="none"/>';
-  }else{
-   props='<ellipse cx="137" cy="93" rx="32" ry="7" fill="#b2946b"/><path d="M137 100v30m-10 0h20" stroke="#937e61" stroke-width="2.5"/>';
-   if(/요리/.test(title))props+='<path d="M117 78h40l-4 13h-32Z" fill="#6c9080"/><path d="M122 78q15-8 30 0M130 70q-5-7 0-12m12 12q-4-7 1-12" stroke="#a69b83" fill="none" stroke-width="1.5"/>';
-   else if(/보드게임/.test(title))props+='<path d="M119 84l25-5 11 9-25 4Z" fill="#e8d9ae"/><circle cx="130" cy="85" r="2.5" fill="#bd765b"/><circle cx="143" cy="86" r="2.5" fill="#648976"/>';
-   else props+='<rect x="125" y="79" width="15" height="12" rx="2" fill="#fcf3dd"/><path d="M140 81q7-1 5 5h-5M129 75q-3-4 1-7" stroke="#ad9070" fill="none" stroke-width="1.3"/>';
-  }
+/* V7.0: scene-specific spatial illustration, not an icon pasted onto a room. */
+function activityVenue(title,indoor){
+ if(/공원 벤치|공원에서 스케치|산책하며 손편지/.test(title))return "bench";
+ if(/서점|책방|도서관/.test(title))return indoor?"library":"bookstreet";
+ if(/도자기/.test(title))return "pottery";
+ if(/향초/.test(title))return "candle";
+ if(/볼링/.test(title))return "bowling";
+ if(/탁구/.test(title))return "pingpong";
+ if(/배드민턴/.test(title))return "badminton";
+ if(/실내 사진/.test(title))return "studio";
+ if(/전시/.test(title))return "gallery";
+ if(/쇼핑/.test(title))return "mall";
+ if(/실내 식물 구경/.test(title))return "plantshop";
+ if(/식물 돌보기/.test(title))return "homeplant";
+ if(/요리|베이킹|쿠키/.test(title))return "kitchen";
+ if(/영화|음악/.test(title))return "living";
+ if(/스트레칭/.test(title))return "exercise";
+ if(/일기|카페에서/.test(title))return "cafe";
+ if(/보드게임 카페/.test(title))return "gamecafe";
+ if(/퍼즐|보드게임|수채화|앨범|종이접기|미술 놀이/.test(title))return "craft";
+ if(/실내 체험/.test(title))return "workshop";
+ if(/꽃집/.test(title))return "florist";
+ if(/빵집/.test(title))return "bakery";
+ if(/문구점|소품숍/.test(title))return "shop";
+ if(/시장|간식 투어/.test(title))return "market";
+ if(/테라스/.test(title))return "terrace";
+ if(/카페까지/.test(title))return "cafestreet";
+ if(/하천/.test(title))return "river";
+ if(/정원/.test(title))return "garden";
+ if(/놀이터/.test(title))return "playground";
+ if(/피크닉/.test(title))return "picnic";
+ if(/벽화/.test(title))return "mural";
+ if(/건축/.test(title))return "architecture";
+ if(/노을|야경/.test(title))return "nightwalk";
+ return indoor?"craft":/동네 산책|걷기 운동/.test(title)?"street":"park";
+}
+function venueBackdrop(title,indoor,night=false,wet=false,cold=false){
+ const v=activityVenue(title,indoor),R=(x,y,w,h,c,rx=0)=>'<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" rx="'+rx+'" fill="'+c+'"/>',P=(d,c,stroke="none",sw=.8)=>'<path d="'+d+'" fill="'+c+'" stroke="'+stroke+'" stroke-width="'+sw+'" stroke-linejoin="round"/>',L=(d,c,w=1)=>P(d,"none",c,w),E=(x,y,rx,ry,c)=>'<ellipse cx="'+x+'" cy="'+y+'" rx="'+rx+'" ry="'+ry+'" fill="'+c+'"/>';
+ const window=(x=12,y=11,w=55,h=63)=>R(x-3,y-3,w+6,h+6,"#c2af91",2)+R(x,y,w,h,wet?"#a7bfc3":"#d3e3df")+P("M"+x+" "+(y+h*.69)+"q"+w*.28+" -13 "+w+" -5v"+(h*.31+5)+"h-"+w+"Z","#a8bda5")+L("M"+(x+w/2)+" "+y+"v"+h+"M"+x+" "+(y+h/2)+"h"+w,"#a18f75",2)+R(x-5,y+h+2,w+10,3,"#b7a38a");
+ const shelf=(x,y,w,h,kind)=>{let out=R(x,y,w,h,"#967e61",1)+R(x+3,y+3,w-6,h-6,"#eee1ca");for(let row=0;row<3;row++){let yy=y+5+row*(h-7)/3;out+=R(x+3,yy+(h-7)/3-3,w-6,2.5,"#b39a77");for(let j=0;j<Math.floor(w/8);j++){let xx=x+5+j*8,cc=["#748d80","#b67c64","#d0ad72","#819aa0","#c9b69a"][(j+row)%5];if(kind==="books")out+=R(xx,yy+4+j%3,5+j%2,(h-7)/3-7-j%3,cc,.5)+L("M"+(xx+1)+" "+(yy+8)+"h3","#e9dfc6",.5);else if(kind==="pots")out+=E(xx+3,yy+5,3.3,1.4,"#967563")+P("M"+xx+" "+(yy+5)+"q-2 8 3 10q5-2 3-10Z",cc,"#9d826b",.4);else if(kind==="plants")out+=P("M"+xx+" "+(yy+10)+"h7l-1 7h-5Z","#b78b71")+L("M"+(xx+3)+" "+(yy+10)+"v-7m0 3-3-3m3 3 3-4","#648d68",1.7);else out+=R(xx,yy+5,6,(h-7)/3-9,cc,1);}}return out};
+ const table=(x,y,w,depth=13)=>P("M"+x+" "+y+"h"+w+"l8 "+depth+"h-"+(w+16)+"Z","#c3a17c","#a18465")+P("M"+(x-8)+" "+(y+depth)+"h"+(w+16)+"v5h-"+(w+16)+"Z","#987858")+L("M"+(x-3)+" "+(y+depth+5)+"v"+(148-y-depth-5)+"M"+(x+w+3)+" "+(y+depth+5)+"v"+(148-y-depth-5),"#8f765d",3);
+ const wall=(c="#e9dfcf",floor="#d0bda3")=>R(0,0,180,106,c)+R(0,106,180,42,floor)+L("M0 105H180M-10 148L48 106M55 148l18-42m48 42-13-42m56 42-33-42M0 122H180M0 137H180","#a79b85",.65);
+ const city=()=>R(0,0,180,148,night?"#84979c":wet?"#c3d0cf":"#d7e5e2")+R(0,108,180,40,"#c1b7a7")+R(0,99,180,13,"#d7c9b3")+L("M0 112H180M0 131H180M30 112l-10 19m85-19 4 19m48-19 10 19","#a59a89",.7);
+ const building=(x,w,c,sign)=>{let y=13;return R(x,y,w,94,c)+R(x+3,y+3,w-6,12,"#b8a28a")+R(x+7,39,w-14,59,"#869d99")+R(x+10,43,w-20,50,"#d7e0cf")+R(x+w-19,43,12,55,"#9d8b72")+R(x+4,29,w-8,11,"#58786d")+L("M"+(x+10)+" 46v45M"+(x+7)+" 73h"+(w-26),"#afab94",1)+ '<text x="'+(x+w/2)+'" y="37" text-anchor="middle" font-size="6.8" font-family="sans-serif" font-weight="700" fill="#fff6de">'+sign+'</text>'};
+ let back="",front="",pose="stand";
+ if(["library","pottery","candle","workshop","plantshop","mall","cafe","gamecafe","craft","kitchen","living","exercise","homeplant","gallery","studio","bowling","pingpong"].includes(v)){
+  back=wall(v==="gallery"?"#f4f0e8":v==="studio"?"#dfd2c8":v==="pingpong"?"#d7e3dd":"#eadfcd",v==="pingpong"?"#91aba0":"#ccb79c");
+  if(v==="library"){back+=shelf(3,8,69,97,"books")+shelf(109,8,68,97,"books")+R(77,10,27,85,"#d7cbb5")+R(81,15,19,73,"#dbe7dd");}
+  else if(v==="pottery"||v==="candle"||v==="workshop"){back+=window(7,12,48,49)+shelf(103,8,73,88,v==="pottery"?"pots":"supplies")+R(4,82,66,19,"#b39170")+L("M7 101v20m56-20v20","#92765a",2);pose="table";front=table(30,96,120)+ (v==="pottery"?E(88,105,19,5,"#9f9f91")+E(88,102,15,4,"#c7c0a7")+P("M77 91q-6 11 1 13q10 5 20 0q7-3 1-13Z","#bd896b","#94654e")+E(88,91,11,4,"#8c614e")+E(88,91,8,2.5,"#c18b6b")+L("M79 99q9 4 18 0","#e1ac8f"):v==="candle"?R(68,91,15,15,"#e9cda9",2)+E(75.5,91,7.5,3,"#f7edce")+L("M75 91v-5","#75604c")+R(95,85,13,20,"#91a99a",2)+E(101.5,85,6.5,2.5,"#eee7cb")+L("M101 85v-5","#75604c"):R(72,92,35,12,"#f3e9d0",2)+L("M77 96h25m-25 4h16","#a7aa91",.8));}
+  else if(v==="kitchen"){back+=R(0,8,70,43,"#a8b8a4")+R(73,8,48,43,"#c2ad90")+R(124,8,56,43,"#a8b8a4")+L("M35 8v43m62-43v43m55-43v43","#788e7e",.8)+R(0,53,180,32,"#f2ede1")+L("M0 64H180M0 75H180M20 53v32m20-32v32m20-32v32m20-32v32m20-32v32m20-32v32m20-32v32m20-32v32","#c7c7b8",.6)+R(0,84,180,7,"#aa8d6c")+R(5,91,170,17,"#a6b29d")+R(121,88,42,37,"#697a71",2)+R(126,96,32,21,"#4c5b55",2)+L("M130 93h23","#ded8c6",1.4);pose="table";front=table(26,96,128)+( /베이킹|쿠키/.test(title)?R(66,94,49,14,"#69766d",2)+[0,1,2,3].map(i=>E(75+i*11,100,4.5,3.5,"#c89555")+E(74+i*11,99,1,1,"#75523b")).join(""):E(87,99,18,7,"#b9c5b5")+P("M69 99q4 16 18 16t18-16Z","#72988d")+E(87,99,16,5,"#efe0b9")+L("M82 100l20-14","#8f765b",2));}
+  else if(v==="gallery"){back+=R(0,0,180,6,"#d5cabb")+[10,73,132].map((x,i)=>R(x,22,38,49,"#a38b70")+R(x+3,25,32,43,"#f7eddb")+P("M"+(x+3)+" 66l11-23 10 12 8-13 3 24Z",["#a7b6a1","#c6a092","#8eaab0"][i])+E(x+24,35,6,6,"#d9b174")+R(x+13,75,13,2,"#afa89b")).join("")+R(112,102,53,6,"#a89881",2)+L("M118 108v14m40-14v14","#8f806d",2);}
+  else if(v==="studio"){back+=P("M23 12H157V111Q149 128 135 128H43Q23 126 23 111Z","#c2cfc3")+L("M23 15v111M157 15v111","#9d9b8a",2)+P("M7 28l23 8-7 20-23-8Z","#f9f1d8","#a9a395")+L("M12 52v65m0 0-8 11m8-11 11 11","#555f59",1.8)+P("M173 28l-23 8 7 20 23-8Z","#f9f1d8","#a9a395")+L("M168 52v65m0 0-11 11m11-11 8 11","#555f59",1.8);front=R(81,115,18,11,"#4b5c58",2)+E(90,120,5,5,"#91aaa6")+L("M90 126v13m0-5-8 12m8-12 8 12","#4a5854",1.5);}
+  else if(v==="bowling"){back=R(0,0,180,148,"#b7aa9a")+R(0,0,180,38,"#566d67")+[9,65,121].map(x=>R(x,6,49,24,"#d4dfd7",2)+L("M"+(x+5)+" 13h39m-"+39+" 7h39","#81998b",.8)).join("")+P("M62 43H118L180 148H0Z","#cfa477","#9f805b")+L("M76 43L38 148M90 43v105M104 43l38 105M63 43L0 148M118 43l62 105","#eed4a9",1.2)+[72,82,92,102,112].map((x,i)=>P("M"+x+" 42q-3-6 0-12q3 6 0 12l4 9h-8Z","#faf4e7","#c8beb0",.5)+L("M"+(x-1)+" 38h2","#ae6956",1)).join("");front=E(139,130,10,9,"#627f77")+E(137,127,1.2,1.2,"#314c45")+E(141,127,1.2,1.2,"#314c45");}
+  else if(v==="pingpong"){back+=R(9,10,162,32,"#e8ede5")+L("M50 10v32m40-32v32m40-32v32","#a2b3a7",1)+L("M0 142h180M45 106l-20 42m110-42 20 42","#e2e9da",1.4);pose="table";front=P("M36 89h108l23 35H13Z","#588f83","#3f7167")+L("M36 89h108l23 35H13Z M90 89v35","#f4f3de",1.2)+R(13,124,154,4,"#3f7167")+L("M28 128v20m124-20v20","#68746c",3)+P("M23 105h134v-8H23Z","#e0e5dc","#758b80",.7)+E(114,101,2.4,2.4,"#fff6de");}
+  else if(v==="living"||v==="exercise"||v==="homeplant"){back+=window(8,8,56,64)+R(111,88,61,23,"#a9957a",3)+R(115,111,4,14,"#9c8164")+R(164,111,4,14,"#9c8164");if(v==="living"){back+=R(100,25,73,44,"#465b58",3)+R(104,29,65,36,"#a4b8ba")+P("M104 65l16-20 15 12 16-20 18 28Z","#6e948b")+E(145,39,7,7,"#e9c48a")+R(129,70,15,3,"#53655b")+R(12,83,61,36,"#a6b2a0",8)+R(7,102,71,17,"#93a48f",6);if(/음악/.test(title))back+=R(115,81,46,12,"#a5815f",2)+E(130,86,10,4,"#4b5a52")+E(130,86,2,1,"#d2ad78")+L("M154 83l-16 4","#dcd4b9",1.4);front=E(88,132,55,10,"#e2d0b7");}else if(v==="exercise"){front=P("M32 114l104-7 19 28-111 5Z","#88a99a","#668779")+L("M39 119l101-7m-96 19 103-7","#bdcfc0",1);}else {back+=shelf(102,11,72,78,"plants");front=E(137,128,18,5,"#b9a78b")+P("M123 113h28l-4 17h-20Z","#b98265")+L("M137 114V89m0 12-11-9m11 8 12-11","#628466",2)+E(126,91,6,3,"#89a87b")+E(148,89,6,4,"#84a779");}}
+  else if(v==="plantshop"){back+=shelf(4,9,64,96,"plants")+shelf(112,9,64,96,"plants")+window(73,12,34,61);}
+  else if(v==="mall"){back+=R(0,4,180,13,"#c2baa9")+R(7,21,65,84,"#a3b5ad")+R(108,21,65,84,"#d2b7a0")+L("M8 44h63m38 0h63","#6e887e",2)+[16,34,52,117,135,153].map((x,i)=>P("M"+x+" 49l-7 7 4 6 3-2v20h14V60l3 2 4-6-7-7Z",["#c58d79","#f3e8ce","#7b9b94"][i%3])).join("");}
+  else{back+=window(7,9,56,59)+R(108,8,65,72,"#c2aa8a",2)+R(111,11,59,66,"#eee3cd")+L("M111 33h59m-59 23h59","#b09a7f",2);if(v==="cafe"||v==="gamecafe"){back+=R(116,17,15,13,"#6c8277",2)+E(145,25,11,4,"#b48c64")+R(105,82,75,15,"#a58361");}else back+=shelf(109,8,64,72,"supplies");pose="table";front=table(29,96,122);if(/퍼즐|보드게임/.test(title)){front+=P("M63 94h49l8 12H58Z","#e8d8b8","#aa9372")+[0,1,2,3,4,5].map(i=>R(68+i%3*12,96+Math.floor(i/3)*4,9,4,["#9aa991","#d1a279","#7a9b9c"][i%3],1)).join("");}else if(/앨범|일기|종이접기|수채화|미술/.test(title)){front+=P("M67 93h42l8 13H60Z","#f8efd9","#ae9b80")+L("M69 98h34m-32 4h21","#b4b4a0",.8)+L("M112 95l10 8","#ae7855",2)+ ( /수채화|미술/.test(title)?E(124,103,10,4,"#cdb993")+E(120,102,2,2,"#c5826b")+E(127,103,2,2,"#709b86"):"");}else front+=E(92,103,12,4,"#f5ebd6")+P("M84 94h16l-2 9H86Z","#eee2ca","#a9957b")+E(92,94,8,2.5,"#a7724d");}
+ }else if(["bookstreet","bakery","florist","shop","market","cafestreet","terrace","architecture","mural","street"].includes(v)){
+  back=city();
+  if(v==="architecture"||v==="street"){back+=building(5,76,"#d0b79b","")+building(88,85,"#b5b8a4","")+R(11,16,64,16,"#c4a88d")+R(94,16,71,16,"#9eaa9a");}
+  else if(v==="mural"){back+=R(3,11,174,94,"#d6c5a8")+E(130,39,19,19,"#dcaf79")+P("M4 99l35-60 31 39 36-52 37 62 34-37v49Z","#8da9a0")+P("M4 100q40-35 80-5t93-3v13H4Z","#be907c")+L("M0 105h180","#9e8b73",2);}
+  else if(v==="market"){back+=building(1,87,"#d3b99b","MARKET")+building(93,87,"#b7bda9","MARKET")+P("M0 44h87l-6 15H4Z","#b77b64")+P("M92 44h88l-4 15H96Z","#7c9d8c")+[0,1,2,3].map(i=>R(9+i*19,83,16,13,"#bda07b")+E(17+i*19,84,6,4,["#bb765b","#d4aa6c","#8aa374"][i%3])).join("");}
+  else{const sign={bookstreet:"BOOKS",bakery:"BAKERY",florist:"FLOWER",shop:/문구/.test(title)?"STATIONERY":"SHOP",cafestreet:"COFFEE",terrace:"COFFEE"}[v];back+=building(7,166,v==="florist"?"#c6cbb6":"#d4bea4",sign);if(v==="bookstreet")back+=shelf(15,47,64,43,"books")+shelf(85,47,48,43,"books");else if(v==="florist")back+=shelf(16,47,113,44,"plants");else if(v==="bakery")back+=[0,1,2,3,4].map(i=>E(24+i*21,65,8,5,"#c39059")+L("M"+(20+i*21)+" 63l5 2","#efd2a1")).join("")+L("M18 74h109","#ab9678",2);else if(v==="shop")back+=shelf(14,46,116,46,"supplies");else back+=R(18,50,108,23,"#b9a388")+E(42,65,11,4,"#e6d5bb")+E(98,65,11,4,"#e6d5bb");if(v==="terrace"){front=E(135,115,26,7,"#b79a74")+L("M135 121v22m-15 0h30","#8b765d",2)+E(134,113,7,3,"#f7ead3")+P("M129 104h10l-1 9h-8Z","#f3e7d0");}}
  }else{
-  body='<rect width="180" height="148" fill="url(#act-'+(night?"dusk":"sky")+')"/>';
-  body+=night?'<circle cx="147" cy="24" r="13" fill="#f8e9bd"/><circle cx="152" cy="20" r="11" fill="#8c9e9e"/><g fill="#f7e9c5"><circle cx="118" cy="17" r=".9"/><circle cx="165" cy="38" r="1"/><circle cx="95" cy="28" r=".7"/></g>':wet?'<path d="M107 28q5-10 16-7 8-10 18-3 11-3 16 7 10 1 11 9H107Z" fill="#edf0e8"/>':'<circle cx="147" cy="26" r="17" fill="#e7c57f" opacity=".95"/><path d="M75 34q10-8 20-2 9-7 18 2" stroke="#f5f0db" stroke-width="4" stroke-linecap="round" fill="none"/>';
-  body+='<path d="M0 79Q35 56 72 74T144 67L180 80V148H0Z" fill="'+(night?"#a2b4a1":"#c2d0b4")+'"/><path d="M0 100Q49 77 92 98T180 86V148H0Z" fill="'+(night?"#789884":"#9db79a")+'"/><path d="M0 148Q66 112 117 120T180 108V148Z" fill="#d9d4b7"/><path d="M0 148Q65 116 116 124T180 113" stroke="#eee5ce" stroke-width="9" fill="none"/><path d="M0 148Q65 116 116 124T180 113" stroke="#c3bda2" stroke-width=".65" fill="none"/>';
-  // Neighborhood silhouettes, windows and garden trees make it a scene rather than a generic icon.
-  body+='<g opacity=".83"><path d="M78 84V55l14-10 15 10v29Z" fill="#ece2cc"/><path d="M75 55l17-13 18 13" stroke="#a77d63" stroke-width="3" stroke-linecap="round" fill="none"/><rect x="86" y="63" width="6" height="9" fill="'+(night?"#e5c889":"#a1b5a8")+'"/><rect x="97" y="62" width="5" height="9" fill="#9db3a5"/><path d="M110 85V59h21v26Z" fill="#d6c6a9"/><path d="M108 59h25" stroke="#9f8b70" stroke-width="2.5"/><rect x="115" y="65" width="4" height="7" fill="#a6b6a7"/><rect x="123" y="65" width="4" height="7" fill="'+(night?"#ebcb85":"#a6b6a7")+'"/></g>';
-  body+=treeArt(19,61,1.04,cold)+treeArt(165,66,.76,cold);
-  for(let i=0;i<12;i++){let gx=7+i*15,gy=120+(i*7%16);body+='<path d="M'+gx+' '+gy+'l-1-4m1 4 3-3" stroke="#648a72" stroke-width=".8" opacity=".45" stroke-linecap="round"/>'}
-  if(wet)body+='<g stroke="#658b91" stroke-opacity=".36" stroke-width=".85" stroke-linecap="round">'+Array.from({length:20},(_,i)=>'<path d="M'+(5+i*31%174)+' '+(12+i*17%91)+'l-3 6"/>').join("")+'</g>';
-  if(/피크닉/.test(title))props='<path d="M109 113l55-8 16 30-61 7Z" fill="#ecd2aa"/><path d="M119 112l9 28m9-31 10 28m8-30 9 28m-51-14 56-9m-51 19 57-9" stroke="#b97e66" stroke-width="1" opacity=".7"/><rect x="137" y="106" width="22" height="15" rx="2" fill="#b88b58"/><path d="M141 106q7-16 14 0" stroke="#8f6e49" stroke-width="2" fill="none"/>';
-  else if(/카페|간식|빵집|시장|꽃집/.test(title))props='<rect x="127" y="62" width="43" height="37" fill="#d6c3a1"/><path d="M125 62h47l-5 10h-38Z" fill="#b77e62"/><path d="M130 62l2 10m10-10v10m10-10-1 10m10-10-2 10" stroke="#f1dfbd" stroke-width="2.5"/><rect x="132" y="76" width="12" height="18" fill="#a1b9a9"/><rect x="148" y="76" width="17" height="12" fill="#e9d4a5"/>';
-  else if(/놀이터/.test(title))props='<path d="M119 112l18-54 30 54M127 88h32" stroke="#a9886b" stroke-width="3" fill="none"/><path d="M137 60h14v25h-14Z" fill="#e5b973"/><path d="M148 85l22 24" stroke="#d5b37a" stroke-width="7"/>';else if(/사진/.test(title))props='<rect x="115" y="86" width="21" height="14" rx="3" fill="#516359"/><circle cx="125" cy="93" r="4.5" fill="#dce4d5"/><rect x="120" y="83" width="7" height="4" rx="1" fill="#516359"/>';
-  else if(night)props='<path d="M146 110V62q0-6-6-6h-6" stroke="#566b61" stroke-width="2.2" fill="none"/><path d="M130 56h11l4 7h-19Z" fill="#eacb85"/>';
+  back=R(0,0,180,148,night?"#899ba3":wet?"#c5d2d1":"#d7e5de")+E(148,24,15,15,night?"#f2dfb5":"#e7c17c")+P("M0 76Q35 50 74 68T180 63V148H0Z","#bbceb0")+P("M0 91Q48 72 92 89T180 84V148H0Z","#93ae91")+P("M0 148Q63 101 118 115T180 102V148Z","#dcd4bb")+treeArt(13,56,.83,cold)+treeArt(165,58,.75,cold);
+  if(v==="river"){back=R(0,0,180,148,"#d4e2dc")+P("M0 56Q60 43 180 54V148H0Z","#9bb8ac")+P("M0 75Q80 60 180 72V116Q80 101 0 120Z","#85acb5")+L("M4 86q70-14 171-5M8 100q90-11 164-6","#d7e5dc",1.5)+P("M0 119q90-22 180-7v36H0Z","#d4c8ad")+L("M0 114q90-20 180-8","#a28e73",3)+[10,45,80,115,150,175].map(x=>L("M"+x+" 100v15","#927b63",1.5)).join("")+treeArt(13,46,.7,cold);}
+  if(v==="garden"){back+=P("M98 97V52Q98 20 137 20t39 32v45","#c7d6be","#77977e",2)+L("M109 97V53q0-20 28-20t28 20v44","#77977e",2)+[0,1,2,3,4,5,6,7].map(i=>{let x=8+i*23,y=103+i%2*15;return L("M"+x+" "+(y+12)+"v-13m0 6-4-5","#6e966f",1.5)+E(x,y,4,5,["#cf8d80","#d9b66b","#b69bb4"][i%3])+E(x,y,1.5,1.5,"#f6e7bc")}).join("");}
+  if(v==="playground"){back+=L("M105 103V38h46v65m-49-65h52M108 58h40","#b68f69",4)+P("M115 38l13-16 18 16Z","#c08b68")+R(116,60,28,7,"#d7b06a")+P("M143 64l32 36-5 5-34-36Z","#d8b478","#a58760")+L("M18 94l18-49 19 49M25 63h23M34 63v23","#9c7f63",2)+R(29,84,11,3,"#be876d");}
+  if(v==="bench"){back+=R(111,78,60,7,"#bca17a")+R(111,88,60,6,"#bca17a")+R(109,97,65,8,"#9e835f")+L("M116 105v19m50-19v19m-50-47v21m50-21v21","#7e6c54",2.4);}
+  if(v==="picnic"){front=P("M67 117l78-10 27 28-92 11Z","#e6c4a9","#b8977b")+L("M84 115l13 29m10-32 15 29m8-32 15 28M75 125l81-11m-77 22 85-10","#b77c6d",.8)+R(125,115,22,14,"#b79768",2)+P("M129 115q7-14 14 0","none","#8e7251",2);}
+  if(v==="badminton"){back+=P("M24 100h123l28 41H3Z","#99b6a3","#e4ebd7")+L("M24 100h123l28 41H3Z M90 100v41","#f4f0d9",1.2)+L("M12 75v43m155-43v43","#8e9279",2)+R(12,77,155,22,"#cdd9c6")+L("M12 77h155M12 99h155","#eee9d4",1.2)+Array.from({length:16},(_,i)=>L("M"+(14+i*10)+" 77v22","#94aa94",.45)).join("");}
+  if(v==="nightwalk"){back+=L("M148 107V51q0-7-7-7h-10","#687e74",3)+P("M129 44h14l4 8h-22Z","#f4d69a")+E(136,53,19,12,"#e8cb91");}
  }
- const detail=sceneDetail(title);if(detail)props=detail;const cast=castFor(who,avatar),count=cast.length,poses=count===1?[[82,24,.83]]:count===2?[[57,29,.79],[105,35,.74]]:familyPoses(cast,"activity");
- const looks=coordinatedLooks(cast,t,rain,wind,indoor,title),stage=garmentStage(looks);
- const people=poses.map(([x,y,k],i)=>'<ellipse cx="'+x+'" cy="'+(y+116*k)+'" rx="'+(27*k)+'" ry="'+(5*k)+'" fill="url(#act-shadow)"/>'+littlePerson(x,y,k,{...looks[i],...cast[i],maskInteractive:true,faceKey:"activity-"+i,gesture:i===0?activityGesture(title):"",walk,bag:!indoor&&i===0&&!look.umbrella&&!activityGesture(title),umbrella:wet&&wind<35&&i===0})).join("");
- return artSvg(id,indoor?"url(#act-paper)":"url(#act-sky)",materialFills(body,id+"scene","scene")+'<defs><radialGradient id="act-light"><stop stop-color="'+stage.base+'" stop-opacity=".56"/><stop offset="1" stop-color="'+stage.base+'" stop-opacity="0"/></radialGradient></defs><ellipse cx="75" cy="79" rx="72" ry="69" fill="url(#act-light)"/>'+sceneAtmosphere(indoor,night,wet)+materialFills(props,id+"prop","scene")+people);
+ if(wet&&!indoor)back+='<g stroke="#7a9ca1" stroke-opacity=".45" stroke-width=".7">'+Array.from({length:22},(_,i)=>L("M"+(5+i*31%174)+" "+(12+i*17%91)+"l-3 6","#7a9ca1",.7)).join("")+'</g>';
+ return {back,front,pose,v};
+}
+function lifestyleArt(title,who,indoor,t,rain=0,startHour=12,wind=0){
+ const id="act-",night=!indoor&&!/노을/.test(title)&&(startHour>=(plan?.sunset??18)||startHour<(plan?.sunrise??7)),wet=!indoor&&rain>=40;
+ const venue=venueBackdrop(title,indoor,night,wet,t<8),cast=castFor(who,avatar),looks=coordinatedLooks(cast,t,rain,wind,indoor,title);
+ const n=cast.length,positions=n===1?[[88,26,.80]]:n===2?[[54,28,.76],[116,32,.72]]:familyPoses(cast,"activity");
+ const walk=!indoor&&/산책|걸어|나들이|투어/.test(title)&&!["bench","picnic","badminton","playground"].includes(venue.v);
+ const gesture=activityGesture(title);
+ const people=positions.map(([x,y,k],i)=>'<ellipse cx="'+x+'" cy="'+(y+118*k)+'" rx="'+(24*k)+'" ry="'+(4*k)+'" fill="url(#act-shadow)"/>'+littlePerson(x,y,k,{...looks[i],...cast[i],maskInteractive:true,faceKey:"activity-"+i,gesture:i===0||["racket","pingpong","book"].includes(gesture)?gesture:"",walk,bag:!indoor&&walk&&!gesture&&i===0,umbrella:wet&&wind<35&&i===0})).join("");
+ return artSvg(id,"url(#act-paper)",materialFills(venue.back,id+"venue","scene")+people+'<g pointer-events="none">'+materialFills(venue.front,id+"foreground","scene")+'</g>');
 }
 function outfitArt(t,rain,wind){
  const look=outfitLook(t,rain,avatar,wearIndex,wind),id="wear-",st=look.style,stage=garmentStage([look]);
@@ -1165,10 +1213,17 @@ function mealArt(title){
  let inner="",base=kim?"#bc6545":juk?"#c7bd91":eom?"#bb965f":kong?"#ece0b6":"#eddfb6";
  if(kim)inner=Array.from({length:7},(_,i)=>'<path d="M'+(49+i*12)+' '+(68+i%3*8)+'q9-9 16 1l-6 9-10-2Z" fill="'+["#c76d4f","#e0a36b","#e7d8b7"][i%3]+'"/>').join("")+'<g><path d="M84 71l18-4 10 7-18 5Z" fill="#fff0d1"/><path d="M84 71v11l10 6v-9Z" fill="#d4bd96"/><path d="M94 79l18-5v11l-18 3Z" fill="#e8d4ad"/><path d="M57 67q10-6 20 2m-17 2 13 3m41 5 11-7" stroke="#eac19a" stroke-width="1.2" fill="none"/></g>';
  else if(juk)inner='<ellipse cx="90" cy="78" rx="48" ry="20" fill="#d8cda5"/>'+Array.from({length:38},(_,i)=>'<ellipse cx="'+(49+i*19%78)+'" cy="'+(65+i*7%27)+'" rx="2.2" ry="1.2" fill="#eee0b8" stroke="#a99c73" stroke-width=".25" transform="rotate('+(i*23%160)+' '+(49+i*19%78)+' '+(65+i*7%27)+')"/>').join("")+'<g fill="#b39b76" stroke="#9d8668"><path d="M68 69q13-10 23 0l-5 10-14 1Z"/><path d="M99 80q12-9 22 0l-5 9-13 1Z"/><path d="M72 69l13-2m-12 5 11-2m18 9 13-2m-12 5 10-2" fill="none" stroke="#e4d5b6" stroke-width="1.4"/></g><path d="M84 63l9 6m-12-3 8 6" stroke="#648060" stroke-width="2"/>';
- else if(eom)inner=[0,1,2].map(i=>'<g transform="translate('+(66+i*24)+' '+(72+i%2*8)+') rotate('+(-30+i*18)+')"><path d="M0-34v61" stroke="#957348" stroke-width="1.6"/><path d="M-8-12q16-8 16 1t-16 8 16 7-16 7 16 5" fill="none" stroke="#eed39e" stroke-width="7" stroke-linecap="round"/></g>').join("");
+ else if(eom){
+  // Folded rectangular fish cake sheets, with individual folds and wooden skewers.
+  const radish=(x,y,k)=>'<g transform="translate('+x+' '+y+') scale('+k+')"><path d="M-12 0l4-8 20 1 2 8-5 6-19-1Z" fill="#e6d9ae" stroke="#c2ab7e" stroke-width=".6"/><path d="M-8-6l18 1 1 5-18-1Z" fill="#fff0c7" opacity=".65"/></g>';
+  const fold=(x,y,angle,k)=>'<g transform="translate('+x+' '+y+') rotate('+angle+') scale('+k+')"><path d="M0-47V31" stroke="#8e6039" stroke-width="2.3" stroke-linecap="round"/><path d="M-.5-46V30" stroke="#efd29b" stroke-width=".7" stroke-linecap="round"/>'+[0,1,2,3].map(j=>{let yy=-19+j*10;return '<path d="M-12 '+yy+'Q-15 '+(yy+3)+'-10 '+(yy+7)+'L9 '+(yy+9)+'Q15 '+(yy+8)+'13 '+(yy+3)+'L-5 '+(yy-1)+'Q-9 '+(yy-2)+'-12 '+yy+'Z" fill="#ca9b5e" stroke="#a47543" stroke-width=".8"/><path d="M-12 '+yy+'Q-8 '+(yy-3)+'-3 '+(yy-1)+'L12 '+(yy+3)+'Q14 '+(yy+5)+'10 '+(yy+6)+'L-8 '+(yy+3)+'Z" fill="#ecd09a"/><path d="M-9 '+(yy+4)+'L9 '+(yy+7)+'" stroke="#a77b4b" stroke-width=".65" opacity=".7"/><circle cx="-5" cy="'+(yy+1)+'" r=".6" fill="#ad8050"/><circle cx="6" cy="'+(yy+4)+'" r=".55" fill="#b58b56"/>'}).join("")+'</g>';
+  inner=radish(51,82,.85)+radish(113,87,.78)+radish(88,93,.62)+ '<g fill="none" stroke="#6c975d" stroke-width="2">'+[0,1,2,3,4,5,6].map(i=>'<ellipse cx="'+(57+i*17%66)+'" cy="'+(70+i*7%21)+'" rx="3" ry="1.7" transform="rotate('+i*23+' '+(57+i*17%66)+' '+(70+i*7%21)+')"/>').join("")+'</g>'+fold(68,72,-28,.85)+fold(91,70,-6,.90)+fold(113,72,22,.82)+'<path d="M48 87q8 4 16 2m45 5q10 0 17-4" fill="none" stroke="#f4d9a3" stroke-width="1.1" opacity=".65"/>';
+ }
  else if(kong)inner=Array.from({length:7},(_,i)=>'<path d="M49 '+(66+i*4)+'q20-9 39 0t40 0" fill="none" stroke="#f7efd7" stroke-width="3"/>').join("")+'<path d="M72 64l18 12m-12-15 18 12m-12-14 17 12" stroke="#6e9a68" stroke-width="3.4"/><path d="M109 65l12 5-9 8-8-6Z" fill="#bd7867"/>';
  else inner='<path d="M56 79q19-24 44-6t-14 19q-26-3-9-13t21 3" fill="none" stroke="#f6e8c7" stroke-width="3.4"/><g fill="#b48a56"><rect x="65" y="68" width="9" height="8" rx="2"/><rect x="104" y="78" width="10" height="9" rx="2"/></g>';
- body+=linen+(kong?"":steam)+bowl(base,inner,eom);
+ if(eom){
+  body+=linen+steam+'<path d="M34 70q-15-5-19 5t19 14m112-19q15-5 19 5t-19 14" fill="none" stroke="#424845" stroke-width="5"/><path d="M28 77q5 48 62 53 57-5 62-53Z" fill="#414b48" stroke="#283b37" stroke-width="1.2"/><path d="M40 108q50 26 100 0" stroke="#626c61" stroke-width="2" fill="none"/><ellipse cx="90" cy="77" rx="62" ry="28" fill="#5b6255" stroke="#293a36" stroke-width="1.1"/><ellipse cx="90" cy="77" rx="55" ry="23" fill="#cda66a" stroke="#8e774e" stroke-width=".9"/><ellipse cx="90" cy="77" rx="54" ry="22" fill="url(#meal-liquid)"/>'+inner+'<path d="M30 80q7 27 60 27t60-27" stroke="#777b69" stroke-width="2" fill="none"/>';
+ }else body+=linen+(kong?"":steam)+bowl(base,inner);
  if(kim)body+='<g transform="translate(30 49)"><ellipse rx="23" ry="9" fill="#f6edd7" stroke="#b8b8a4"/><path d="M-20 0q2 20 20 20T20 0" fill="#d7dfcc" stroke="#a1ad9d"/><ellipse rx="20" ry="7" fill="#f7efdc"/><path d="M-12-1l3-1m8 1 4-2m6 3 3-1" stroke="#d8ccb1" stroke-width="1.4"/></g>';
  }else if(/호떡|크루아상|달걀 토스트|채소 치킨 랩/.test(title)){
  let dish='<ellipse cx="75" cy="111" rx="59" ry="24" fill="#f9f1de" stroke="#bcb29e"/>';
@@ -1276,6 +1331,8 @@ function windowCharacterArt(who,self,t,rain,indoor,hour,title,wind=0){
  let scenery='<defs><radialGradient id="hero-glow"><stop stop-color="#fffdf7" stop-opacity=".96"/><stop offset="1" stop-color="#fffdf7" stop-opacity="0"/></radialGradient><radialGradient id="hero-shadow"><stop stop-color="#655b49" stop-opacity=".20"/><stop offset="1" stop-color="#655b49" stop-opacity="0"/></radialGradient></defs><path d="M12 137V76C12 32 43 8 94 8s81 26 81 68v61Z" fill="'+stage.base+'"/><path d="M12 137V76C12 32 43 8 94 8s81 26 81 68v61" fill="none" stroke="'+stage.edge+'" stroke-width=".7"/><ellipse cx="103" cy="57" rx="66" ry="52" fill="url(#hero-glow)" opacity=".18"/>';
  if(indoor)scenery+='<path d="M95 114V31q0-24 25-24t25 24v83" fill="#e2d9ca" opacity=".28"/><path d="M95 114V31q0-24 25-24t25 24v83" stroke="#d4c7b6" stroke-width=".8" fill="none"/><path d="M120 8v104M95 49h50" stroke="#d4c7b6" stroke-width=".75" opacity=".65"/>';
  else scenery+=(night?'<path d="M150 14a13 13 0 1 0 14 19 14 14 0 0 1-14-19Z" fill="#c7b99f"/>':'<circle cx="151" cy="25" r="12" fill="#e1b66c" opacity=".82"/>')+'<path d="M12 130q50-16 100-6t68-8" stroke="#c9bcaa" stroke-width=".85" fill="none" opacity=".75"/><path d="M15 139q52-14 110-7t55-4" stroke="#d7ccbc" stroke-width=".75" fill="none" opacity=".65"/>';
+ const venue=venueBackdrop(title,indoor,night,!indoor&&rain>=40,t<8);
+ scenery+='<defs><clipPath id="hero-venue-clip"><path d="M12 137V76C12 32 43 8 94 8s81 26 81 68v61Z"/></clipPath></defs><g clip-path="url(#hero-venue-clip)" opacity=".64" pointer-events="none">'+venue.back+'</g>';
  const positions=cast.length===1?[[101,25,1.02]]:cast.length===2?[[67,30,.93],[126,34,.88]]:familyPoses(cast,"hero");
  const figures=positions.map(([x,y,k],i)=>'<ellipse cx="'+x+'" cy="'+(y+118*k)+'" rx="'+(31*k)+'" ry="'+(5*k)+'" fill="url(#hero-shadow)"/>'+littlePerson(x,y,k,{...looks[i],...cast[i],maskInteractive:true,faceKey:"hero-"+i,bag:!indoor&&i===0&&!look.umbrella,umbrella:!indoor&&look.umbrella&&i===0,walk})).join("");
  return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 148" preserveAspectRatio="xMidYMid meet" role="group" aria-label="캐릭터 · 얼굴은 마스크, 몸은 옷차림 변경">'+scenery+figures+'</svg>';
