@@ -335,6 +335,9 @@ dialog::backdrop{background:#24342f66}
 #maskHint{font-weight:650;text-align:right;white-space:nowrap}
 .window[data-mask-demo="tap"] #maskHint{color:#28564e}
 @media(prefers-reduced-motion:reduce){.window .window-character .pm-mask{opacity:1!important;animation:none!important}.mask-demo-overlay{display:none!important}}
+
+/* V6.7 — crisp original artwork. */
+.rec-art{border-radius:12px;isolation:isolate}.rec-art svg,.window-character svg{shape-rendering:geometricPrecision}
 </style></head><body><div class="shell">
 <header><div class="brand"><span class="mark" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 34" fill="none"><circle cx="31" cy="10" r="7.5" fill="#e8b868"/><path d="M23 12C18 1 7 7 4 17c-4 14 9 16 20 9 8-5 15-8 21 1" stroke="#315b49" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>날씨틈</div><div class="header-meta"><span class="date" id="date"></span><button type="button" id="soundToggle" class="sound-toggle" aria-pressed="true" aria-label="효과음 켜기 또는 끄기" title="효과음 켜짐"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4Z" stroke="currentColor" stroke-width="1.65" stroke-linejoin="round"/><g class="sound-waves" stroke="currentColor" stroke-width="1.55" stroke-linecap="round"><path d="M16 9q3 3 0 6M19 6q5 6 0 12"/></g><path class="sound-cross" d="m16 9 5 6m0-6-5 6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button><button id="locationBtn" class="location-btn" aria-label="지역 변경"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 21s7-6 7-12a7 7 0 0 0-14 0c0 6 7 12 7 12Z" stroke="currentColor" stroke-width="1.7"/><circle cx="12" cy="9" r="2.5" stroke="currentColor" stroke-width="1.7"/></svg><span id="locLabel">지역 선택</span><svg width="14" height="14" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button></div></header>
 <main><div class="app-intro"><div><h1>오늘 최고의 두 시간.</h1><p>날씨에 맞춰 옷차림, 음식, 할 일까지.</p></div><span class="tag">오늘의 일상 큐레이션</span></div>
@@ -902,6 +905,51 @@ function coordinatedLooks(cast,t,rain,wind,indoor,title){
    return {...look,coat:c,top:isTop?c:(colorLum(c)<.25?"#e8dbc5":"#f0e6d4"),pants};
  });
 }
+/* V6.7: hand-authored material shading, fabric folds and activity props. */
+function blendColor(c,other,amount){
+ const a=colorRGB(c),b=colorRGB(other);
+ return "#"+a.map((v,i)=>Math.round((v+(b[i]-v)*amount)*255).toString(16).padStart(2,"0")).join("");
+}
+function materialFills(markup,prefix,kind="fabric"){
+ const tones=new Map(),strength=kind==="fabric"?.20:kind==="food"?.24:.12;
+ const body=markup.replace(/<(path|ellipse|circle|rect|polygon)\b[^>]*\bfill="(#[0-9a-fA-F]{6})"[^>]*\/>/g,(tag,shape,c)=>{
+   if(/opacity=|class="mask-hit"/.test(tag))return tag;
+   if(shape==="circle"&&Number(tag.match(/\br="([\d.]+)"/)?.[1]||0)<3.4)return tag;
+   if(shape==="ellipse"&&Number(tag.match(/\brx="([\d.]+)"/)?.[1]||0)<4)return tag;
+   if(shape==="rect"&&Number(tag.match(/\bwidth="([\d.]+)"/)?.[1]||0)<5)return tag;
+   if(!tones.has(c))tones.set(c,prefix+"-"+tones.size);
+   return tag.replace('fill="'+c+'"','fill="url(#'+tones.get(c)+')"');
+ });
+ let defs="";
+ for(const [c,id] of tones){
+   const light=blendColor(c,"#fff6df",strength),dark=blendColor(c,kind==="food"?"#62432c":"#353b3c",strength*.88);
+   defs+='<linearGradient id="'+id+'" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0" stop-color="'+light+'"/><stop offset=".44" stop-color="'+c+'"/><stop offset="1" stop-color="'+dark+'"/></linearGradient>';
+ }
+ return (defs?"<defs>"+defs+"</defs>":"")+body;
+}
+function activityGesture(title){
+ if(/배드민턴/.test(title))return "racket";
+ if(/탁구/.test(title))return "pingpong";
+ if(/사진/.test(title)&&!/앨범/.test(title))return "camera";
+ if(/수채화|스케치|미술/.test(title))return "paint";
+ if(/도자기/.test(title))return "pot";
+ if(/요리|쿠키|베이킹/.test(title))return "bowl";
+ if(/독서|책방|서점|도서관/.test(title))return "book";
+ if(/카페|차 한 잔|커피/.test(title))return "cup";
+ return "";
+}
+function heldObject(type){
+ const props={
+ racket:'<g transform="translate(34 37) rotate(-18)"><path d="M0 16v-19" stroke="#a58a60" stroke-width="2.7" stroke-linecap="round"/><ellipse cy="-10" rx="9" ry="12" fill="#dbe5d6" stroke="#5c786e" stroke-width="1.7"/><path d="M-5-17v14m5-17v20m5-17v14M-8-12H8m-7 5h14" stroke="#8caa9b" stroke-width=".65"/></g>',
+ pingpong:'<g transform="translate(34 36) rotate(-15)"><path d="M0 16V4" stroke="#a68a63" stroke-width="3.4" stroke-linecap="round"/><ellipse cy="-3" rx="8.5" ry="10" fill="#b96555" stroke="#795648" stroke-width=".8"/><ellipse cx="-1" cy="-4" rx="6.5" ry="8" fill="#cf806e"/></g>',
+ camera:'<g transform="translate(29 43)"><rect x="-9" y="-6" width="20" height="14" rx="2.3" fill="#53615c" stroke="#344a43" stroke-width=".8"/><rect x="-5" y="-9" width="6" height="3" rx=".7" fill="#657971"/><circle cx="2" cy="1" r="5.2" fill="#b3c4ba" stroke="#304840" stroke-width="1.1"/><circle cx="2" cy="1" r="3.1" fill="#597a80"/><circle cx=".7" cy="-.7" r="1" fill="#dfede1"/></g>',
+ paint:'<g transform="translate(30 45)"><ellipse rx="10" ry="7" fill="#d7bf92" stroke="#9b805d" stroke-width=".7"/><ellipse cx="6" cy="1" rx="1.8" ry="2.5" fill="#f5e7cc"/><circle cx="-5" cy="-3" r="2" fill="#b87865"/><circle cy="-4" r="2" fill="#71978c"/><circle cx="-5" cy="3" r="2" fill="#d5aa57"/><path d="M2 6l6-19" stroke="#715a42" stroke-width="1.3" stroke-linecap="round"/></g>',
+ pot:'<g transform="translate(29 43)"><path d="M-7-4Q-11 3-8 9Q0 14 8 9Q11 3 7-4Z" fill="#c59074" stroke="#9a6b52" stroke-width=".75"/><ellipse cy="-4" rx="7" ry="2.8" fill="#8f6250"/><ellipse cy="-4" rx="5" ry="1.4" fill="#b48062"/><path d="M-7 3Q0 6 7 3" fill="none" stroke="#e3b59a" stroke-width=".8"/></g>',
+ bowl:'<g transform="translate(29 45)"><path d="M-11-2Q-9 12 0 12T11-2Z" fill="#72948b" stroke="#4e756c" stroke-width=".8"/><ellipse cy="-2" rx="11" ry="4.8" fill="#e8d9b1" stroke="#a99c7d" stroke-width=".7"/><path d="M-3-2q3-5 7 0" fill="none" stroke="#87a371" stroke-width="2"/><path d="M6-4l7-14" stroke="#9e815b" stroke-width="1.8" stroke-linecap="round"/></g>',
+ book:'<g transform="translate(28 43) rotate(-12)"><path d="M-12-8Q-5-10 0-5Q6-10 12-8V9Q5 7 0 12Q-6 7-12 9Z" fill="#8c9c88" stroke="#596e5b" stroke-width=".8"/><path d="M-11-7Q-5-8 0-4Q6-8 11-7V7Q5 6 0 10Q-6 6-11 7Z" fill="#faf2df"/><path d="M0-4V10M-8-3l5 1m-5 3 5 1m6-4 5-1m-5 5 5-1" stroke="#b9aa8c" stroke-width=".6" fill="none"/></g>',
+ cup:'<g transform="translate(29 43)"><path d="M-6-6H7L5 8Q0 11-5 8Z" fill="#f4e7cd" stroke="#9a876a" stroke-width=".8"/><ellipse cy="-6" rx="6.5" ry="2.5" fill="#a16c47"/><path d="M7-3q7-1 5 4-1 3-6 3" fill="none" stroke="#9a876a" stroke-width="1.4"/></g>'
+ };return props[type]||"";
+}
 function littlePerson(x,y,k,o={}){
  const p=artP,skin=o.skin||p.skin,hair=o.hair||p.hair,coat=o.coat||p.green,top=o.top||p.cream,pants=o.pants||"#737c72";
  const st=o.style||"jacket",puff=st==="puffer",long=st==="coat",tee=st==="tee"||st==="summer",hem=long?82:puff?(o.cut==="longPuffer"?88:o.cut==="cropped"?61:69):tee?59:64,walking=!!o.walk,cut=o.cut||"tailored";
@@ -912,7 +960,7 @@ function littlePerson(x,y,k,o={}){
  const sleeve=tee||o.cut==="vest"||o.cut==="blouse"||o.cut==="linenBlouse"?top:coat;
  const arm=tee?43:61;
  const armLeft=walking?'<path d="M-13 28Q-22 28-24 39L-27 '+(arm+3)+'Q-23 '+(arm+6)+'-18 '+(arm+4)+'L-15 43Z" fill="'+sleeve+'"/><path d="M-27 '+(arm+3)+'l-2 6q2 4 6 3l5-8Z" fill="'+skin+'"/>':'<path d="M-12 27Q-23 28-25 42L-23 '+arm+'-15 '+arm+'-14 43Z" fill="'+sleeve+'"/><path d="M-23 '+arm+'l1 10q4 4 8-2l-1-8Z" fill="'+skin+'"/>';
- const armRight=o.umbrella?'<path d="M12 27q12 1 13 16l-1 11 12-11 6 7-17 19q-5 3-9-1l-5-24Z" fill="'+sleeve+'"/><path d="M35 44l5-8q4-2 6 2l-3 12Z" fill="'+skin+'"/>':walking?'<path d="M12 28Q22 28 24 41L27 '+(arm-2)+'l-7 5-9-18Z" fill="'+sleeve+'"/><path d="M20 '+(arm+3)+'l7-5 4 7q0 4-5 5Z" fill="'+skin+'"/>':'<path d="M12 27Q23 28 25 42L23 '+arm+'H15L14 43Z" fill="'+sleeve+'"/><path d="M15 '+arm+'l-1 9q4 5 8 0l1-9Z" fill="'+skin+'"/>';
+ const gesture=o.umbrella?"":o.gesture;const armRight=gesture?'<path d="M12 27Q24 29 24 41L27 44 31 41 35 47 27 54Q20 55 17 48L12 38Z" fill="'+sleeve+'"/><path d="M29 42q3-5 6-3l3 5q0 3-4 5l-3-2Z" fill="'+skin+'"/>':o.umbrella?'<path d="M12 27q12 1 13 16l-1 11 12-11 6 7-17 19q-5 3-9-1l-5-24Z" fill="'+sleeve+'"/><path d="M35 44l5-8q4-2 6 2l-3 12Z" fill="'+skin+'"/>':walking?'<path d="M12 28Q22 28 24 41L27 '+(arm-2)+'l-7 5-9-18Z" fill="'+sleeve+'"/><path d="M20 '+(arm+3)+'l7-5 4 7q0 4-5 5Z" fill="'+skin+'"/>':'<path d="M12 27Q23 28 25 42L23 '+arm+'H15L14 43Z" fill="'+sleeve+'"/><path d="M15 '+arm+'l-1 9q4 5 8 0l1-9Z" fill="'+skin+'"/>';
  let garment='';
  const outline="#4d6050",light="#f5edda",collar='<path d="M-7 26Q0 34 7 26" stroke="#a2967e" stroke-width=".8" fill="none"/>';
  const buttonRow=(x,ys)=>ys.map(y=>'<circle cx="'+x+'" cy="'+y+'" r="1.05" fill="'+outline+'"/>').join("");
@@ -948,6 +996,11 @@ function littlePerson(x,y,k,o={}){
  }
  if(o.cut==="vest")garment+='<path d="M-13 29q-4 11-3 17m29-17q4 11 3 17" stroke="#e4d6bb" stroke-width="1.5" fill="none"/>';
  if(o.scarf)garment+='<path d="M-11 25Q0 34 11 25" stroke="#bd8269" stroke-width="6" stroke-linecap="round" fill="none"/><path d="M7 28l4 18-6 1-4-17" fill="#bd8269"/><path d="M5 43l2 4m2-5 2 4" stroke="#e3b59a" stroke-width=".9"/>';
+ const textile='<g fill="none" stroke-linecap="round" stroke-linejoin="round">'+
+ (puff?'<path d="M-15 34q-3 13-1 21m29-21q3 13 1 21" stroke="#fff5dc" stroke-opacity=".36" stroke-width=".9"/>':'<path d="M-11 31q-2 9 0 14m22-14q2 9 0 14" stroke="#fff4df" stroke-opacity=".42" stroke-width=".8"/>')+
+ (cut==="cardigan"||cut==="indoorKnit"?Array.from({length:7},(_,i)=>'<path d="M'+(-9+i*3)+' 36v'+(hem-42)+'" stroke="#655e53" stroke-opacity=".14" stroke-width=".6"/>').join(""):"")+
+ (bottom-hem>31?'<path d="M-10 '+(hem+10)+'q4 10 1 20M8 '+(hem+10)+'q-3 10-1 20" stroke="#353e3b" stroke-opacity=".22" stroke-width=".8"/>':'')+
+ '<path d="M-10 '+(bottom-8)+'l6-2M8 '+(bottom-8)+'l-5-2" stroke="#353e3b" stroke-opacity=".24" stroke-width=".8"/></g>';
  // Distinct facial designs, not merely a different haircut.
  const female=o.gender==="f",child=o.gender==="child";
  let hairBack=o.longHair?'<path d="M-12 0q-7 7-5 24l-2 10 13-3 14 3 7-7-1-28Z" fill="'+hair+'"/>':'';
@@ -972,7 +1025,7 @@ function littlePerson(x,y,k,o={}){
  const faceTarget=o.maskInteractive?'<g data-mask-toggle="true" data-face-key="'+o.faceKey+'" role="button" tabindex="0" aria-pressed="'+String(!!o.mask)+'" aria-label="마스크 착용 전환"><title>얼굴을 눌러 마스크 '+(o.mask?"벗기기":"쓰기")+'</title><rect class="mask-hit" x="-22" y="-12" width="44" height="46" rx="16" fill="transparent"/></g>':'';
  const umbrella=o.umbrella?'<g transform="translate(40 -2)"><path d="M-38 4Q-32-27 0-28Q32-25 38 4Q26-3 13 4Q0-4-13 4Q-26-3-38 4Z" fill="#8da9a4" stroke="#5f7d72" stroke-width="1.2"/><path d="M0-27Q-16-17-13 4M0-27Q16-17 13 4" stroke="#d1d9cb" stroke-width="1" fill="none"/><path d="M0 4v50q0 7-5 7t-5-5" stroke="#536b60" stroke-width="1.5" fill="none" stroke-linecap="round"/></g>':'';
  const bag=o.bag?(female?'<path d="M12 28Q24 39 20 58" fill="none" stroke="#927759" stroke-width="2"/><rect x="12" y="54" width="19" height="17" rx="5" fill="#b59068" stroke="#806749" stroke-width=".8"/><path d="M13 58q8 5 17 0" fill="none" stroke="#e6ca98" stroke-width="1"/><circle cx="22" cy="60" r="1" fill="#e3c38e"/>':'<path d="M-12 26L20 60" stroke="#8d6c4b" stroke-width="2"/><path d="M10 54l18-2 4 20-21 3Z" fill="#bb9567" stroke="#886c4e" stroke-width=".8"/><path d="M13 57l15-2" stroke="#e6ca98" stroke-width="1"/>'):'';
- return '<g transform="translate('+x+' '+y+') scale('+k+')">'+'<g stroke="#514d46" stroke-opacity=".50" stroke-width=".65" stroke-linejoin="round" paint-order="stroke fill">'+leg+armLeft+armRight+garment+'</g>'+bag+face+umbrella+faceTarget+'</g>';
+ return '<g transform="translate('+x+' '+y+') scale('+k+')">'+'<g stroke="#514d46" stroke-opacity=".50" stroke-width=".65" stroke-linejoin="round" paint-order="stroke fill">'+materialFills(leg+armLeft+armRight+garment,'cloth-'+(o.faceKey||('portrait-'+o.gender+'-'+x+'-'+y)).replace(/[^a-zA-Z0-9_-]/g,'-'))+textile+'</g>'+bag+face+heldObject(gesture)+umbrella+faceTarget+'</g>';
 }
 function treeArt(x,y,k,fall=false){
  const colors=fall?["#d3aa62","#c68a61","#e2c78b"]:["#809e80","#9fb59a","#b9c9a9"];
@@ -1022,6 +1075,11 @@ function sceneOutfit(look,indoor,title){
  if(!indoor||!/집에서|퍼즐|수채화|베이킹|쿠키|앨범|식물 돌보기|종이접기|미술 놀이|가족 영화|가족 보드게임|함께 요리/.test(title))return look;
  return {...look,style:look.style==="tee"||look.style==="summer"?look.style:"shirt",cut:look.style==="tee"||look.style==="summer"?look.cut:"indoorKnit",coat:look.top,scarf:false,umbrella:false};
 }
+function sceneAtmosphere(indoor,night,wet){
+ if(indoor)return '<g pointer-events="none"><path d="M16 16L61 16 137 148H83Z" fill="#fff6d8" opacity=".12"/><path d="M0 103H180" stroke="#8a816e" stroke-width=".8" opacity=".28"/><path d="M0 122l180-4M0 139l180-5" stroke="#968c76" stroke-width=".6" opacity=".18"/></g>';
+ const detail=Array.from({length:17},(_,i)=>{const x=5+i*31%173,y=95+i*11%37;return '<path d="M'+x+' '+y+'q-2-3-4-4m4 4 2-4" fill="none" stroke="'+(night?"#638276":"#799c77")+'" stroke-opacity=".42" stroke-width=".65"/>'}).join("");
+ return '<g pointer-events="none">'+detail+(wet?'<ellipse cx="111" cy="135" rx="19" ry="3" fill="#b0c4c3" opacity=".42"/><path d="M98 135h26" stroke="#e4eeea" stroke-width=".7"/>':"")+'</g>';
+}
 function lifestyleArt(title,who,indoor,t,rain=0,startHour=12,wind=0){
  const id="act-",p=artP,night=!indoor&&!/노을/.test(title)&&(startHour>=(plan?.sunset??18)||startHour<(plan?.sunrise??7)),wet=!indoor&&rain>=40,cold=t<8,walk=!indoor&&/산책|걸어|나들이|데이트|투어|사진/.test(title),look=outfitLook(t,rain);
  let body="",props="",floor="";
@@ -1057,8 +1115,8 @@ function lifestyleArt(title,who,indoor,t,rain=0,startHour=12,wind=0){
  }
  const detail=sceneDetail(title);if(detail)props=detail;const cast=castFor(who,avatar),count=cast.length,poses=count===1?[[82,24,.83]]:count===2?[[57,29,.79],[105,35,.74]]:familyPoses(cast,"activity");
  const looks=coordinatedLooks(cast,t,rain,wind,indoor,title),stage=garmentStage(looks);
- const people=poses.map(([x,y,k],i)=>'<ellipse cx="'+x+'" cy="'+(y+116*k)+'" rx="'+(27*k)+'" ry="'+(5*k)+'" fill="url(#act-shadow)"/>'+littlePerson(x,y,k,{...looks[i],...cast[i],maskInteractive:true,faceKey:"activity-"+i,walk,bag:!indoor&&i===0&&!look.umbrella,umbrella:wet&&wind<35&&i===0})).join("");
- return artSvg(id,indoor?"url(#act-paper)":"url(#act-sky)",body+'<ellipse cx="75" cy="78" rx="67" ry="66" fill="'+stage.base+'" opacity=".72"/>'+props+people);
+ const people=poses.map(([x,y,k],i)=>'<ellipse cx="'+x+'" cy="'+(y+116*k)+'" rx="'+(27*k)+'" ry="'+(5*k)+'" fill="url(#act-shadow)"/>'+littlePerson(x,y,k,{...looks[i],...cast[i],maskInteractive:true,faceKey:"activity-"+i,gesture:i===0?activityGesture(title):"",walk,bag:!indoor&&i===0&&!look.umbrella&&!activityGesture(title),umbrella:wet&&wind<35&&i===0})).join("");
+ return artSvg(id,indoor?"url(#act-paper)":"url(#act-sky)",materialFills(body,id+"scene","scene")+'<defs><radialGradient id="act-light"><stop stop-color="'+stage.base+'" stop-opacity=".56"/><stop offset="1" stop-color="'+stage.base+'" stop-opacity="0"/></radialGradient></defs><ellipse cx="75" cy="79" rx="72" ry="69" fill="url(#act-light)"/>'+sceneAtmosphere(indoor,night,wet)+materialFills(props,id+"prop","scene")+people);
 }
 function outfitArt(t,rain,wind){
  const look=outfitLook(t,rain,avatar,wearIndex,wind),id="wear-",st=look.style,stage=garmentStage([look]);
@@ -1077,23 +1135,23 @@ function outfitArt(t,rain,wind){
 }
 function mealArt(title){
  const id="meal-",g=(x)=>"url(#meal-"+x+")";
- let body='<rect width="180" height="148" fill="'+g("paper")+'"/><path d="M0 108L180 99V148H0Z" fill="#ddd3b9"/><path d="M0 128L180 118M0 143L180 133" stroke="#b8a789" stroke-opacity=".32" stroke-width=".65"/><ellipse cx="89" cy="125" rx="74" ry="14" fill="'+g("shadow")+'"/>';
+ let body='<defs><radialGradient id="meal-liquid" cx="35%" cy="24%" r="80%"><stop stop-color="#fff5db" stop-opacity=".32"/><stop offset=".56" stop-color="#fff5db" stop-opacity="0"/><stop offset="1" stop-color="#604732" stop-opacity=".17"/></radialGradient></defs><rect width="180" height="148" fill="'+g("paper")+'"/><path d="M0 108L180 99V148H0Z" fill="#ddd3b9"/><path d="M0 128L180 118M0 143L180 133" stroke="#b8a789" stroke-opacity=".32" stroke-width=".65"/><ellipse cx="89" cy="125" rx="74" ry="14" fill="'+g("shadow")+'"/>';
  const linen='<path d="M7 104l49-15 24 46-52 13Z" fill="#e9e5d2"/><path d="M17 103l24 43m-10-47 24 42m-38-23 45-13m-40 25 45-13" stroke="#a4b59d" stroke-width="1" stroke-opacity=".48"/>';
  const steam='<g fill="none" stroke="#b9aa8d" stroke-width="1.3" stroke-linecap="round" opacity=".58"><path d="M67 51q-9-10 1-19t0-14M92 48q-9-9 0-19t0-13M117 52q-9-10 0-20t1-11"/></g>';
- const bowl=(fill,inner,skewers=false)=>'<path d="M30 78Q34 119 81 130Q89 132 99 130Q146 119 150 78Z" fill="'+g("ceramic")+'" stroke="#a1a898" stroke-width=".8"/><path d="M36 94q53 31 108 0" stroke="#b6c4b1" fill="none" stroke-width="2"/><path d="M48 111q43 18 84 0" stroke="#f1eedb" fill="none" stroke-width="1.2"/><ellipse cx="90" cy="78" rx="60" ry="28" fill="#f7f0df" stroke="#c4bca7" stroke-width="1"/><ellipse cx="90" cy="78" rx="51.5" ry="22" fill="'+fill+'" stroke="#c1ac87" stroke-width=".6"/>'+(skewers?inner:'<defs><clipPath id="meal-bowl-contents"><ellipse cx="90" cy="78" rx="51.5" ry="22"/></clipPath></defs><g clip-path="url(#meal-bowl-contents)">'+inner+'</g>')+'<path d="M39 80q7 21 51 23t51-23" stroke="#fff9e8" stroke-width="1.2" fill="none" opacity=".8"/>';
+ const bowl=(fill,inner,skewers=false)=>'<path d="M30 78Q34 119 81 130Q89 132 99 130Q146 119 150 78Z" fill="'+g("ceramic")+'" stroke="#a1a898" stroke-width=".8"/><path d="M36 94q53 31 108 0" stroke="#b6c4b1" fill="none" stroke-width="2"/><path d="M48 111q43 18 84 0" stroke="#f1eedb" fill="none" stroke-width="1.2"/><ellipse cx="90" cy="78" rx="60" ry="28" fill="#f7f0df" stroke="#c4bca7" stroke-width="1"/><ellipse cx="90" cy="78" rx="51.5" ry="22" fill="'+fill+'" stroke="#c1ac87" stroke-width=".6"/><ellipse cx="90" cy="78" rx="51" ry="21.5" fill="url(#meal-liquid)"/>'+(skewers?inner:'<defs><clipPath id="meal-bowl-contents"><ellipse cx="90" cy="78" rx="51.5" ry="22"/></clipPath></defs><g clip-path="url(#meal-bowl-contents)">'+inner+'</g>')+'<path d="M39 80q7 21 51 23t51-23" stroke="#fff9e8" stroke-width="1.2" fill="none" opacity=".8"/>';
  const chop='<g class="utensil-chopsticks" transform="rotate(-25 150 101)"><rect x="145" y="49" width="2.7" height="83" rx="1.3" fill="#9e7851"/><rect x="151" y="48" width="2.7" height="83" rx="1.3" fill="#b58a5d"/><path d="M146.4 54v31m6-31v31" stroke="#d6b38a" stroke-width=".6"/></g>';
  const spoon='<g class="utensil-spoon" transform="translate(157 89) rotate(17)"><path d="M0-4v47" stroke="#87928b" stroke-width="4.2" stroke-linecap="round"/><ellipse cy="-11" rx="7.5" ry="12" fill="#d6ded5" stroke="#87928b" stroke-width="1"/><path d="M-4-17q-3 7 1 13M-1 7v32" stroke="#faf7e9" stroke-width="1.3" fill="none" stroke-linecap="round"/></g>';
  const fork='<g class="utensil-fork" transform="translate(157 85) rotate(17)"><path d="M0 0v47" stroke="#8a9690" stroke-width="3.6" stroke-linecap="round"/><path d="M-6-19v13q0 7 6 7t6-7v-13M-2-19v12m4-12v12" stroke="#8a9690" stroke-width="1.8" stroke-linecap="round" fill="none"/><path d="M-1 8v33" stroke="#f7f4e5" stroke-width=".85"/></g>';
  const cup=(x,y,k,tea,cold=false)=>'<g transform="translate('+x+' '+y+') scale('+k+')"><ellipse cx="0" cy="37" rx="23" ry="7" fill="#f7efda" stroke="#bfb59d" stroke-width=".8"/><path d="M-15 1h30l-3 31q-12 10-24 0Z" fill="'+(cold?"#e4c47b":g("ceramic"))+'" stroke="#b2b09b" stroke-width=".8"/>'+(cold?'<path d="M-6 11l8-5 7 9-9 8-7-4Zm-2 12 8 8 9-5" fill="#f2e6bd" opacity=".65"/><path d="M4 0l7-17" stroke="#8a9f82" stroke-width="1.7"/>':'<path d="M15 6q14-2 13 8-2 8-14 7" stroke="#a9a28d" stroke-width="3" fill="none"/>')+'<ellipse rx="15" ry="5" cy="1" fill="#f5ebd3" stroke="#bfb59d" stroke-width=".8"/><ellipse rx="12" ry="3.3" cy="1" fill="'+tea+'"/>'+(cold?'':'<path d="M-4-7q-3-6 2-11m6 11q-3-6 2-11" stroke="#b9a88c" stroke-width="1" fill="none" stroke-linecap="round"/>')+'</g>';
  if(/따뜻한 우동/.test(title)){
- const noodles=Array.from({length:6},(_,i)=>'<path d="M'+(50+i*3)+' '+(70+i*4)+'q22-16 41-2t39-3" stroke="#fff0ca" stroke-width="5.4" fill="none" stroke-linecap="round"/>').join("");
+ const noodles=Array.from({length:7},(_,i)=>{const d="M"+(43+i*4)+" "+(66+i*4)+"q18-15 34-3t38-3";return '<path d="'+d+'" stroke="#9d7544" stroke-width="6.3" fill="none" stroke-linecap="round" opacity=".38"/><path d="'+d+'" stroke="#f5dfb3" stroke-width="5.1" fill="none" stroke-linecap="round"/><path d="'+d+'" stroke="#fff7dd" stroke-width="1.3" fill="none" stroke-linecap="round" opacity=".76"/>'}).join("");
  const topping='<path d="M56 69q9-14 20-5l-3 11-13 4Z" fill="#697d57"/><path d="M57 67l9 5m-5-8 7 6" stroke="#adc18c" stroke-width="1.3"/><g transform="translate(107 67)"><ellipse rx="13" ry="9" fill="#fff5e7" stroke="#e4c6ad"/><path d="M-8 1q2-7 8-5t4 7-7-1 4-2" fill="none" stroke="#d78e83" stroke-width="2.4"/></g><path d="M112 84l14-5 6 8-15 6" fill="#d4a666"/><g fill="#7da063"><circle cx="81" cy="63" r="2"/><circle cx="87" cy="66" r="2.3"/><circle cx="94" cy="89" r="2"/></g>';
  body+=linen+steam+'<g><path d="M27 76q8 49 63 55 55-6 63-55" fill="#45665d" stroke="#314b44"/><path d="M40 103q50 31 100 0" fill="none" stroke="#789187" stroke-width="3"/><ellipse cx="90" cy="76" rx="63" ry="29" fill="#47685f" stroke="#294b42"/><ellipse cx="90" cy="76" rx="55" ry="23" fill="#b98c54"/><defs><clipPath id="meal-udon-contents"><ellipse cx="90" cy="76" rx="55" ry="23"/></clipPath></defs><g clip-path="url(#meal-udon-contents)">'+noodles+topping+'</g></g>';
  }else if(/김치찌개|전복죽|어묵탕|감자 수프|시원한 콩국수/.test(title)){
  const kim=title.includes("김치"),juk=title.includes("죽"),eom=title.includes("어묵"),kong=title.includes("콩국수");
  let inner="",base=kim?"#bc6545":juk?"#c7bd91":eom?"#bb965f":kong?"#ece0b6":"#eddfb6";
- if(kim)inner=Array.from({length:7},(_,i)=>'<path d="M'+(49+i*12)+' '+(68+i%3*8)+'q9-9 16 1l-6 9-10-2Z" fill="'+["#c76d4f","#e0a36b","#e7d8b7"][i%3]+'"/>').join("")+'<rect x="84" y="71" width="21" height="13" rx="3" fill="#f3e3c6"/>';
- else if(juk)inner='<ellipse cx="90" cy="78" rx="48" ry="20" fill="#d8cda5"/>'+Array.from({length:38},(_,i)=>'<ellipse cx="'+(49+i*19%78)+'" cy="'+(65+i*7%27)+'" rx="2.2" ry="1.2" fill="#eee0b8"/>').join("")+'<g fill="#b39b76" stroke="#9d8668"><path d="M68 69q13-10 23 0l-5 10-14 1Z"/><path d="M99 80q12-9 22 0l-5 9-13 1Z"/><path d="M72 69l13-2m-12 5 11-2m18 9 13-2m-12 5 10-2" fill="none" stroke="#e4d5b6" stroke-width="1.4"/></g><path d="M84 63l9 6m-12-3 8 6" stroke="#648060" stroke-width="2"/>';
+ if(kim)inner=Array.from({length:7},(_,i)=>'<path d="M'+(49+i*12)+' '+(68+i%3*8)+'q9-9 16 1l-6 9-10-2Z" fill="'+["#c76d4f","#e0a36b","#e7d8b7"][i%3]+'"/>').join("")+'<g><path d="M84 71l18-4 10 7-18 5Z" fill="#fff0d1"/><path d="M84 71v11l10 6v-9Z" fill="#d4bd96"/><path d="M94 79l18-5v11l-18 3Z" fill="#e8d4ad"/><path d="M57 67q10-6 20 2m-17 2 13 3m41 5 11-7" stroke="#eac19a" stroke-width="1.2" fill="none"/></g>';
+ else if(juk)inner='<ellipse cx="90" cy="78" rx="48" ry="20" fill="#d8cda5"/>'+Array.from({length:38},(_,i)=>'<ellipse cx="'+(49+i*19%78)+'" cy="'+(65+i*7%27)+'" rx="2.2" ry="1.2" fill="#eee0b8" stroke="#a99c73" stroke-width=".25" transform="rotate('+(i*23%160)+' '+(49+i*19%78)+' '+(65+i*7%27)+')"/>').join("")+'<g fill="#b39b76" stroke="#9d8668"><path d="M68 69q13-10 23 0l-5 10-14 1Z"/><path d="M99 80q12-9 22 0l-5 9-13 1Z"/><path d="M72 69l13-2m-12 5 11-2m18 9 13-2m-12 5 10-2" fill="none" stroke="#e4d5b6" stroke-width="1.4"/></g><path d="M84 63l9 6m-12-3 8 6" stroke="#648060" stroke-width="2"/>';
  else if(eom)inner=[0,1,2].map(i=>'<g transform="translate('+(66+i*24)+' '+(72+i%2*8)+') rotate('+(-30+i*18)+')"><path d="M0-34v61" stroke="#957348" stroke-width="1.6"/><path d="M-8-12q16-8 16 1t-16 8 16 7-16 7 16 5" fill="none" stroke="#eed39e" stroke-width="7" stroke-linecap="round"/></g>').join("");
  else if(kong)inner=Array.from({length:7},(_,i)=>'<path d="M49 '+(66+i*4)+'q20-9 39 0t40 0" fill="none" stroke="#f7efd7" stroke-width="3"/>').join("")+'<path d="M72 64l18 12m-12-15 18 12m-12-14 17 12" stroke="#6e9a68" stroke-width="3.4"/><path d="M109 65l12 5-9 8-8-6Z" fill="#bd7867"/>';
  else inner='<path d="M56 79q19-24 44-6t-14 19q-26-3-9-13t21 3" fill="none" stroke="#f6e8c7" stroke-width="3.4"/><g fill="#b48a56"><rect x="65" y="68" width="9" height="8" rx="2"/><rect x="104" y="78" width="10" height="9" rx="2"/></g>';
@@ -1127,7 +1185,7 @@ function mealArt(title){
    if(cold)inside+='<ellipse cx="99" cy="69" rx="14" ry="8" fill="#f6efdc" stroke="#d6c4a3" stroke-width=".65"/><ellipse cx="99" cy="69" rx="6" ry="4" fill="#d9a951"/><path d="M72 63l15 7m-20-3 14 7m-16-1 13 6" stroke="#638a65" stroke-width="2.6" stroke-linecap="round"/>';
    else inside+='<path d="M63 69l6-5 7 4-5 6Z" fill="#d6c7a0"/><path d="M106 82l9-6 6 3-6 7" fill="#d5a374"/>';
   }
-  if(dumpling)inside=Array.from({length:5},(_,i)=>'<g transform="translate('+(59+i*15)+' '+(78+i%2*8)+')"><path d="M-9 4Q-7-12 0-9Q7-12 9 4Q0 10-9 4Z" fill="#f1dfb6" stroke="#b8a282" stroke-width=".8"/><path d="M-5 0l2-5m3 5v-6m3 6 2-5" stroke="#bea889" stroke-width=".6"/></g>').join("");
+  if(dumpling)inside=Array.from({length:5},(_,i)=>'<g transform="translate('+(59+i*15)+' '+(78+i%2*8)+')"><path d="M-9 4Q-7-12 0-9Q7-12 9 4Q0 10-9 4Z" fill="#f1dfb6" stroke="#b8a282" stroke-width=".8"/><path d="M-5 0l2-5m3 5v-6m3 6 2-5" stroke="#bea889" stroke-width=".6"/><path d="M-7 2Q0 7 7 2" stroke="#fff3d8" stroke-width=".9" fill="none"/><path d="M-5-2q2-5 4-6" stroke="#fff4db" stroke-width=".7" fill="none"/></g>').join("");
  if(tofu)inside=Array.from({length:6},(_,i)=>'<rect x="'+(52+i*13)+'" y="'+(66+i%2*11)+'" width="15" height="12" rx="3" fill="#f6e6cc" stroke="#c28c71" stroke-width=".7"/>').join("")+'<ellipse cx="95" cy="84" rx="9" ry="6" fill="#efd9a0"/>';
  if(soba)inside=Array.from({length:13},(_,i)=>'<path d="M'+(48+i%4*3)+' '+(65+i*2.3)+'q16-11 31 0t36 0" stroke="#9b886b" stroke-width="1.8" fill="none"/>').join("")+'<path d="M82 62l20 10m-18-14 20 10m-22 0 18 9" stroke="#435f50" stroke-width="2"/><ellipse cx="120" cy="70" rx="7" ry="5" fill="#9fb985"/>';
  inside+=Array.from({length:13},(_,i)=>'<path d="M'+(60+i*13%61)+' '+(64+i*7%27)+'l'+(2+i%4)+' '+(-1-i%3)+'" stroke="'+["#6c985f","#91ad70","#ba7858"][i%3]+'" stroke-width="1.7" stroke-linecap="round"/>').join("");
@@ -1139,6 +1197,8 @@ function mealArt(title){
  const pasta=title.includes("파스타"),curry=title.includes("카레");
  let inner=pasta?Array.from({length:10},(_,i)=>'<path d="M'+(50+i%3*5)+' '+(65+i*3)+'q15-13 27 0t30 0t24 0" fill="none" stroke="#e6bc78" stroke-width="2.5" stroke-linecap="round"/>').join(""):'<path d="M43 80Q49 57 87 57L93 97Q57 100 43 80Z" fill="#f5e8cd"/><path d="M85 59Q133 57 142 80Q127 98 92 98Z" fill="'+(curry?"#b58b53":"#b99770")+'"/>';
  inner+=Array.from({length:9},(_,i)=>'<rect x="'+(pasta?58+i*17%62:96+i*7%31)+'" y="'+(65+i*9%25)+'" width="'+(pasta?6:9)+'" height="6" rx="2" fill="'+(pasta?"#bc6d50":curry?["#d2a562","#b96c50","#87a26c"][i%3]:"#d2b38b")+'"/>').join("");
+ if(!pasta)inner+=Array.from({length:34},(_,i)=>'<ellipse cx="'+(48+i*13%38)+'" cy="'+(64+i*7%29)+'" rx="1.65" ry=".9" fill="#fff3d8" stroke="#d6c5a3" stroke-width=".25"/>').join("");
+ else inner+='<path d="M87 64q5-9 12-6l-2 8q-4 7-10-2m9 4q9-6 16 0-5 8-16 0" fill="#71945d" stroke="#557c4a" stroke-width=".6"/><path d="M90 61l8 3m2 4 8 1" stroke="#d2d6a0" stroke-width=".65"/>';
  body+=linen+steam+bowl(pasta?"#bb7653":"#d4b990",inner);
  }else if(/과일|요거트/.test(title)){
  let inner='<ellipse cx="90" cy="78" rx="45" ry="18" fill="#f6efdb"/>'+Array.from({length:12},(_,i)=>'<circle cx="'+(55+i*17%70)+'" cy="'+(64+i*7%27)+'" r="'+(4+i%3)+'" fill="'+["#b97467","#d9b764","#899e77","#7e879f"][i%4]+'"/>').join("");
@@ -1168,7 +1228,7 @@ function mealArt(title){
  else if(forkOnly)body+=fork;
  else if(both)body+=chop.replace('rotate(-25 150 101)','translate(-120 0) rotate(-25 150 101)')+spoon;
  else if(chopOnly)body+=chop;
- return artSvg(id,g("paper"),body);
+ return artSvg(id,g("paper"),materialFills(body,id+"material","food"));
 }
 
 
