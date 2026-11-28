@@ -345,6 +345,11 @@ dialog::backdrop{background:#24342f66}
 #gpsBtn .gps-nudge *{pointer-events:none}
 @keyframes gpsNudge{0%{opacity:0;transform:translate(9px,10px)}12%{opacity:1;transform:translate(5px,7px)}28%{opacity:1;transform:translate(0,0)}42%{opacity:1;transform:translate(5px,7px)}58%{opacity:1;transform:translate(0,0)}73%{opacity:1;transform:translate(5px,7px)}85%{opacity:1;transform:translate(5px,7px)}100%{opacity:0;transform:translate(9px,10px)}}
 @media(prefers-reduced-motion:reduce){#gpsBtn .gps-nudge{display:none!important;animation:none!important}}
+/* V6.9 — independent face and body hit areas. */
+.window-character [data-wear-toggle],.window-character .wear-hit,.rec-art [data-wear-toggle],.rec-art .wear-hit{pointer-events:all!important;cursor:pointer;touch-action:manipulation}
+[data-wear-toggle]:focus-visible .wear-hit{stroke:#587961;stroke-width:1.7;stroke-dasharray:3 2}
+[data-wear-toggle]:hover .wear-hit{fill:#ffffff12}
+#maskHint{white-space:normal;line-height:1.35}
 </style></head><body><div class="shell">
 <header><div class="brand"><span class="mark" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 34" fill="none"><circle cx="31" cy="10" r="7.5" fill="#e8b868"/><path d="M23 12C18 1 7 7 4 17c-4 14 9 16 20 9 8-5 15-8 21 1" stroke="#315b49" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>날씨틈</div><div class="header-meta"><span class="date" id="date"></span><button type="button" id="soundToggle" class="sound-toggle" aria-pressed="true" aria-label="효과음 켜기 또는 끄기" title="효과음 켜짐"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4Z" stroke="currentColor" stroke-width="1.65" stroke-linejoin="round"/><g class="sound-waves" stroke="currentColor" stroke-width="1.55" stroke-linecap="round"><path d="M16 9q3 3 0 6M19 6q5 6 0 12"/></g><path class="sound-cross" d="m16 9 5 6m0-6-5 6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button><button id="locationBtn" class="location-btn" aria-label="지역 변경"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 21s7-6 7-12a7 7 0 0 0-14 0c0 6 7 12 7 12Z" stroke="currentColor" stroke-width="1.7"/><circle cx="12" cy="9" r="2.5" stroke="currentColor" stroke-width="1.7"/></svg><span id="locLabel">지역 선택</span><svg width="14" height="14" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button></div></header>
 <main><div class="app-intro"><div><h1>오늘 최고의 두 시간.</h1><p>날씨에 맞춰 옷차림, 음식, 할 일까지.</p></div><span class="tag">오늘의 일상 큐레이션</span></div>
@@ -432,7 +437,7 @@ function activatedSound(kind){
  return unlockSound().then(ok=>{if(ok&&gen===soundGeneration&&performance.now()-begin<350)playSound(kind)}).catch(()=>{});
 }
 function controlSound(el){
- const id=el.id||"";if(el.hasAttribute("data-mask-toggle"))return "select";
+ const id=el.id||"";if(el.hasAttribute("data-wear-toggle"))return "wear";if(el.hasAttribute("data-mask-toggle"))return "select";
  if(id==="gpsBtn"||id==="applyRegion"||id==="retryRegion")return "search";
  if(id==="closeDialog"||id==="closeShareDialog")return "close";
  if(id==="manualBtn"||id==="locationBtn")return "open";
@@ -497,7 +502,7 @@ function finishMaskDemo(){
 }
 function armMaskDemo(){
  finishMaskDemo();
- $("maskHint").textContent=maskNeeded()?"얼굴을 톡! 마스크 ON/OFF":"01 / 오늘의 틈";
+ $("maskHint").textContent="얼굴 톡! 마스크 · 몸 톡! 옷 변경";
  if(maskNeeded()&&maskWorn()&&!document.hidden&&!reelReduced())setMaskDemoPhase("pending");
 }
 function startMaskDemo(){
@@ -799,7 +804,7 @@ function artDefs(id){
  return '<defs><linearGradient id="'+id+'paper" x2="0" y2="1"><stop stop-color="#f9f5e9"/><stop offset="1" stop-color="#e9e5d5"/></linearGradient><linearGradient id="'+id+'sky" x2="0" y2="1"><stop stop-color="#d6e6e3"/><stop offset="1" stop-color="#f1e9d4"/></linearGradient><linearGradient id="'+id+'dusk" x2="0" y2="1"><stop stop-color="#788e95"/><stop offset=".7" stop-color="#c5c4af"/><stop offset="1" stop-color="#ebc9a1"/></linearGradient><linearGradient id="'+id+'floor" x2="0" y2="1"><stop stop-color="#d7d0b9"/><stop offset="1" stop-color="#eee4ce"/></linearGradient><linearGradient id="'+id+'ceramic" x2=".2" y2="1"><stop stop-color="#fff9e8"/><stop offset=".62" stop-color="#e0ded0"/><stop offset="1" stop-color="#9eb3a1"/></linearGradient><radialGradient id="'+id+'shadow"><stop stop-color="#405b45" stop-opacity=".24"/><stop offset="1" stop-color="#405b45" stop-opacity="0"/></radialGradient><pattern id="'+id+'grain" width="13" height="17" patternUnits="userSpaceOnUse"><path d="M1 3h.3m9 3h.4M4 12h.3m7 4h.2" stroke="#5e5747" stroke-opacity=".19" stroke-width=".35" stroke-linecap="round"/></pattern></defs>';
 }
 function artSvg(id,bg,body){
- return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 148" preserveAspectRatio="xMidYMid meet" '+(body.includes("data-mask-toggle")?'role="group" aria-label="캐릭터 얼굴 터치로 마스크 변경"':'aria-hidden="true" focusable="false"')+'>'+artDefs(id)+'<rect width="180" height="148" rx="10" fill="'+bg+'"/>'+body+'<rect width="180" height="148" fill="url(#'+id+'grain)" opacity=".52" pointer-events="none"/></svg>';
+ return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 148" preserveAspectRatio="xMidYMid meet" '+(body.includes("data-mask-toggle")?'role="group" aria-label="캐릭터 얼굴은 마스크, 몸은 옷차림 변경"':'aria-hidden="true" focusable="false"')+'>'+artDefs(id)+'<rect width="180" height="148" rx="10" fill="'+bg+'"/>'+body+'<rect width="180" height="148" fill="url(#'+id+'grain)" opacity=".52" pointer-events="none"/></svg>';
 }
 /* Weather-appropriate wardrobe, tailored to the selected illustrated character.
    The same outfit object drives all scenes and the recommendation copy. */
@@ -1030,9 +1035,10 @@ function littlePerson(x,y,k,o={}){
  const mask=o.mask?'<g class="pm-mask"><path d="M-11 12Q-14 9-14 13t4 5M11 12Q15 9 15 13t-4 5" fill="none" stroke="#e4ede8" stroke-width="1.4" stroke-linecap="round"/><path d="M-10.7 11.7Q-4 12.4 1 10.7Q6 12.2 12 11.6L10 19.2Q1 25-8.4 19.5Z" fill="#f6f7ed" stroke="#7d9690" stroke-width=".65" stroke-linejoin="round"/><path d="M-8 14.3Q1 12.7 10 14.2M-7.5 16.6Q1 15.5 9 16.5M-6.5 19Q1 20 8 18.9" fill="none" stroke="#becdc5" stroke-width=".65" stroke-linecap="round"/><path d="M1 11.5v10.5" stroke="#d6e0d7" stroke-width=".6"/></g>':'';
  const face=hairBack+neck+head+hairFront+features+mask;
  const faceTarget=o.maskInteractive?'<g data-mask-toggle="true" data-face-key="'+o.faceKey+'" role="button" tabindex="0" aria-pressed="'+String(!!o.mask)+'" aria-label="마스크 착용 전환"><title>얼굴을 눌러 마스크 '+(o.mask?"벗기기":"쓰기")+'</title><rect class="mask-hit" x="-22" y="-12" width="44" height="46" rx="16" fill="transparent"/></g>':'';
+ const wearTarget=o.maskInteractive?'<g data-wear-toggle="true" data-wear-key="'+o.faceKey+'" role="button" tabindex="0" aria-label="다음 옷차림으로 변경"><title>몸을 눌러 옷차림 바꾸기</title><rect class="wear-hit" x="-23" y="34" width="46" height="82" rx="12" fill="transparent"/></g>':'';
  const umbrella=o.umbrella?'<g transform="translate(40 -2)"><path d="M-38 4Q-32-27 0-28Q32-25 38 4Q26-3 13 4Q0-4-13 4Q-26-3-38 4Z" fill="#8da9a4" stroke="#5f7d72" stroke-width="1.2"/><path d="M0-27Q-16-17-13 4M0-27Q16-17 13 4" stroke="#d1d9cb" stroke-width="1" fill="none"/><path d="M0 4v50q0 7-5 7t-5-5" stroke="#536b60" stroke-width="1.5" fill="none" stroke-linecap="round"/></g>':'';
  const bag=o.bag?(female?'<path d="M12 28Q24 39 20 58" fill="none" stroke="#927759" stroke-width="2"/><rect x="12" y="54" width="19" height="17" rx="5" fill="#b59068" stroke="#806749" stroke-width=".8"/><path d="M13 58q8 5 17 0" fill="none" stroke="#e6ca98" stroke-width="1"/><circle cx="22" cy="60" r="1" fill="#e3c38e"/>':'<path d="M-12 26L20 60" stroke="#8d6c4b" stroke-width="2"/><path d="M10 54l18-2 4 20-21 3Z" fill="#bb9567" stroke="#886c4e" stroke-width=".8"/><path d="M13 57l15-2" stroke="#e6ca98" stroke-width="1"/>'):'';
- return '<g transform="translate('+x+' '+y+') scale('+k+')">'+'<g stroke="#514d46" stroke-opacity=".50" stroke-width=".65" stroke-linejoin="round" paint-order="stroke fill">'+materialFills(leg+armLeft+armRight+garment,'cloth-'+(o.faceKey||('portrait-'+o.gender+'-'+x+'-'+y)).replace(/[^a-zA-Z0-9_-]/g,'-'))+textile+'</g>'+bag+face+heldObject(gesture)+umbrella+faceTarget+'</g>';
+ return '<g transform="translate('+x+' '+y+') scale('+k+')">'+'<g stroke="#514d46" stroke-opacity=".50" stroke-width=".65" stroke-linejoin="round" paint-order="stroke fill">'+materialFills(leg+armLeft+armRight+garment,'cloth-'+(o.faceKey||('portrait-'+o.gender+'-'+x+'-'+y)).replace(/[^a-zA-Z0-9_-]/g,'-'))+textile+'</g>'+bag+face+heldObject(gesture)+umbrella+wearTarget+faceTarget+'</g>';
 }
 function treeArt(x,y,k,fall=false){
  const colors=fall?["#d3aa62","#c68a61","#e2c78b"]:["#809e80","#9fb59a","#b9c9a9"];
@@ -1264,7 +1270,7 @@ function portrait(gender){
  return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 42 44" aria-hidden="true"><rect x="1" y="1" width="40" height="42" rx="13" fill="#dce3d0"/><svg x="0" y="2" width="42" height="42" viewBox="-25 -16 50 50">'+littlePerson(0,0,1,{...p,style:"jacket",coat:gender==="m"?"#567763":"#bd765b"})+'</svg></svg>';
 }
 function windowCharacterArt(who,self,t,rain,indoor,hour,title,wind=0){
- const cast=castFor(who,self),look=outfitLook(t,rain),night=!/노을/.test(title)&&(hour>=(plan?.sunset??18)||hour<(plan?.sunrise??7)),walk=!indoor&&/산책|걸어|나들이|데이트|투어|사진/.test(title);
+ const cast=castFor(who,self),look=outfitLook(t,rain,self,wearIndex,wind),night=!/노을/.test(title)&&(hour>=(plan?.sunset??18)||hour<(plan?.sunrise??7)),walk=!indoor&&/산책|걸어|나들이|데이트|투어|사진/.test(title);
  // Warm neutral fashion-editorial setting; retain the original outfit colors.
  const looks=coordinatedLooks(cast,t,rain,wind,indoor,title),stage=garmentStage(looks);
  let scenery='<defs><radialGradient id="hero-glow"><stop stop-color="#fffdf7" stop-opacity=".96"/><stop offset="1" stop-color="#fffdf7" stop-opacity="0"/></radialGradient><radialGradient id="hero-shadow"><stop stop-color="#655b49" stop-opacity=".20"/><stop offset="1" stop-color="#655b49" stop-opacity="0"/></radialGradient></defs><path d="M12 137V76C12 32 43 8 94 8s81 26 81 68v61Z" fill="'+stage.base+'"/><path d="M12 137V76C12 32 43 8 94 8s81 26 81 68v61" fill="none" stroke="'+stage.edge+'" stroke-width=".7"/><ellipse cx="103" cy="57" rx="66" ry="52" fill="url(#hero-glow)" opacity=".18"/>';
@@ -1272,7 +1278,7 @@ function windowCharacterArt(who,self,t,rain,indoor,hour,title,wind=0){
  else scenery+=(night?'<path d="M150 14a13 13 0 1 0 14 19 14 14 0 0 1-14-19Z" fill="#c7b99f"/>':'<circle cx="151" cy="25" r="12" fill="#e1b66c" opacity=".82"/>')+'<path d="M12 130q50-16 100-6t68-8" stroke="#c9bcaa" stroke-width=".85" fill="none" opacity=".75"/><path d="M15 139q52-14 110-7t55-4" stroke="#d7ccbc" stroke-width=".75" fill="none" opacity=".65"/>';
  const positions=cast.length===1?[[101,25,1.02]]:cast.length===2?[[67,30,.93],[126,34,.88]]:familyPoses(cast,"hero");
  const figures=positions.map(([x,y,k],i)=>'<ellipse cx="'+x+'" cy="'+(y+118*k)+'" rx="'+(31*k)+'" ry="'+(5*k)+'" fill="url(#hero-shadow)"/>'+littlePerson(x,y,k,{...looks[i],...cast[i],maskInteractive:true,faceKey:"hero-"+i,bag:!indoor&&i===0&&!look.umbrella,umbrella:!indoor&&look.umbrella&&i===0,walk})).join("");
- return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 148" preserveAspectRatio="xMidYMid meet" role="group" aria-label="캐릭터 · 얼굴을 누르면 마스크 전환">'+scenery+figures+'</svg>';
+ return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 148" preserveAspectRatio="xMidYMid meet" role="group" aria-label="캐릭터 · 얼굴은 마스크, 몸은 옷차림 변경">'+scenery+figures+'</svg>';
 }
 function weatherAtmosphere(code,day){
  const cloudy=code>=2,rainy=code>=51&&!(code>=71&&code<=77||code===85||code===86),snow=code>=71&&code<=77||code===85||code===86;
@@ -1482,7 +1488,7 @@ function wrap(c,str,x,y,max,preferred,maxLines=3){
 $("locationBtn").onclick=$("manualBtn").onclick=openRegion;$("gpsBtn").onclick=autoLocation;$("closeDialog").onclick=()=>$("regionDialog").close();$("retryRegion").onclick=openRegion;$("sido").onchange=onSido;$("sgg").onchange=onSgg;$("emd").onchange=onEmd;
 $("regionSearch").oninput=()=>{let q=$("regionSearch").value.trim().replace(/\s/g,""),out=$("searchResults");out.replaceChildren();if(q.length<2)return;let hits=regions.filter(r=>r.full.replace(/\s/g,"").includes(q)).slice(0,15);for(let r of hits){let b=document.createElement("button");b.type="button";b.textContent=r.full;b.onclick=()=>{selectPath(r);out.replaceChildren();$("regionSearch").value=r.name};out.append(b)}if(!hits.length){let p=document.createElement("p");p.textContent="검색 결과가 없어요.";out.append(p)}};
 $("applyRegion").onclick=()=>{let r=regions.find(r=>r.sido===$("sido").value&&r.sgg===$("sgg").value&&r.name===$("emd").value);if(!r&&!regions.length&&PROVINCES[$("sido").value]){let n=$("sido").value,[lat,lon]=PROVINCES[n];r={full:n+" 대표 지점",name:n,lat,lon}}if(r){$("regionDialog").close();fetchWeather(r)}};
-document.querySelectorAll("[data-who]").forEach(b=>b.onclick=()=>{who=b.dataset.who;actIndex=0;document.querySelectorAll("[data-who]").forEach(x=>x.setAttribute("aria-pressed",String(x===b)));renderRecs()});$("moreAct").onclick=()=>{actIndex++;renderRecs()};$("moreFood").onclick=()=>{foodIndex++;renderRecs()};$("moreWear").onclick=()=>{wearIndex++;renderRecs()};$("download").onclick=()=>makeCard(true);$("share").onclick=()=>makeCard(false);
+document.querySelectorAll("[data-who]").forEach(b=>b.onclick=()=>{who=b.dataset.who;actIndex=0;document.querySelectorAll("[data-who]").forEach(x=>x.setAttribute("aria-pressed",String(x===b)));renderRecs()});$("moreAct").onclick=()=>{actIndex++;renderRecs()};$("moreFood").onclick=()=>{foodIndex++;renderRecs()};$("moreWear").onclick=()=>changeWear();$("download").onclick=()=>makeCard(true);$("share").onclick=()=>makeCard(false);
 initAvatarPicker();initShareChooser();initSounds();
 function activateMaskFace(el,keyboard=false){
  const key=el.dataset.faceKey;
@@ -1492,8 +1498,16 @@ function activateMaskFace(el,keyboard=false){
  if(!early&&!toggleMask())return;
  if(keyboard){activatedSound("select");document.querySelector('[data-face-key="'+key+'"]')?.focus()}
 }
-document.addEventListener("click",e=>{const el=e.target?.closest?.("[data-mask-toggle]");if(el)activateMaskFace(el)});
-document.addEventListener("keydown",e=>{const el=e.target?.closest?.("[data-mask-toggle]");if(el&&(e.key==="Enter"||e.key===" ")){e.preventDefault();if(!e.repeat)activateMaskFace(el,true)}});
+function changeWear(el=null,keyboard=false){
+ if(!plan||!current||sample||$("gpsBtn").disabled)return;
+ const count=selectedWearOptions().length;if(count<2)return;
+ const key=el?.dataset.wearKey;
+ if(maskDemoPhase!=="idle")finishMaskDemo();
+ wearIndex=(wearIndex+1)%count;renderRecs();
+ if(keyboard&&key){activatedSound("wear");document.querySelector('[data-wear-key="'+key+'"]')?.focus()}
+}
+document.addEventListener("click",e=>{const el=e.target?.closest?.("[data-mask-toggle],[data-wear-toggle]");if(el?.hasAttribute("data-wear-toggle"))changeWear(el);else if(el)activateMaskFace(el)});
+document.addEventListener("keydown",e=>{const el=e.target?.closest?.("[data-mask-toggle],[data-wear-toggle]");if(el&&(e.key==="Enter"||e.key===" ")){e.preventDefault();if(!e.repeat){if(el.hasAttribute("data-wear-toggle"))changeWear(el,true);else activateMaskFace(el,true)}}});
 
 document.addEventListener("visibilitychange",()=>{if(document.hidden&&maskDemoPhase!=="idle")finishMaskDemo()});
 resetUnresolved("idle");setStatus("내 위치나 지역을 선택하면 오늘의 틈을 찾아드려요.","idle");
